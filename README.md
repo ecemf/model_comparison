@@ -1,7 +1,7 @@
 # Model Comparison
 
 This project includes:
- - `.R\model_comparison`: a R markdown script to download data directly from the iiasa database and create a model comparison html report including all participating model on the ECEMF Working Package 1.   
+ - `.R\model_comparison`: a R markdown script to download data directly from the iiasa database and create a model comparison html report including all participating models of the ECEMF Working Package 1.   
 
 ## How to use
  - Make sure you have R and the required libraries installed in your system. All packages can be installed via `install.packages`
