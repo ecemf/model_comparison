@@ -15,6 +15,9 @@ output:
   .main-container {
     max-width: 95% !important;
   }
+  .toc-content {
+    padding-left: 0px !important;
+  }
   .svg-container {
     margin: auto !important;
   }
@@ -51,6 +54,7 @@ library(tidyr)
 library(gridExtra)
 library(grid)
 library(svglite)
+library(gtable)
 ```
 
 
@@ -176,9 +180,6 @@ dfLong <- rbind(dfLong,tmp)
 #select Regions
 dfLong <- dfLong[dfLong$Region %in% c("EU27 & UK", "Europe", "Europe (excl. Turkey)"),] #"EU27", 
 
-#select Years
-#dfLong <- dfLong[dfLong$period <= 2050,] 
-
 # changing period to numeric
 dfLong$period <- as.numeric(dfLong$period)
 
@@ -219,110 +220,110 @@ for (model in unique(df$Model)){
                         dpi=100
                         )
 
-color <- list(
-  model = c(
-    "IMAGE" = "#000000",
-    "Euro-Calliope" = "#c0c0c0",
-    "MEESA" = "#ff00ff",
-    "MESSAGE" = "#800080",
-    "OSeMBE" = "#a52a2a",
-    "PRIMES" = "#0000ff",
-    "PROMETHEUS" = "#ffd900",
-    "REMIND" = "#ff6347",
-    "TIAM-ECN" = "#4682b4",
-    "WITCH" = "#228b22"
-  ),
-  emi = c(
-    "Supply" = "#3D4849",
-    "Supply - Electricity"= "#ffb200",
-    "Supply - Heat"= "#cc0000",
-    "Supply - Gases"= "#999959",
-    "Supply - Liquids"= "#0000cc",
-    "Supply - Solids"= "#0c0c0c",
-    "Supply - Other" = "#79a6d2",
-    "Demand" = "#999959",
-    "Demand - Transportation" = "#a1dd70",
-    "Demand - Residential and Commercial" = "#5edfff",
-    "Demand - Other Sector" = "#999959",
-    "Demand - AFOFI" = "#005900",
-    "Demand - Industry" = "#5f6769",
-    "Industrial Processes" = "#b2b2b2",
-    "Other" = "#5b0d8f",
-    "AFOLU" = "#4DAF4A"
-  ),
-  capture = c(
-    "CCS - Biomass" = "#008c00",
-    "CCS - Biomass Energy" = "#005900",
-    "CCS - Biomass Industry" = "#377EB8",
-    "CCS - Biomass Industrial Processes" = "#79a6d2",
-    "CCS - Fossil" = "#cccccc",
-    "CCS - Fossil Energy" = "#a6a6a6",
-    "CCS - Fossil Industry" = "#4e4e4e",
-    "CCS - Fossil Industrial Processes" = "#282828",
-    "DAC" = "#CC6666",
-    "Enhanced Weathering" = "#5b0d8f",
-    "Land Use Capture" = "#4DAF4A"
-  ),
-  carrier = c(
-    "Electricity" = "#ffb200",
-    "Heat"        = "#cc0000",
-    "Hydrogen"    = "#5ed5b0",
-    "Gases"       = "#999959",
-    "Gases - Fossil"  = "#a1a161", # #a1a161",
-    "Gases - Biomass" = "#999959", # "#999959",
-    "Gases - Efuel"   = "#caca8a", # "#caca8a",
-    "Liquids"     = "#0000cc",
-    "Liquids - Fossil"  = "#000068", #"#000068",
-    "Liquids - Biomass" = "#0000cc", #"#0000cc",
-    "Liquids - Efuel"   = "#5050ff", #"#5050ff",
-    "Solids"      = "#0c0c0c",
-    "Solids - Fossil"  = "#0c0c0c", 
-    "Solids - Biomass" = "#9fa1a4", 
-    "Other Carrier" = "#79a6d2",
-    "Geothermal" = "#e51900",
-    "Solar" = "#ffcc00",
-    "Non-Energy Biomass" = "#005900",
-    "Non-Energy Coal" = "#b2b2b2",
-    "Non-Energy Gas" = "#b79e38",
-    "Non-Energy Oil" = "#ff6565"
-  ),
-  sector = c(
-    "Industry" = "#5f6769",
-    "Residential and Commercial" = "#5edfff",
-    "Transportation" = "#a1dd70",
-    "Non-Energy Use" = "#ff9966"
-  ),
-  tech = c(
-    "Solar" = "#ffcc00",
-    "Solar CSP" = "#ffcc00",
-    "Solar PV" = "#ffe600",
-    "Wind" = "#337fff",
-    "Wind Offshore" = "#4d33ff",
-    "Wind Onshore" = "#337fff",
-    "Other" = "#5b0d8f",
-    "Ocean" = "#0000FF",
-    "Biomass" = "#005900",
-    "Biomass w/ CCS" = "#33ff00",
-    "Biomass w/o CCS" = "#005900",
-    "Hydro" = "#191999",
-    "Hydro Reservoir" = "#8a8aec",
-    "Hydro Pumped Storage" = "#dfdffa",
-    "Hydro Run of River" = "#191999",
-    "Geothermal" = "#e51900",
-    "Nuclear" = "#ff33ff",
-    "Gas" = "#999959",
-    "Gas CCGT" = "#7c6b2a",
-    "Gas w/ CCS" = "#b79e38",
-    "Gas w/o CCS" = "#999959",
-    "Coal" = "#0c0c0c",
-    "Coal w/ CCS" = "#b2b2b2",
-    "Coal w/o CCS" = "#0c0c0c",
-    "Oil" = "#b30000",
-    "Oil w/ CCS" = "#ff6565",
-    "Oil w/o CCS" = "#b30000"
-  )
+color <- c(
+#model
+  "IMAGE" = "#000000",
+  "Euro-Calliope" = "#c0c0c0",
+  "MEESA" = "#ff00ff",
+  "MESSAGE" = "#800080",
+  "OSeMBE" = "#a52a2a",
+  "PRIMES" = "#0000ff",
+  "PROMETHEUS" = "#ffd900",
+  "REMIND" = "#ff6347",
+  "TIAM-ECN" = "#4682b4",
+  "WITCH" = "#228b22",
+#scenario
+  "DIAG-Base" = "#f1746e",
+  "DIAG-NPI" = "#b49f06",
+  "DIAG-C80-gr5" = "#2eba38",
+  "DIAG-C0to80-gr5" = "#38c0c4",
+  "DIAG-C400-lin" = "#939dff",
+  "DIAG-NZero" = "#f062e4",
+#emi
+  "Supply" = "#3D4849",
+  "Supply - Electricity"= "#ffb200",
+  "Supply - Heat"= "#cc0000",
+  "Supply - Gases"= "#999959",
+  "Supply - Liquids"= "#0000cc",
+  "Supply - Solids"= "#0c0c0c",
+  "Supply - Other" = "#79a6d2",
+  "Demand" = "#999959",
+  "Demand - Transportation" = "#a1dd70",
+  "Demand - Residential and Commercial" = "#5edfff",
+  "Demand - Other Sector" = "#999959",
+  "Demand - AFOFI" = "#005900",
+  "Demand - Industry" = "#5f6769",
+  "Industrial Processes" = "#b2b2b2",
+  "Other" = "#5b0d8f",
+  "AFOLU" = "#4DAF4A",
+#capture
+  "CCS - Biomass" = "#008c00",
+  "CCS - Biomass Energy" = "#005900",
+  "CCS - Biomass Industry" = "#377EB8",
+  "CCS - Biomass Industrial Processes" = "#79a6d2",
+  "CCS - Fossil" = "#cccccc",
+  "CCS - Fossil Energy" = "#a6a6a6",
+  "CCS - Fossil Industry" = "#4e4e4e",
+  "CCS - Fossil Industrial Processes" = "#282828",
+  "DAC" = "#CC6666",
+  "Enhanced Weathering" = "#5b0d8f",
+  "Land Use Capture" = "#4DAF4A",
+#carrier
+  "Electricity" = "#ffb200",
+  "Heat"        = "#cc0000",
+  "Hydrogen"    = "#5ed5b0",
+  "Gases"       = "#999959",
+  "Gases - Fossil"  = "#a1a161", # #a1a161",
+  "Gases - Biomass" = "#999959", # "#999959",
+  "Gases - Efuel"   = "#caca8a", # "#caca8a",
+  "Liquids"     = "#0000cc",
+  "Liquids - Fossil"  = "#000068", #"#000068",
+  "Liquids - Biomass" = "#0000cc", #"#0000cc",
+  "Liquids - Efuel"   = "#5050ff", #"#5050ff",
+  "Solids"      = "#0c0c0c",
+  "Solids - Fossil"  = "#0c0c0c", 
+  "Solids - Biomass" = "#9fa1a4", 
+  "Other Carrier" = "#79a6d2",
+  "Geothermal" = "#e51900",
+  "Solar" = "#ffcc00",
+  "Non-Energy Biomass" = "#005900",
+  "Non-Energy Coal" = "#b2b2b2",
+  "Non-Energy Gas" = "#b79e38",
+  "Non-Energy Oil" = "#ff6565",
+#sector
+  "Industry" = "#5f6769",
+  "Residential and Commercial" = "#5edfff",
+  "Transportation" = "#a1dd70",
+  "Non-Energy Use" = "#ff9966",
+#tech
+  "Solar" = "#ffcc00",
+  "Solar CSP" = "#ffcc00",
+  "Solar PV" = "#ffe600",
+  "Wind" = "#337fff",
+  "Wind Offshore" = "#4d33ff",
+  "Wind Onshore" = "#337fff",
+  "Other" = "#5b0d8f",
+  "Ocean" = "#0000FF",
+  "Biomass" = "#005900",
+  "Biomass w/ CCS" = "#33ff00",
+  "Biomass w/o CCS" = "#005900",
+  "Hydro" = "#191999",
+  "Hydro Reservoir" = "#8a8aec",
+  "Hydro Pumped Storage" = "#dfdffa",
+  "Hydro Run of River" = "#191999",
+  "Geothermal" = "#e51900",
+  "Nuclear" = "#ff33ff",
+  "Gas" = "#999959",
+  "Gas CCGT" = "#7c6b2a",
+  "Gas w/ CCS" = "#b79e38",
+  "Gas w/o CCS" = "#999959",
+  "Coal" = "#0c0c0c",
+  "Coal w/ CCS" = "#b2b2b2",
+  "Coal w/o CCS" = "#0c0c0c",
+  "Oil" = "#b30000",
+  "Oil w/ CCS" = "#ff6565",
+  "Oil w/o CCS" = "#b30000"
 )
-
 
 hierarchy <- list(
   # Emi
@@ -427,11 +428,59 @@ theme_singleColumn <- function(){
   )
 }
 
+#function to space facets
+spaceFacet <- function(gg,size=3,layout=c(15,27)){
+  gt = ggplot_gtable(ggplot_build(gg))
+  #gtable_show_layout(gt)
+  for (item in layout){
+    gt$widths[item] = size*gt$widths[item]
+  }
+  return(gt) 
+}
+
+
 ```
 
 <!-- Creating Plots -->
 ```{r initialize_plots_object, echo=FALSE, include=FALSE}
 g <- NULL
+
+# function to create bar Plots
+barPlot <- function(data,total=NULL,title="", legend = list(nRow=NULL)){
+  gg <- ggplot(data,aes(x=Model,y=value,fill=Variable)) +
+    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
+    geom_point(data=total,aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.5) +
+    geom_bar(stat='identity') +
+    facet_wrap(~Scenario+period, scales='free_x', nrow=2, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-Base","","","DIAG-NPI","","","DIAG-C80-gr5","","", "DIAG-C0to80-gr5","","","DIAG-C400-lin","","","DIAG-NZero","")})) +
+    theme_singleColumn() + 
+    scale_fill_manual(values = setNames(color[names(vars)],vars), labels = setNames(names(vars),vars)) +
+
+    scale_x_discrete(drop=FALSE) +
+    ylab(title) +
+    theme(axis.text.x = element_text(size = 10))
+  if(!is.null(legend$nRow))
+    gg <- gg + guides(fill = guide_legend(nrow = legend$nRow))
+  return(gg)
+}
+
+# function to create line Plots
+linePlot <- function(data,title="", colorDim="Model", facetDim="Scenario"){
+  gg <- ggplot(data,aes_(x=~period,y=~value,color=as.formula(paste0("~",colorDim)),group=as.formula(paste0("~",colorDim)))) + 
+    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
+    geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
+    geom_line(size=1) + #,linetype=parent
+    geom_point() +
+    facet_wrap(facetDim) +
+    theme_singleColumn() +
+    theme(
+      legend.key.size = unit(30,"pt"),
+      legend.text = element_text(size=16, margin = margin(r = 20, t = 10, b = 10, unit = 'pt'))
+    ) +
+    scale_color_manual(values = setNames(color[levels(d[[colorDim]])],levels(d[[colorDim]])),drop=FALSE) + 
+    ylab(title) +
+    scale_x_continuous(breaks=seq(2010, 2050, 10))
+  return(gg)
+}
 
 ```
 
@@ -441,25 +490,11 @@ g <- NULL
 
 ```{r, echo = FALSE, include=FALSE}
 
-#Emissions|CO2
 vars <- c("Emissions|CO2")
 
 d <- dfLong[(dfLong$Variable %in% vars & dfLong$period <= 2050),] 
 
-g$emiCO2 <- ggplot(d,aes(x=period,y=value,color=Model,group=Model)) + 
-  geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-  geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
-  geom_line(size=1) + #,linetype=parent
-  geom_point() +
-  facet_wrap("Scenario") +
-  theme_singleColumn() +
-  theme(
-    legend.key.size = unit(30,"pt"),
-    legend.text = element_text(size=16, margin = margin(r = 20, t = 10, b = 10, unit = 'pt'))
-  ) +
-  scale_color_manual(values = color$model) +
-  ylab("Emissions|CO2 (Mt CO2/yr)") +
-  scale_x_continuous(breaks=seq(2010, 2050, 10))
+g$emiCO2 <- linePlot(data=d,title="CO2 Emissions (Mt CO2/yr)")
 
 ```
 
@@ -471,11 +506,7 @@ g$emiCO2
 
 ## CO2 emissions per source
 
-- Mt CO2/yr
-
 ```{r, echo = FALSE, include=FALSE}
-
-# CO2 emissions per source
 
 vars <- c(
   "Supply" = "Emissions|CO2|Energy|Supply",
@@ -516,43 +547,14 @@ d$Variable <- factor(d$Variable , levels = vars)
 #total emi
 d2 <- dfLong[(dfLong$Variable %in% c("Emissions|CO2") & dfLong$period %in% c(2020,2030,2050)),]
 
-maxY <- max(as.data.frame(d2 %>% group_by(period,Model,Scenario) %>% summarize(value = sum(value)))[,]$value)
-
-g$emiSource <- arrangeGrob(
-    ggplot(d[d$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_point(data=d2[d2$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.5) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-Base","","","DIAG-NPI","","","DIAG-C80-gr5","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$emi[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    guides(fill="none") +
-    theme(axis.title.y = element_blank()) + 
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10)) 
-    ,
-    ggplot(d[d$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_point(data=d2[d2$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.5) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-C0to80-gr5","","","DIAG-C400-lin","","","DIAG-NZero","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$emi[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    theme(axis.title.y = element_blank()) +
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10)) 
-    ,
-    nrow=2,
-    heights=c(3,4)
-  )
+#creating plot
+g$emiSource <- barPlot(data=d,total=d2,title="CO2 emissions per source (Mt CO2/yr)") 
 
 ```
 
 ```{r, echo = FALSE, fig.width=16, fig.height=10}
 
-grid.draw(g$emiSource)
+grid.draw(spaceFacet(g$emiSource))
 
 ```
 
@@ -562,45 +564,18 @@ grid.draw(g$emiSource)
 
 ```{r, echo = FALSE, include=FALSE}
 
-#Price|Carbon
 vars <- c("Price|Carbon")
 
 d <- dfLong[(dfLong$Variable %in% vars & dfLong$period <= 2100),] 
 
-g$carbonPrice <- ggplot(d,aes(x=period,y=value,color=Model,group=Model)) + 
-  geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-  geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
-  geom_line(size=1) + #,linetype=parent
-  geom_point() +
-  facet_wrap("Scenario") +
-  theme_singleColumn() +
-  theme(
-    legend.key.size = unit(30,"pt"),
-    legend.text = element_text(size=16, margin = margin(r = 20, t = 10, b = 10, unit = 'pt'))
-  ) +
-  scale_color_manual(values = color$model) +
-  ylab("Price|Carbon (EUR/t CO2)") +
-  scale_x_continuous(breaks=c(seq(2010, 2050, 10),2070,2100))
+g$carbonPrice <- linePlot(data=d,title="Carbon Price (\u20ac/t CO2)")
 
-g$carbonPrice2 <- ggplot(d,aes(x=period,y=value,color=Scenario,group=Scenario)) + 
-  geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-  geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
-  geom_line(size=1) + #,linetype=parent
-  geom_point() +
-  facet_wrap("Model") +
-  theme_singleColumn() +
-  theme(
-    legend.key.size = unit(30,"pt"),
-    legend.text = element_text(size=16, margin = margin(r = 20, t = 10, b = 10, unit = 'pt'))
-  ) +
-  #scale_color_manual(values = color$model) +
-  ylab("Price|Carbon (EUR/t CO2)") +
-  scale_x_continuous(breaks=c(seq(2010, 2050, 10),2070,2100))
+g$carbonPrice2 <- linePlot(data=d,title="Carbon Price (\u20ac/t CO2)", colorDim="Scenario", facetDim="Model")
 
 ```
 
 
-- per scenario
+## per scenario
 
 ```{r, echo = FALSE, fig.width=16, fig.height=8}
 
@@ -608,12 +583,13 @@ g$carbonPrice
 
 ```
 
-- per model
+## per model
 
 ```{r, echo = FALSE, fig.width=16, fig.height=8}
-g$carbonPrice2
-```
 
+g$carbonPrice2
+
+```
 
 
 ---
@@ -622,25 +598,11 @@ g$carbonPrice2
 
 ```{r, echo = FALSE, include=FALSE}
 
-#Carbon Sequestration|CCS
 vars <- c("Carbon Sequestration|CCS")
 
 d <- dfLong[(dfLong$Variable %in% vars & dfLong$period <= 2050),] 
 
-g$ccs <- ggplot(d,aes(x=period,y=value,color=Model,group=Model)) + 
-  geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-  geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
-  geom_line(size=1) + #,linetype=parent
-  geom_point() +
-  facet_wrap("Scenario") +
-  theme_singleColumn() +
-  theme(
-    legend.key.size = unit(30,"pt"),
-    legend.text = element_text(size=16, margin = margin(r = 20, t = 10, b = 10, unit = 'pt'))
-  ) +
-  scale_color_manual(values = color$model) +
-  ylab("Carbon Capture and Storage (Mt CO2/yr)") +
-  scale_x_continuous(breaks=seq(2010, 2050, 10))
+g$ccs <- linePlot(data=d,title="Carbon Capture and Storage (Mt CO2/yr)")
 
 ```
 
@@ -655,11 +617,8 @@ g$ccs
 
 ## Carbon Sequestration per source
 
-- Mt CO2/yr
 
 ```{r, echo = FALSE, include=FALSE}
-
-# Carbon Sequestration per source
 
 vars <- c(
   "CCS - Biomass" = "Carbon Sequestration|CCS|Biomass|Energy",
@@ -697,44 +656,14 @@ d2 <- dfLong[(dfLong$Variable %in% c("Carbon Sequestration|CCS","Carbon Sequestr
   group_by(Model,Scenario,Region,period) %>% 
   summarize(value = sum(value))
 
-maxY <- max(as.data.frame(d2 %>% group_by(period,Model,Scenario) %>% summarize(value = sum(value)))[,]$value)
-
-g$capture <- arrangeGrob(
-    ggplot(d[d$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_point(data=d2[d2$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.5) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-Base","","","DIAG-NPI","","","DIAG-C80-gr5","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$capture[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    guides(fill="none") +
-    theme(axis.title.y = element_blank()) + 
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10)) 
-    ,
-    ggplot(d[d$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_point(data=d2[d2$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.5) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-C0to80-gr5","","","DIAG-C400-lin","","","DIAG-NZero","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$capture[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    theme(axis.title.y = element_blank()) +
-    expand_limits(y=c(0,maxY)) +
-    guides(fill = guide_legend(nrow = 4)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10)) 
-    ,
-    nrow=2,
-    heights=c(3,4)
-  )
+#creating plot
+g$capture <- barPlot(data=d,total=d2,title="Carbon Sequestration per source (Mt CO2/yr)")
 
 ```
 
 ```{r, echo = FALSE, fig.width=16, fig.height=10}
 
-grid.draw(g$capture)
+grid.draw(spaceFacet(g$capture))
 
 ```
 
@@ -744,25 +673,11 @@ grid.draw(g$capture)
 
 ```{r, echo = FALSE, include=FALSE}
 
-#Primary Energy
 vars <- c("Primary Energy")
 
 d <- dfLong[(dfLong$Variable %in% vars & dfLong$period <= 2050),]
 
-g$pe <- ggplot(d,aes(x=period,y=value,color=Model,group=Model)) + 
-  geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-  geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
-  geom_line(size=1) + #,linetype=parent
-  geom_point() +
-  facet_wrap("Scenario") +
-  theme_singleColumn() +
-  theme(
-    legend.key.size = unit(30,"pt"),
-    legend.text = element_text(size=16, margin = margin(r = 20, t = 10, b = 10, unit = 'pt'))
-  ) +
-  scale_color_manual(values = color$model) +
-  ylab("Primary Energy (EJ/yr)") +
-  scale_x_continuous(breaks=seq(2010, 2050, 10))
+g$pe <- linePlot(data=d,title="Primary Energy (EJ/yr)")
 
 ```
 
@@ -774,16 +689,11 @@ g$pe
 
 ## Primary Energy per Carrier
 
-- EJ/yr
-
 ```{r, echo = FALSE, include=FALSE}
-
-# Primary Energy by carrier
 
 vars <- c(
   "Solar" = "Primary Energy|Solar",
   "Wind" = "Primary Energy|Wind",
-  #"Non-Biomass Renewables = "Primary Energy|Non-Biomass Renewables",
   "Ocean" = "Primary Energy|Ocean",
   "Other" = "Primary Energy|Other",
   "Biomass"  = "Primary Energy|Biomass",
@@ -796,9 +706,9 @@ vars <- c(
   "Coal" = "Primary Energy|Coal",
   "Coal w/ CCS" = "Primary Energy|Coal|w/ CCS",
   "Coal w/o CCS" = "Primary Energy|Coal|w/o CCS",
-  "Oil" = "Primary Energy|Oil"#,
-  #"Oil w/ CCS" = "Primary Energy|Oil|w/ CCS",
-  #"Oil w/o CCS" = "Primary Energy|Oil|w/o CCS"
+  "Oil" = "Primary Energy|Oil",
+  "Oil w/ CCS" = "Primary Energy|Oil|w/ CCS",
+  "Oil w/o CCS" = "Primary Energy|Oil|w/o CCS"
 )
 
 tmp <- dfLong[(dfLong$Variable %in% vars & dfLong$period %in% c(2020,2030,2050)),]
@@ -821,43 +731,14 @@ d$Variable <- factor(d$Variable , levels = vars)
 #total pe
 d2 <- dfLong[(dfLong$Variable %in% c("Primary Energy") & dfLong$period %in% c(2020,2030,2050)),]
 
-maxY <- max(as.data.frame(d2 %>% group_by(period,Model,Scenario) %>% summarize(value = sum(value)))[,]$value)
-
-g$peCarrier <- arrangeGrob(
-    ggplot(d[d$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_point(data=d2[d2$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.5) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-Base","","","DIAG-NPI","","","DIAG-C80-gr5","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$tech[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    guides(fill="none") +
-    theme(axis.title.y = element_blank()) + 
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10)) 
-    ,
-    ggplot(d[d$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_point(data=d2[d2$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.5) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-C0to80-gr5","","","DIAG-C400-lin","","","DIAG-NZero","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$tech[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    theme(axis.title.y = element_blank()) +
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10)) 
-    ,
-    nrow=2,
-    heights=c(3,4)
-  )
+#creating plot
+g$peCarrier <- barPlot(data=d,total=d2,title="Primary Energy per Carrier (EJ/yr)",legend = list(nRow=2))
 
 ```
 
 ```{r, echo = FALSE, fig.width=16, fig.height=10}
 
-grid.draw(g$peCarrier)
+grid.draw(spaceFacet(g$peCarrier))
 
 ```
 
@@ -867,25 +748,12 @@ grid.draw(g$peCarrier)
 
 ```{r, echo = FALSE, include=FALSE}
 
-#Final Energy
 vars <- c("Final Energy")
 
 d <- dfLong[(dfLong$Variable %in% vars & dfLong$period <= 2050),]
 
-g$fe <- ggplot(d,aes(x=period,y=value,color=Model,group=Model)) + 
-  geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-  geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
-  geom_line(size=1) + #,linetype=parent
-  geom_point() +
-  facet_wrap("Scenario") +
-  theme_singleColumn() +
-  theme(
-    legend.key.size = unit(30,"pt"),
-    legend.text = element_text(size=16, margin = margin(r = 20, t = 10, b = 10, unit = 'pt'))
-  ) +
-  scale_color_manual(values = color$model) +
-  ylab("Final Energy (EJ/yr)") +
-  scale_x_continuous(breaks=seq(2010, 2050, 10))
+g$fe <- linePlot(data=d,title="Final Energy (EJ/yr)")
+
 
 ```
 
@@ -900,25 +768,11 @@ g$fe
 
 ```{r, echo = FALSE, include=FALSE}
 
-#Final Energy Electricity
 vars <- c("Final Energy|Electricity")
 
 d <- dfLong[(dfLong$Variable %in% vars & dfLong$period <= 2050),]
 
-g$feElec <- ggplot(d,aes(x=period,y=value,color=Model,group=Model)) + 
-  geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-  geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
-  geom_line(size=1) + #,linetype=parent
-  geom_point() +
-  facet_wrap("Scenario") +
-  theme_singleColumn() +
-  theme(
-    legend.key.size = unit(30,"pt"),
-    legend.text = element_text(size=16, margin = margin(r = 20, t = 10, b = 10, unit = 'pt'))
-  ) +
-  scale_color_manual(values = color$model) +
-  ylab("Electricity Final Energy (EJ/yr)") +
-  scale_x_continuous(breaks=seq(2010, 2050, 10))
+g$feElec <- linePlot(data=d,title="Electricity Final Energy (EJ/yr)")
 
 ```
 
@@ -931,11 +785,7 @@ g$feElec
 
 ## Final Energy per Carrier
 
-- EJ/yr
-
 ```{r, echo = FALSE, include=FALSE}
-
-# Final Energy by carrier
 
 vars <- c(
   "Electricity" = "Final Energy|Electricity",
@@ -970,43 +820,14 @@ d$Variable <- factor(d$Variable , levels = vars)
 #total fe
 d2 <- dfLong[(dfLong$Variable %in% c("Final Energy") & dfLong$period %in% c(2020,2030,2050)),]
 
-maxY <- max(as.data.frame(d2 %>% group_by(period,Model,Scenario) %>% summarize(value = sum(value)))[,]$value)
-
-g$feCarrier <- arrangeGrob(
-    ggplot(d[d$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_point(data=d2[d2$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.35) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-Base","","","DIAG-NPI","","","DIAG-C80-gr5","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$carrier[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    guides(fill="none") +
-    theme(axis.title.y = element_blank()) + 
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10)) 
-    ,
-    ggplot(d[d$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_point(data=d2[d2$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.35) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-C0to80-gr5","","","DIAG-C400-lin","","","DIAG-NZero","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$carrier[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    theme(axis.title.y = element_blank()) +
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10))
-    ,
-    nrow=2,
-    heights=c(5,6)
-  )
+#creating plot
+g$feCarrier <- barPlot(data=d,total=d2,title="Final Energy per Carrier (EJ/yr)")
 
 ```
 
 ```{r, echo = FALSE, fig.width=16, fig.height=10}
 
-grid.draw(g$feCarrier)
+grid.draw(spaceFacet(g$feCarrier))
 
 ```
 
@@ -1015,7 +836,6 @@ grid.draw(g$feCarrier)
 
 ## Final Energy per sector
 
-- EJ/yr
 
 ```{r, echo = FALSE, include=FALSE}
 
@@ -1034,44 +854,15 @@ d$Variable <- factor(d$Variable , levels = vars)
 #total fe
 d2 <- dfLong[(dfLong$Variable %in% c("Final Energy") & dfLong$period %in% c(2020,2030,2050)),]
 
-maxY <- max(as.data.frame(d2 %>% group_by(period,Model,Scenario) %>% summarize(value = sum(value)))[,]$value)
-
-g$feSector <- arrangeGrob(
-    ggplot(d[d$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_point(data=d2[d2$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.35) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-Base","","","DIAG-NPI","","","DIAG-C80-gr5","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$sector[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    guides(fill="none") +
-    theme(axis.title.y = element_blank()) + 
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10)) 
-    ,
-    ggplot(d[d$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_point(data=d2[d2$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.3) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-C0to80-gr5","","","DIAG-C400-lin","","","DIAG-NZero","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$sector[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    theme(axis.title.y = element_blank()) +
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10)) 
-    ,
-    nrow=2,
-    heights=c(8,9)
-  )
+#creating plot
+g$feSector <- barPlot(data=d,total=d2,title="Final Energy per Sector (EJ/yr)")
 
 ```
 
 
 ```{r, echo = FALSE, fig.width=16, fig.height=10}
 
-grid.draw(g$feSector)
+grid.draw(spaceFacet(g$feSector))
 
 ```
 
@@ -1079,11 +870,8 @@ grid.draw(g$feSector)
 
 ## Industry FE and Non-energy Use
 
-- EJ/yr
 
 ```{r, echo = FALSE, include=FALSE}
-
-# Final Energy by sector and carrier
 
 # Industry Final Energy
 vars <- c(
@@ -1100,7 +888,6 @@ vars <- c(
   "Other Carrier" = "Final Energy|Industry|Other"
 )
 
-
 d <- dfLong[(dfLong$Variable %in% vars & dfLong$period %in% c(2020,2030,2050)),]
 
 #order
@@ -1111,52 +898,21 @@ d2 <- dfLong[(dfLong$Variable %in% c("Final Energy|Industry","Final Energy|Non-E
   group_by(Model,Scenario,Region,period) %>% 
   summarize(value = sum(value))
 
-maxY <- max(as.data.frame(d2 %>% group_by(period,Model,Scenario) %>% summarize(value = sum(value)))[,]$value)
+#creating plot
+g$feIndst <- barPlot(data=d,total=d2,title="Industry FE and Non-energy Use (EJ/yr)",legend = list(nRow=2))
 
-g$feIndst <- arrangeGrob(
-    ggplot(d[d$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_point(data=d2[d2$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.35) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-Base","","","DIAG-NPI","","","DIAG-C80-gr5","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$carrier[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    guides(fill="none") +
-    theme(axis.title.y = element_blank()) + 
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10)) 
-    ,
-    ggplot(d[d$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-      geom_point(data=d2[d2$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.35) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-C0to80-gr5","","","DIAG-C400-lin","","","DIAG-NZero","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$carrier[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    theme(axis.title.y = element_blank()) +
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10)) 
-    ,
-    nrow=2,
-    heights=c(3,4)
-  )
 ```
 
 ```{r, echo = FALSE, fig.width=16, fig.height=10}
 
-grid.draw(g$feIndst)
+grid.draw(spaceFacet(g$feIndst))
 
 ```
 
 ## Residential and Commercial Final Energy
 
-- EJ/yr
-
 ```{r, echo = FALSE, include=FALSE}
 
-# Residential and Commercial Final Energy
 vars <- c(
   "Electricity" = "Final Energy|Residential and Commercial|Electricity",
   "Heat"        = "Final Energy|Residential and Commercial|Heat",
@@ -1174,54 +930,21 @@ d$Variable <- factor(d$Variable , levels = vars)
 
 #total fe Residential and Commercial
 d2 <- dfLong[(dfLong$Variable %in% c("Final Energy|Residential and Commercial") & dfLong$period %in% c(2020,2030,2050)),] 
-
-maxY <- max(as.data.frame(d2 %>% group_by(period,Model,Scenario) %>% summarize(value = sum(value)))[,]$value)
-
-g$feBuild <- arrangeGrob(
-    ggplot(d[d$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_point(data=d2[d2$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.35) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-Base","","","DIAG-NPI","","","DIAG-C80-gr5","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$carrier[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    guides(fill="none") +
-    theme(axis.title.y = element_blank()) + 
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10)) 
-    ,
-    ggplot(d[d$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_point(data=d2[d2$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.35) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-C0to80-gr5","","","DIAG-C400-lin","","","DIAG-NZero","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$carrier[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    theme(axis.title.y = element_blank()) +
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10)) 
-    ,
-    nrow=2,
-    heights=c(5,6)
-  )
+#creating plot
+g$feBuild <- barPlot(data=d,total=d2,title="Residential and Commercial FE (EJ/yr)")
 
 ```
 
 ```{r, echo = FALSE, fig.width=16, fig.height=10}
 
-grid.draw(g$feBuild)
+grid.draw(spaceFacet(g$feBuild))
 
 ```
 
 ## Transportation Final Energy
 
-- EJ/yr
-
 ```{r, echo = FALSE, include=FALSE}
 
-# Transportation Final Energy
 vars <- c(
   "Electricity" = "Final Energy|Transportation|Electricity",
   "Hydrogen"    = "Final Energy|Transportation|Hydrogen",
@@ -1238,44 +961,14 @@ d$Variable <- factor(d$Variable , levels = vars)
 #total fe Transportation
 d2 <- dfLong[(dfLong$Variable %in% c("Final Energy|Transportation") & dfLong$period %in% c(2020,2030,2050)),] 
 
-maxY <- max(as.data.frame(d2 %>% group_by(period,Model,Scenario) %>% summarize(value = sum(value)))[,]$value)
-
-g$feTrans <- arrangeGrob(
-    ggplot(d[d$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_point(data=d2[d2$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.35) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-Base","","","DIAG-NPI","","","DIAG-C80-gr5","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$carrier[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    guides(fill="none") +
-    theme(axis.title.y = element_blank()) + 
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10))   
-    ,
-    ggplot(d[d$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_point(data=d2[d2$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.35) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-C0to80-gr5","","","DIAG-C400-lin","","","DIAG-NZero","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$carrier[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    theme(axis.title.y = element_blank()) +
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10))  
-    ,
-    nrow=2,
-    heights=c(8,9)
-  )
-
+#creating plot
+g$feTrans <- barPlot(data=d,total=d2,title="Transportation Final Energy (EJ/yr)")
 
 ```
 
 ```{r, echo = FALSE, fig.width=16, fig.height=10}
 
-grid.draw(g$feTrans)
+grid.draw(spaceFacet(g$feTrans))
 
 ```
 
@@ -1284,7 +977,6 @@ grid.draw(g$feTrans)
 # Electricity
 ```{r, echo = FALSE, include=FALSE}
 
-# Electricity
 vars <- c("Electricity" = "Secondary Energy|Electricity")
 
 d <- dfLong[(dfLong$Variable %in% vars & dfLong$period <= 2050),] 
@@ -1293,20 +985,7 @@ d <- dfLong[(dfLong$Variable %in% vars & dfLong$period <= 2050),]
 d$value <- 1/0.0036 * d$value # converting from EJ to TWh
 d$Unit <- "TWh/yr"
 
-g$elec <- ggplot(d,aes(x=period,y=value,color=Model,group=Model)) + 
-  geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-  geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
-  geom_line(size=1) + #,linetype=parent
-  geom_point() +
-  facet_wrap("Scenario") +
-  theme_singleColumn() +
-  theme(
-    legend.key.size = unit(30,"pt"),
-    legend.text = element_text(size=16, margin = margin(r = 20, t = 10, b = 10, unit = 'pt'))
-  ) +
-  scale_color_manual(values = color$model) +
-  ylab("Secondary Energy|Electricity (TWh/yr)") +
-  scale_x_continuous(breaks=seq(2010, 2050, 10))
+g$elec <- linePlot(data=d,title="Secondary Energy Electricity (TWh/yr)")
 
 ```
 
@@ -1318,11 +997,9 @@ g$elec
 
 ## Electricity Generation
 
-- TWh/yr
 
 ```{r, echo = FALSE, include=FALSE}
 
-# Electricity Generation
 vars <- c(
   "Solar" = "Secondary Energy|Electricity|Solar",
   "Solar CSP" = "Secondary Energy|Electricity|Solar|CSP",
@@ -1330,7 +1007,6 @@ vars <- c(
   "Wind" = "Secondary Energy|Electricity|Wind",
   "Wind Offshore" = "Secondary Energy|Electricity|Wind|Offshore",
   "Wind Onshore" = "Secondary Energy|Electricity|Wind|Onshore",
-  ##"Non-Biomass Renewables" = "Secondary Energy|Electricity|Non-Biomass Renewables",
   "Other" = "Secondary Energy|Electricity|Other",
   "Biomass" = "Secondary Energy|Electricity|Biomass",
   "Biomass w/ CCS" = "Secondary Energy|Electricity|Biomass|w/ CCS",
@@ -1346,11 +1022,7 @@ vars <- c(
   "Coal w/o CCS" = "Secondary Energy|Electricity|Coal|w/o CCS",
   "Oil" = "Secondary Energy|Electricity|Oil",
   "Oil w/ CCS" = "Secondary Energy|Electricity|Oil|w/ CCS",
-  "Oil w/o CCS" = "Secondary Energy|Electricity|Oil|w/o CCS",
-  ##"Fossil" = "Secondary Energy|Electricity|Fossil",
-  ##"Fossil w/ CCS" = "Secondary Energy|Electricity|Fossil|w/ CCS",
-  ##"Fossil w/o CCS" = "Secondary Energy|Electricity|Fossil|w/o CCS",
-  NULL
+  "Oil w/o CCS" = "Secondary Energy|Electricity|Oil|w/o CCS"
 )
 
 tmp <- dfLong[(dfLong$Variable %in% vars & dfLong$period %in% c(2020,2030,2050)),] 
@@ -1380,55 +1052,22 @@ d2 <- dfLong[(dfLong$Variable %in% c("Secondary Energy|Electricity") & dfLong$pe
 d2$value <- 1/0.0036 * d2$value # converting from EJ to TWh
 d2$Unit <- "TWh/yr"
 
-maxY <- max(as.data.frame(d2 %>% group_by(period,Model,Scenario) %>% summarize(value = sum(value)))[,]$value)
-
-g$gen <- arrangeGrob(
-    ggplot(d[d$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_point(data=d2[d2$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.35) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-Base","","","DIAG-NPI","","","DIAG-C80-gr5","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$tech[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    guides(fill="none") +
-    theme(axis.title.y = element_blank()) + 
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10)) 
-    ,
-    ggplot(d[d$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_point(data=d2[d2$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill="gray"), shape=23, alpha = 0.35) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-C0to80-gr5","","","DIAG-C400-lin","","","DIAG-NZero","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$tech[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    theme(axis.title.y = element_blank()) +
-    guides(fill = guide_legend(nrow = 3)) +
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10)) 
-    ,
-    nrow=2
-    ,
-    heights=c(3,4)
-  )
+#creating plot
+g$gen <- barPlot(data=d,total=d2,title="Electricity Generation (TWh/yr)",legend = list(nRow=4))
 
 ```
 
 ```{r, echo = FALSE, fig.width=16, fig.height=10}
 
-grid.draw(g$gen)
+grid.draw(spaceFacet(g$gen))
 
 ```
 
-## Electricity Capacity
 
-- GW
+## Electricity Capacity
 
 ```{r, echo = FALSE, include=FALSE}
 
-# Electricity Capacity
 vars <- c(
   "Solar" = "Capacity|Electricity|Solar",
   "Solar CSP" = "Capacity|Electricity|Solar|CSP",
@@ -1436,7 +1075,6 @@ vars <- c(
   "Wind" = "Capacity|Electricity|Wind",
   "Wind Offshore" = "Capacity|Electricity|Wind|Offshore",
   "Wind Onshore" = "Capacity|Electricity|Wind|Onshore",
-  ##"Non-Biomass Renewables" = "Capacity|Electricity|Non-Biomass Renewables",
   "Other" = "Capacity|Electricity|Other",
   "Biomass" = "Capacity|Electricity|Biomass",
   "Biomass w/ CCS" = "Capacity|Electricity|Biomass|w/ CCS",
@@ -1448,7 +1086,6 @@ vars <- c(
   "Geothermal" = "Capacity|Electricity|Geothermal",
   "Nuclear" = "Capacity|Electricity|Nuclear",
   "Gas" = "Capacity|Electricity|Gas",
-  "Gas CCGT" = "Capacity|Electricity|Gas|CCGT",
   "Gas w/ CCS" = "Capacity|Electricity|Gas|w/ CCS",
   "Gas w/o CCS" = "Capacity|Electricity|Gas|w/o CCS",
   "Coal" = "Capacity|Electricity|Coal",
@@ -1456,11 +1093,7 @@ vars <- c(
   "Coal w/o CCS" = "Capacity|Electricity|Coal|w/o CCS",
   "Oil" = "Capacity|Electricity|Oil",
   "Oil w/ CCS" = "Capacity|Electricity|Oil|w/ CCS",
-  "Oil w/o CCS" = "Capacity|Electricity|Oil|w/o CCS",
-  ##"Fossil" = "Capacity|Electricity|Fossil",
-  ##"Fossil w/ CCS" = "Capacity|Electricity|Fossil|w/ CCS",
-  ##"Fossil w/o CCS" = "Capacity|Electricity|Fossil|w/o CCS",
-  NULL
+  "Oil w/o CCS" = "Capacity|Electricity|Oil|w/o CCS"
 )
 
 
@@ -1481,43 +1114,14 @@ for (model in unique(tmp$Model)){
 #order
 d$Variable <- factor(d$Variable , levels = vars) 
 
-maxY <- max(as.data.frame(d %>% group_by(period,Model,Scenario) %>% summarize(value = sum(value)))[,]$value)
-
-g$cap <- arrangeGrob(
-    ggplot(d[d$Scenario %in% c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-Base","","","DIAG-NPI","","","DIAG-C80-gr5","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$tech[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    guides(fill="none") +
-    theme(axis.title.y = element_blank()) + 
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10)) 
-    ,
-    ggplot(d[d$Scenario %in% c("DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero"),],aes(x=Model,y=value,fill=Variable)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_bar(stat='identity') +
-    facet_grid(~Scenario+period, labeller = labeller(Scenario = function(Variable, value) {c("", "DIAG-C0to80-gr5","","","DIAG-C400-lin","","","DIAG-NZero","")})) +
-    theme_singleColumn() + 
-    scale_fill_manual(values = setNames(color$tech[names(vars)],vars), labels = setNames(names(vars),vars)) +
-    theme(axis.title.y = element_blank()) +
-    guides(fill = guide_legend(nrow = 4)) +
-    expand_limits(y=c(0,maxY)) +
-    scale_x_discrete(drop=FALSE) +
-    theme(axis.text.x = element_text(size = 10)) 
-    ,
-    nrow=2
-    ,
-    heights=c(3,4)
-  )
+#creating plot
+g$cap <- barPlot(data=d,title="Electricity Capacity (GW)",legend = list(nRow=4))
 
 ```
 
 ```{r, echo = FALSE, fig.width=16, fig.height=10}
 
-grid.draw(g$cap)
+grid.draw(spaceFacet(g$cap))
 
 ```
 
