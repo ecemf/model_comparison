@@ -1,7 +1,22 @@
 # Model Comparison
 
 This project includes:
- - `.R\model_comparison`: a R markdown script to download data directly from the iiasa database and create a model comparison html report including all participating models of the ECEMF Working Package 1.   
+ - `.R\model_comparison`: a R markdown script to download data directly from the IIASA database and create a model comparison html report including all participating models of the ECEMF Working Package 1.
+
+## Installation
+
+You can use Anaconda or Miniconda to setup up a combined R and Python environment to run the script:
+
+    conda env create -f environment.yaml
+
+Then, activate the conda environment:
+
+    conda activate model_comparison
+
+Use Rscript command to run render the R Markdown document using knitr
+
+    Rscript render.R
+
 
 ## How to use
  - Make sure you have R and the required libraries installed in your system. All packages can be installed via `install.packages`
@@ -19,7 +34,7 @@ install.packages(pkgs)
 ```
 
  - Rename the file "credentials_example.json" to "credentials.json" and fill it with your iiasa database credentials to download the most up to date data.
- - Set `updateResults` to true in the rmd file to download data directly from the iiasa database. The downloaded data will be saved to your local data folder. You can set the option back to FALSE afterwards (`updateResults = FALSE`) to use local data instead.   
+ - Set `updateResults` to true in the rmd file to download data directly from the iiasa database. The downloaded data will be saved to your local data folder. You can set the option back to FALSE afterwards (`updateResults = FALSE`) to use local data instead.
 
 
 ## LICENSE
