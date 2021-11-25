@@ -1,4 +1,4 @@
-name: model_comparison_test
+name: model_comparison
 channels:
   - conda-forge
   - defaults
