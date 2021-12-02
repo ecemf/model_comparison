@@ -1,0 +1,16 @@
+name: model_comparison
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - r-dplyr
+  - r-ggplot2
+  - r-rjson
+  - r-gridextra
+  - r-svglite
+  - r-tidyr
+  - r-rmarkdown
+  - r-reticulate
+  - pyam
+prefix: /Users/wusher/miniconda3/envs/model_comparison
