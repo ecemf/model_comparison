@@ -1,0 +1,1156 @@
+
+---
+title: "ECEMF model comparison plots"
+output:
+  html_document:
+    theme: paper
+    toc: true
+    toc_float:
+      collapsed: false
+    toc_depth: 1
+params:
+    updateResults: FALSE
+    regionDisplayed: "EU27"
+---
+
+<!-- author: "Renato Rodrigues" -->
+
+<style>
+  .main-container {
+    max-width: 95% !important;
+  }
+  .toc-content {
+    padding-left: 0px !important;
+  }
+  .svg-container {
+    margin: auto !important;
+  }
+</style>
+
+Description:
+Model comparison for ECEMF - Summary plots.
+
+<!-- Options -->
+```{r options, include=FALSE}
+
+# if you want to download new results set updateResults to TRUE, else the script will load the latest created csv file in the folder ./data
+updateResults <- FALSE
+updateResults <- params$updateResults
+
+regionDisplayed <- "EU27"
+regionDisplayed <- params$regionDisplayed
+
+```
+
+
+<!-- Loading required packages -->
+```{r Loading_required_packages, echo=FALSE, include=FALSE}
+library(reticulate)
+library(rjson)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(gridExtra)
+library(grid)
+library(svglite)
+library(gtable)
+library(ggplotify)
+library(ggpattern)
+```
+
+
+Regions represented in the plots:
+
+```{r, echo=FALSE}
+
+  if(regionDisplayed=="EU27"){
+    regionsText <- paste0('
+* EU27: "REMIND 2.1", "WITCH 5.0", "OSeMBE v1.0.0" (calculated) and "Euro-Calliope 2.0" (calculated)
+* EU27 & UK: "MEESA v1.1"
+* Europe: "IMAGE 3.2", "PROMETHEUS 1.2"   
+* Europe (excl. Turkey): "TIAM-ECN 1.2"
+* Europe (incl. Turkey): "MESSAGEix-GLOBIOM 1.2"
+* “PRIMES” is missing results in the database`\n\n
+')
+  } else if(regionDisplayed=="EU27 & UK"){
+    regionsText <- paste0('
+* EU27 & UK: "REMIND 2.1", "WITCH 5.0", "MEESA v1.1", "OSeMBE v1.0.0" (calculated) and "Euro-Calliope 2.0" (calculated)
+* Europe: "IMAGE 3.2", "PROMETHEUS 1.2"   
+* Europe (excl. Turkey): "TIAM-ECN 1.2"
+* Europe (incl. Turkey): "MESSAGEix-GLOBIOM 1.2"
+* “PRIMES” is missing results in the database`\n\n
+')
+  }
+
+```
+
+`r paste(knitr::knit(text = regionsText))`
+
+
+```{r download_data, include=FALSE}
+if(updateResults){
+  if (file.exists("credentials.json")){
+    credentials <- fromJSON(file="credentials.json")
+  } else {
+    stop('To download the most up to date ECEMF data, please rename the file "credentials_example.json" to "credentials.json" and fill it with your iiasa database credentials.')
+  }
+}
+
+#create data folder
+if(!(file.exists("./data")))
+   dir.create("./data")
+
+```
+
+
+```{python, include=FALSE}
+
+if (r.updateResults):
+
+  import pyam
+  pyam.iiasa.set_config(r.credentials["login"], r.credentials["password"])
+  conn = pyam.iiasa.Connection()
+  conn.connect('ecemf_internal')
+
+  df = conn.query(
+      model='*',
+      variable='*',
+      region='*'
+  )
+
+  from datetime import datetime
+  now = datetime.now()
+  filename = "data_" + now.strftime("%Y_%m_%d_%H.%M.%S")
+
+  df.to_excel("./data/" + filename + ".xlsx")
+
+  import pandas as pd
+
+  read_file = pd.read_excel("./data/" + filename + ".xlsx", sheet_name="data")
+  read_file.to_csv("./data/" + filename + ".csv", index = None, header=True)
+
+```
+
+
+```{r load_data, include=FALSE}
+
+  files <- file.info(list.files(path="./data", pattern="^data_.*.csv", full.names = T))
+
+  if (!(nrow(files))){
+    stop('You need a valid csv file in the ./data folder with model data. You can set the option updateResults to TRUE to download the data directly from the iiasa database. Just set your credentials to the database also in the "credentials.json" file.')
+  }
+  filename <- rownames(files)[which.max(files$mtime)]
+
+  dateString <- gsub("./data/data_|.csv", "", filename)
+
+  df <- read.csv(filename,check.names=FALSE,stringsAsFactors=FALSE, dec = ".")
+
+  #long format
+  dfLong <- df %>%
+    gather(Period, Value, -c(1:5))
+
+  # load hist data
+  histDf <- read.csv("./hist/hist.csv",check.names=FALSE,stringsAsFactors=FALSE, dec = ".")
+
+  #copy EU27 for EU28 for EURef
+  tmp <- histDf[histDf$Scenario == "EU_ReferenceScenario_2020",]
+  tmp$Region <- "EU27 & UK"
+  histDf <- rbind(histDf, tmp)
+
+  histDf <- histDf[histDf$Region == regionDisplayed,]
+  histDf <- histDf[! names(histDf) %in% c("")] # remove columns with no names
+  
+  histData <- histDf %>%
+    gather(Period, Value, -c(1:5))
+  histData$Value <- as.numeric(as.character(histData$Value))
+  
+  #copy 2019 CEDS to 2020 values
+  tmp <- histData[histData$Scenario == "CEDS" & histData$Period==2019,]
+  tmp$Period <- 2020
+  tmp$Scenario <- "CEDS2019"
+  histData <- rbind(histData, tmp)
+
+  # filter
+  histData <- histData[histData$Scenario %in% c("CEDS","CEDS2019","EU_ReferenceScenario_2020","James_IMF"),]
+
+  #shortNames
+  histData[histData$Scenario == "EU_ReferenceScenario_2020",]$Scenario <- "EU27Ref"
+  histData[histData$Scenario == "James_IMF",]$Scenario <- "IMF"
+
+  #histData[histData$Scenario == "CEDS" & histData$Variable == "Emissions|N2O",]$Value <- histData[histData$Scenario == "CEDS" & histData$Variable == "Emissions|N2O",]$Value * 1000
+  histData <- histData[!(histData$Scenario == "CEDS" & histData$Variable == "Emissions|N2O"),]
+
+  #merge data with hist
+  df <- rbind(dfLong,histData)
+
+  # removing Na Values
+  df <- df[!is.na(df$Value),]
+
+
+```
+
+
+<!-- Loading Data -->
+```{r preparing_data, echo=FALSE, include=FALSE}
+
+#remove unwanted models
+df <- df[!df$Model %in% c("OSeMBE v0.1.2", "test_model","MESSAGEix-GLOBIOM_1.2"),]
+
+#should we use results from MESSAGEix-GLOBIOM_1.2 or MESSAGEix-GLOBIOM 1.2 ????
+
+#rename scenarios for TIAM-ECN 1.2
+scenRename <- c(
+  "DIAG_C0to80-gr5" = "DIAG-C0to80-gr5",
+  "DIAG_C400-lin" = "DIAG-C400-lin",
+  "DIAG_C80-gr5" = "DIAG-C80-gr5" ,
+  "DIAG_NPi" = "DIAG-NPI",
+  "DIAG_Nzero" = "DIAG-NZero"#,
+#  "DIAG-Nzero" = "DIAG-NZero"
+)
+df[df$Model == "TIAM-ECN 1.2" & df$Scenario %in% names(scenRename),]$Scenario <- scenRename[df[df$Scenario %in% names(scenRename),]$Scenario]
+
+#rescale results for N2O in WITCH
+df[df$Model == "WITCH 5.0" & df$Variable == "Emissions|N2O",]$Value <- df[df$Model == "WITCH 5.0" & df$Variable == "Emissions|N2O",]$Value/1000
+
+# PROMETHEUS 1.2 is providing values at millions
+df[df$Unit == "million EUR/yr",]$Value <- df[df$Unit == "million EUR/yr",]$Value / 1000
+df[df$Unit == "million EUR/yr",]$Unit <- "billion EUR/yr"
+
+# select scenarios
+histScen <- unique(df[df$Model == "reference",]$Scenario)
+policyScen <- c("DIAG-Base", "DIAG-NPI", "DIAG-C80-gr5", "DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero")
+df <- df[(df$Scenario %in% c(histScen,policyScen)),]
+
+#reorder scenarios
+df <- df %>%
+  mutate(Scenario = factor(Scenario, levels=c(histScen,policyScen)))
+
+#Create Region aggregate for "OSeMBE v1.0.0" and "Euro-Calliope 2.0"
+`EU27 & UK` <- c("Austria", "Belgium", "Bulgaria", "Croatia", "Cyprus", "Czech Republic", "Denmark",
+          "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy",
+          "Latvia", "Lithuania", "Luxembourg", "Malta", "The Netherlands", "Poland", "Portugal",
+          "Romania", "Slovakia", "Slovenia", "Spain", "Sweden",
+          "United Kingdom"
+          )
+EU27regions <- `EU27 & UK`[`EU27 & UK` != "United Kingdom"]
+
+tmp <- df[(df$Model == "Euro-Calliope 2.0" & df$Region %in% `EU27 & UK`),]
+tmp <- tmp[!(tmp$Unit %in% c("US$2010/kW/yr","billion US$2010/yr","EUR/MWh")) ,]
+tmp <- tmp %>% group_by(Model,Scenario,Variable, Unit, Period) %>%
+  summarize(Value = sum(Value))
+tmp$Region <- "EU27 & UK"
+tmp <- as.data.frame(tmp[,c(1,2,7,3,4,5,6)])
+
+df <- rbind(df,tmp)
+
+tmp <- df[(df$Model == "Euro-Calliope 2.0" & df$Region %in% EU27regions),]
+tmp <- tmp[!(tmp$Unit %in% c("US$2010/kW/yr","billion US$2010/yr","EUR/MWh")) ,]
+tmp <- tmp %>% group_by(Model,Scenario,Variable, Unit, Period) %>%
+  summarize(Value = sum(Value))
+tmp$Region <- "EU27"
+tmp <- as.data.frame(tmp[,c(1,2,7,3,4,5,6)])
+
+df <- rbind(df,tmp)
+
+tmp <- df[(df$Model == "OSeMBE v1.0.0" & df$Region %in% `EU27 & UK`),]
+tmp <- tmp[!(tmp$Unit %in% c("EUR_2020/GJ")) ,]
+tmp <- tmp %>% group_by(Model,Scenario,Variable, Unit, Period) %>%
+  summarize(Value = sum(Value))
+tmp$Region <- "EU27 & UK"
+tmp <- as.data.frame(tmp[,c(1,2,7,3,4,5,6)])
+
+df <- rbind(df,tmp)
+
+tmp <- df[(df$Model == "OSeMBE v1.0.0" & df$Region %in% EU27regions),]
+tmp <- tmp[!(tmp$Unit %in% c("EUR_2020/GJ")) ,]
+tmp <- tmp %>% group_by(Model,Scenario,Variable, Unit, Period) %>%
+  summarize(Value = sum(Value))
+tmp$Region <- "EU27"
+tmp <- as.data.frame(tmp[,c(1,2,7,3,4,5,6)])
+
+df <- rbind(df,tmp)
+
+#select Regions
+if(regionDisplayed=="EU27"){
+  df <- df[(df$Region %in% c("EU27", "Europe", "Europe (excl. Turkey)", "Europe (incl. Turkey)")) | (df$Model == "MEESA" & df$Region == "EU27 & UK"),]
+} else if (regionDisplayed=="EU27 & UK"){
+  df <- df[df$Region %in% c("EU27 & UK", "Europe", "Europe (excl. Turkey)", "Europe (incl. Turkey)"),] #"EU27",
+}
+
+# changing Period to numeric
+df$Period <- as.numeric(df$Period)
+
+#remove version from model names
+df$Model <- gsub("v\\d*\\.?\\d*\\.?\\d*", "", df$Model) # remove "v1.0.0"
+df$Model <- gsub("v\\d*\\.?\\d*", "", df$Model) # remove "v1.1"
+df$Model <- gsub(" \\d*\\.?\\d*", "", df$Model) # remove "1.1"
+df$Model <- gsub("\\s$*", "", df$Model) # remove trailing spaces
+df$Model <- gsub("\\_*$", "", df$Model) # remove trailing underscores
+
+#rename MESSAGE
+df[df$Model == "MESSAGEix-GLOBIOM",]$Model <- "MESSAGE"
+
+#order of Models
+modelsOrder <- c("Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH") #,"PRIMES"
+df$Model <- factor(df$Model, levels = c("reference",modelsOrder))
+
+#order of scenarios
+df$Scenario <- factor(df$Scenario, levels=c(histScen,policyScen))
+
+#report number of vars per model
+nVars <- NULL
+for (model in unique(df$Model)){
+  n <- length(unique(df[df$Model == model,]$Variable))
+  names(n) = model
+  nVars <- c(nVars, n)
+}
+
+```
+
+
+<!-- Aesthetics -->
+```{r aestetics, echo=FALSE, include=FALSE}
+
+#knitr::opts_chunk$set(echo = TRUE)
+# setting global R chunk options (https://yihui.name/knitr/options/#chunk_options)
+  knitr::opts_chunk$set(dev='svglite', # svg, png,...
+                        fig.ext = ".svg",
+                        #fig.asp = .8 # default aspect ratio
+                        fig.width = 16,
+                        fig.height = 9,
+                        dpi=100
+                        )
+
+color <- c(
+#model
+  "IMAGE" = "#000000",
+  "Euro-Calliope" = "#c0c0c0",
+  "MEESA" = "#ff00ff",
+  "MESSAGE" = "#800080",
+  "OSeMBE" = "#a52a2a",
+  "PRIMES" = "#0000ff",
+  "PROMETHEUS" = "#ffd900",
+  "REMIND" = "#ff6347",
+  "TIAM-ECN" = "#4682b4",
+  "WITCH" = "#228b22",
+#scenario
+  "DIAG-Base" = "#f1746e",
+  "DIAG-NPI" = "#b49f06",
+  "DIAG-C80-gr5" = "#2eba38",
+  "DIAG-C0to80-gr5" = "#38c0c4",
+  "DIAG-C400-lin" = "#939dff",
+  "DIAG-NZero" = "#f062e4",
+#emi
+  "Energy Supply" = "#3D4849",
+  "Energy Supply - Electricity"= "#ffb200",
+  "Energy Supply - Heat"= "#cc0000",
+  "Energy Supply - Gases"= "#999959",
+  "Energy Supply - Liquids"= "#0000cc",
+  "Energy Supply - Solids"= "#0c0c0c",
+  "Energy Supply - Other" = "#79a6d2",
+  "Energy Demand" = "#999959",
+  "Energy Demand - Transportation" = "#a1dd70",
+  "Energy Demand - Bunkers" = "#333333",
+  "Energy Demand - Buildings" = "#5edfff",
+  "Energy Demand - Residential and Commercial" = "#5edfff",
+  "Energy Demand - Other Sector" = "#999959",
+  "Demand - AFOFI" = "#005900",
+  "Energy Demand - Industry" = "#5f6769",
+  "Industrial Processes" = "#b2b2b2",
+  "Other" = "#5b0d8f",
+  "AFOLU" = "#4DAF4A",
+#capture
+  "CCS - Biomass" = "#008c00",
+  "CCS - Biomass Energy" = "#005900",
+  "CCS - Biomass Industry" = "#377EB8",
+  "CCS - Biomass Industrial Processes" = "#79a6d2",
+  "CCS - Fossil" = "#cccccc",
+  "CCS - Fossil Energy" = "#a6a6a6",
+  "CCS - Fossil Industry" = "#4e4e4e",
+  "CCS - Fossil Industrial Processes" = "#282828",
+  "DAC" = "#CC6666",
+  "Enhanced Weathering" = "#5b0d8f",
+  "Land Use Capture" = "#4DAF4A",
+#carrier
+  "Electricity" = "#ffb200",
+  "Heat"        = "#cc0000",
+  "Hydrogen"    = "#5ed5b0",
+  "Gases"       = "#999959",
+  "Gases - Fossil"  = "#a1a161", # #a1a161",
+  "Gases - Biomass" = "#999959", # "#999959",
+  "Gases - Efuel"   = "#caca8a", # "#caca8a",
+  "Liquids"     = "#0000cc",
+  "Liquids - Fossil"  = "#000068", #"#000068",
+  "Liquids - Biomass" = "#0000cc", #"#0000cc",
+  "Liquids - Efuel"   = "#5050ff", #"#5050ff",
+  "Solids"      = "#0c0c0c",
+  "Solids - Fossil"  = "#0c0c0c",
+  "Solids - Biomass" = "#9fa1a4",
+  "Other Carrier" = "#79a6d2",
+  "Geothermal" = "#e51900",
+  "Solar" = "#ffcc00",
+  "Non-Energy Biomass" = "#005900",
+  "Non-Energy Coal" = "#b2b2b2",
+  "Non-Energy Gas" = "#b79e38",
+  "Non-Energy Oil" = "#ff6565",
+#sector
+  "Industry" = "#5f6769",
+  "Residential and Commercial" = "#5edfff",
+  "Transportation" = "#a1dd70",
+  "Non-Energy Use" = "#ff9966",
+  "Bunkers" = "#333333",
+#sector fe carrier
+  "Non-Energy Use - Hydrogen" = "#5ed5b0",
+  "Non-Energy Use - Gases" = "#999959",
+  "Non-Energy Use - Liquids" = "#0000cc",
+  "Non-Energy Use - Solids" = "#0c0c0c",
+  "Non-Energy Use - Other" = "#79a6d2",
+  "Industry - Electricity" = "#ffb200",
+  "Industry - Heat" = "#cc0000",
+  "Industry - Hydrogen" = "#5ed5b0",
+  "Industry - Gases" = "#999959",
+  "Industry - Liquids" = "#0000cc",
+  "Industry - Solids" = "#0c0c0c",
+  "Industry - Other" = "#79a6d2",
+  "Transport - Electricity" = "#ffb200",
+  "Transport - Hydrogen" = "#5ed5b0",
+  "Transport - Gases" = "#999959",
+  "Transport - Liquids" = "#0000cc",
+  "Transport - Other" = "#79a6d2",
+  "Bunkers - Electricity" = "#ffb200",
+  "Bunkers - Hydrogen" = "#5ed5b0",
+  "Bunkers - Gases" = "#999959",
+  "Bunkers - Liquids" = "#0000cc",
+  "Bunkers - Other" = "#79a6d2",
+#sector per type
+  "Passenger" = "#77c3e6",
+  "Freight" = "#37474f",
+#tech
+  "Solar" = "#ffcc00",
+  "Solar CSP" = "#ffcc00",
+  "Solar PV" = "#ffe600",
+  "Wind" = "#337fff",
+  "Wind Offshore" = "#4d33ff",
+  "Wind Onshore" = "#337fff",
+  "Other" = "#5b0d8f",
+  "Ocean" = "#0000FF",
+  "Biomass" = "#005900",
+  "Biomass w/ CCS" = "#33ff00",
+  "Biomass w/o CCS" = "#005900",
+  "Hydro" = "#191999",
+  "Hydro Reservoir" = "#8a8aec",
+  "Hydro Pumped Storage" = "#dfdffa",
+  "Hydro Run of River" = "#191999",
+  "Geothermal" = "#e51900",
+  "Nuclear" = "#ff33ff",
+  "Gas" = "#999959",
+  "Gas CCGT" = "#7c6b2a",
+  "Gas w/ CCS" = "#b79e38",
+  "Gas w/o CCS" = "#999959",
+  "Coal" = "#0c0c0c",
+  "Coal w/ CCS" = "#b2b2b2",
+  "Coal w/o CCS" = "#0c0c0c",
+  "Oil" = "#b30000",
+  "Oil w/ CCS" = "#ff6565",
+  "Oil w/o CCS" = "#b30000"
+)
+
+#plot aesthetics
+theme_singleColumn <- function(){
+  theme_minimal(base_size = 16) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5),
+    legend.position="bottom",
+    legend.title=element_blank(),
+    legend.key.size = unit(20,"pt"),
+    legend.text = element_text(size=14, margin = margin(r = 20, unit = 'pt')),
+    panel.spacing = unit(1.5, "lines")
+  )
+}
+
+```
+
+<!-- Creating Plots -->
+
+```{r auxilir_plot_functions, echo=FALSE, include=FALSE}
+
+# function to create line plots
+linePlot <- function(data, scen=NULL, title="", colorDim="Model", linetypeDim=NULL, xdim="Period", ydim="Value", facetDim="Scenario", legend = list(nRow=NULL), min=0, max=NULL, minPeriod=2005, maxPeriod=2050, labels=NULL){
+
+  if(nrow(data)==0){
+    return(NULL)
+  }
+
+  data <- data[(data$Period >= minPeriod) & (data$Period <= maxPeriod),]
+  plotData <- data[((!(data$Model=="reference")) & (data$Scenario %in% scen)),]
+  plotData$Scenario <- factor(plotData$Scenario , levels = scen)
+  plotData$Model <- factor(plotData$Model, level = levels(plotData$Model)[!levels(plotData$Model) == c("reference")])
+
+  hist <- data[(data$Model=="reference"),]
+
+  if(!(nrow(hist)==0)){
+    tmp <- hist
+    tmp$source <- tmp$Scenario
+    histFull <- NULL
+    for(sc in scen){
+      tmp$Scenario <- sc
+      histFull <- rbind(histFull,tmp)
+    }
+    histLabel <- histFull %>%
+      group_by(source, Region, Variable) %>%
+      filter(Period == max(Period))
+    histFull$Scenario <- factor(histFull$Scenario , levels = scen)
+    histLabel$Scenario <- factor(histLabel$Scenario , levels = scen)
+  }
+
+  gg <- ggplot(plotData,aes_string(x=xdim ,y=ydim, color=colorDim ,linetype=linetypeDim)) +
+    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
+    geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
+    {if((!(nrow(hist)==0)) & !is.null(linetypeDim)) geom_line(data=histFull,size=1,aes_string(color = colorDim),alpha = 0.5,lty="11") } +
+    {if((!(nrow(hist)==0)) & is.null(linetypeDim)) geom_line(data=histFull,size=1,aes(color = source),alpha = 0.5,lty="11") } +
+    {if(!(nrow(hist)==0)) geom_text(data=histLabel, aes(label = source,color = source), hjust ="inward", vjust=1.2, alpha = 0.5) } +
+    geom_line(size=1) +
+    geom_point() +
+    facet_wrap(facetDim,drop = FALSE, nrow = 2) +
+    theme_singleColumn() +
+    theme(
+      legend.key.size = unit(30,"pt"),
+      legend.text = element_text(size=16, margin = margin(r = 20, t = 10, b = 10, unit = 'pt'))
+    ) +
+    ylab(title) +
+    #scale_x_continuous(breaks=seq(2010, 2050, 10)) +
+    {if(!is.null(legend$nRow)) guides(color = guide_legend(nrow = legend$nRow),linetype = guide_legend(nrow = legend$nRow))} +
+    {if(is.null(max)) expand_limits(y=c(min))} +
+    {if(!(is.null(max))) expand_limits(y=c(min,max))}
+
+  if(colorDim=="Variable"){
+    if(!(is.null(labels))){
+      fullVars <- levels(data$Variable)
+      names(fullVars) <- labels
+      vars <- fullVars[unique(data$Variable)]
+      gg <- gg + scale_color_manual(values = setNames(color[names(vars)],vars), labels = setNames(names(vars),vars),drop=FALSE)
+    }
+  } else {
+    lvl <- levels(plotData[[colorDim]])
+    lvl <- lvl[lvl!="reference"]
+    gg <- gg +
+      scale_color_manual(values = setNames(color[lvl],lvl),drop=FALSE)
+  }
+
+  return(gg)
+}
+
+
+# function to create bar Plots
+barPlot <- function(data, scen=NULL,total=NULL,period=c(2020,2030,2050),title="", legend = list(nRow=NULL), min=0, max=NULL, labels=NULL, pattern=NULL){
+
+  if(nrow(data)==0){
+    return(NULL)
+  }
+
+  plotData <- data[((!(data$Model=="reference")) & (data$Scenario %in% scen)),]
+  plotData <- plotData[(plotData$Period %in% period),]
+  plotData$Scenario <- factor(plotData$Scenario , levels = scen)
+  plotData$Model <- factor(plotData$Model, level = levels(plotData$Model)[!levels(plotData$Model) == c("reference")])
+
+  total <- total[(total$Period %in% period),]
+  total$Model <- factor(total$Model, level = levels(plotData$Model))
+  #total$Model <- factor(total$Model)
+
+  hist <- data[(data$Model=="reference") & (data$Period %in% period),]
+
+  if(!(nrow(hist)==0)){
+    tmp <- hist
+    tmp$Model <- tmp$Scenario
+    histFull <- NULL
+    for(sc in scen){
+      tmp$Scenario <- sc
+      histFull <- rbind(histFull,tmp)
+    }
+    histFull$Scenario <- factor(histFull$Scenario , levels = scen)
+    histFull$Model <- as.character(histFull$Model) #remove factor
+  }
+  
+  # if(!(nrow(hist)==0)){
+  #   tmp <- hist %>%
+  #     group_by(Model, Scenario, Region) %>%
+  #     filter(Period == max(Period))
+  #   tmp$Model <- paste0(tmp$Period, " ", tmp$Scenario)
+  #   tmp$Period <- 2020
+  #   histFull <- NULL
+  #   for(sc in scen){
+  #     tmp$Scenario <- sc
+  #     histFull <- rbind(histFull,tmp)
+  #   }
+  #   histFull$Scenario <- factor(histFull$Scenario , levels = scen)
+  #   #histFull$Model <- factor(histFull$Model, levels = c(unique(histFull$Model),levels(plotData$Model)))
+  # }
+
+  if(!(is.null(labels))){
+      fullVars <- levels(data$Variable)
+      names(fullVars) <- labels
+      labelsVars <- fullVars[unique(data$Variable)]
+  }
+
+  if(!(is.null(pattern))){
+      fullVars <- levels(data$Variable)
+      names(fullVars) <- pattern
+      patternVars <- fullVars[unique(data$Variable)]
+  }
+
+  gg <- ggplot(plotData,aes(x=Model,y=Value,fill=Variable,pattern=Variable)) +
+    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
+    {if(nrow(total)>0)geom_point(data=total,aes(x=Model,y=Value,fill="gray"), shape=23, alpha = 0.5)} +
+    {if(!(nrow(hist)==0)) geom_bar(data=histFull,stat='identity')} +
+    {if(is.null(pattern)) geom_bar(stat='identity')} +
+    {if(!is.null(pattern)) geom_bar_pattern(stat='identity', pattern_key_scale_factor = 0.3, pattern_density=0.5, pattern_spacing = 0.03, pattern_colour = "white", pattern_fill = "white", pattern_alpha=0.4)} +
+    facet_wrap(~Scenario+Period, scales='free_x', nrow=2, labeller = labeller(Scenario = function(Variable, Value) {c("", "DIAG-Base","","","DIAG-NPI","","","DIAG-C80-gr5","","", "DIAG-C0to80-gr5","","","DIAG-C400-lin","","","DIAG-NZero","")}),drop = FALSE) +
+    theme_singleColumn() +
+    scale_x_discrete(drop=FALSE) +
+    {if(!is.null(labels)) scale_fill_manual(values = setNames(color[names(labelsVars)],labelsVars), labels = setNames(names(labelsVars),labelsVars),drop=FALSE) } +
+    {if(!is.null(pattern)) scale_pattern_manual(values = setNames(c("none",names(patternVars)),c("Total",patternVars)))} +
+    {if(!is.null(pattern)) guides(fill = guide_legend(override.aes = list(pattern = setNames(names(patternVars),patternVars) ) ) )} +
+    {if(!is.null(pattern)) guides(pattern="none")} +
+    ylab(title) +
+    theme(axis.text.x = element_text(size = 10)) +
+    {if(!is.null(legend$nRow)) guides(fill = guide_legend(nrow = legend$nRow))} +
+    {if(is.null(max)) expand_limits(y=c(min))} +
+    {if(!(is.null(max))) expand_limits(y=c(min,max))}
+
+  gg <- spaceFacet(gg)
+
+  return(gg)
+}
+
+#function to space facets and remove crop from facet titles
+spaceFacet <- function(gg,size=3,layout=c(15,27)){
+  gt = ggplot_gtable(ggplot_build(gg))
+  #gtable_show_layout(gt)
+  for (item in layout){
+    gt$widths[item] = size*gt$widths[item]
+  }
+  #remove crop from titles
+  for(i in which(grepl("strip-r|strip-t", gt$layout$name))){
+    gt$grobs[[i]]$layout$clip <- "off"
+  }
+  return(as.ggplot(gt))
+}
+
+
+# function to filter data recursively
+filterData <- function (data, plotName, l = plotList) {
+
+  loopList <- function (lt, varList, dd) { # function to filter only vars that have values, in the highest node levels possible
+    for (node in names(lt)){
+      if(length(intersect(node,unique(dd$Variable)))==0){ #remove node if it has no data
+        varList <- varList[varList != as.character(node)]
+      }
+      if(!(is.null(names(lt[[node]])))){ # node is not a terminal node
+        if(length(intersect(unique(unlist((strsplit(names(unlist(lt[[node]])),"\\.")))),unique(dd$Variable)))>0){ #remove node if any children has data
+          varList <- varList[varList != as.character(node)]
+        }
+        varList <- loopList(lt[[node]], varList, dd)
+      }
+    }
+    return(varList)
+  }
+
+  vars <- unique(unlist((strsplit(names(unlist(l[[plotName]]$vars)),"\\."))))
+
+  out <- do.call(rbind,
+      lapply(unique(data$Model), function(model){
+         return(data[data$Model == model & data$Variable %in% loopList(lt=l[[plotName]]$vars, varList=vars, dd=data[data$Model == model,]),])
+      })
+    )
+
+  out$Variable <- factor(out$Variable , levels = unique(unlist((strsplit(names(unlist(plotList[[plotName]]$vars)),"\\.")))))
+  out$Model <- factor(out$Model , levels = levels(data$Model))
+  out$Scenario <- factor(out$Scenario , levels = levels(data$Scenario))
+  #intersect(unique(unlist((strsplit(names(unlist(plotList[[plotName]]$vars)),"\\.")))),unique(out$Variable))) #order
+
+  return(out)
+
+}
+
+```
+
+
+```{r creating_Plots, echo=FALSE, include=FALSE}
+
+# reading json file that define all plots
+plotList <- fromJSON(file="plots.json")
+
+# creating all plots from JSON specification
+g <- NULL
+g <-
+  lapply(names(plotList),function(plot){
+    print(plot)
+    if(plotList[[plot]]$type == "line"){
+      d <- filterData(data=df[df$Scenario!="CEDS2019",],plotName=plot) # filtering data for plot
+      p <- do.call(linePlot, c(list(data=d,scen=policyScen),plotList[[plot]]$arg))
+    } else if (plotList[[plot]]$type == "bar"){
+      d <- filterData(data=df,plotName=plot) # filtering data for plot
+      totalSum <- df[(df$Scenario %in% policyScen) & (df$Variable %in%  names(plotList[[plot]]$vars)),] %>%
+          group_by(Model,Scenario,Period) %>% summarize(Value = sum(Value),.groups="drop") %>% mutate(Variable="Total",Scenario = factor(Scenario, levels=policyScen))
+      p <- do.call(barPlot, c(list(data=d,scen=policyScen,total=totalSum),plotList[[plot]]$arg))
+    }
+    return(p)
+  })
+names(g) <- names(plotList)
+
+```
+
+
+<!-- Display Plots -->
+
+# Emissions {.tabset}
+
+## CO2
+
+### CO2 Emissions
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`CO2 Emissions`
+
+```
+
+---
+
+## per source
+
+### CO2 Emissions per source
+
+```{r, echo = FALSE, fig.width=16, fig.height=10}
+
+g$`CO2 emissions per source`
+
+```
+
+---
+
+## Kyoto Gases
+
+### Kyoto Gases Emissions
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Kyoto Gases Emissions`
+
+```
+
+---
+
+## per source
+
+### Kyoto Gases emissions per source
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Kyoto Gases emissions per source`
+
+```
+
+---
+
+## CH4
+
+### CH4 emissions
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`CH4 Emissions`
+
+```
+
+---
+
+## N2O
+
+### N2O emissions
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`N2O Emissions`
+
+```
+
+---
+
+## F-Gases
+
+### F-Gases emissions
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`F-Gases Emissions`
+
+```
+
+---
+
+# Carbon Price {.tabset}
+
+## Carbon Price per scenario
+
+### per scenario
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Carbon Price (per scenario)`
+
+```
+
+---
+
+## Carbon Price per model
+
+### per model
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Carbon Price (per model)`
+
+```
+
+---
+
+
+# Carbon Capture {.tabset}
+
+## Carbon Capture
+
+### Carbon Capture
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Carbon Capture`
+
+```
+
+---
+
+## per source
+
+### Carbon Capture per source
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Carbon Capture per source`
+
+```
+
+---
+
+## Carbon Removal
+
+### Carbon Removal
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Carbon Removal`
+
+```
+
+---
+
+## Land Use
+
+### Carbon Removal - Land Use
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Carbon Removal - Land Use`
+
+```
+
+---
+
+# Primary Energy {.tabset}
+
+## Primary Energy
+
+### Primary Energy
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Primary Energy`
+
+```
+
+---
+
+## per source
+
+### Primary Energy per source
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Primary Energy per source`
+
+```
+
+---
+
+## Trade
+
+### Primary Energy Trade
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Primary Energy Trade`
+
+```
+
+---
+
+# Primary Energy Prices
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Primary Energy Price`
+
+```
+
+---
+
+
+# Secondary Energy {.tabset}
+
+## Secondary Energy
+
+### Secondary Energy
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Secondary Energy`
+
+```
+
+---
+
+## per carrier
+
+### Secondary Energy per carrier
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Secondary Energy per carrier`
+
+```
+
+---
+
+## Trade
+
+### Secondary Energy Trade
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Trade Secondary Energy`
+
+```
+
+---
+
+## Electricity
+
+### Secondary Energy Electricity
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Secondary Energy Electricity`
+
+```
+
+---
+
+# Secondary Energy Prices
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Secondary Energy Price`
+
+```
+
+---
+
+# Final Energy {.tabset}
+
+## Final Energy
+
+### Final Energy
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Final Energy`
+
+```
+
+---
+
+## per source
+
+### Final Energy per source
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Final Energy per source`
+
+```
+
+---
+
+## per sector
+
+### Final Energy per sector
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Final Energy per sector`
+
+```
+
+
+---
+
+## Non-Energy and Industry
+
+### Non-Energy and Industry Final Energy per carrier
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Non-Energy and Industry Final Energy per carrier`
+
+```
+
+---
+
+## Buildings
+
+### Residential and Commercial Final Energy per carrier
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Residential and Commercial Final Energy per carrier`
+
+```
+
+---
+
+## Transport
+
+### Transportation and Bunkers Final Energy per carrier
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Transportation and Bunkers Final Energy per carrier`
+
+```
+
+<!-- --- -->
+
+<!-- ## Other Sectors -->
+
+<!-- ### Other Sectors Final Energy per carrier -->
+
+<!-- ```{r, echo = FALSE, fig.width=16, fig.height=8} -->
+
+<!-- g$`Other Sectors Final Energy per carrier` -->
+
+<!-- ``` -->
+
+
+---
+
+## Transport per type
+
+### Transportation Final Energy per type
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Transportation Final Energy per type`
+
+```
+
+---
+
+# Final Energy Prices {.tabset}
+
+## Industry
+
+### Industry Final Energy Prices
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Industry Final Energy Price`
+
+```
+
+---
+
+## Residential and Commercial
+
+### Residential and Commercial Final Energy Prices
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Residential and Commercial Final Energy Price`
+
+```
+
+---
+
+## Transportation
+
+### Transportation Final Energy Prices
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Transportation Final Energy Price`
+
+```
+
+---
+
+# Economy {.tabset}
+
+## Population
+
+### Population
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`Population`
+
+```
+
+---
+
+## GDP MER
+
+### GDP MER
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`GDP MER`
+
+```
+
+---
+
+## GDP PPP
+
+### GDP PPP
+
+```{r, echo = FALSE, fig.width=16, fig.height=8}
+
+g$`GDP PPP`
+
+```
+
+---
+
+
+
