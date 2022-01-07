@@ -509,7 +509,7 @@ linePlot <- function(data, scen=NULL, title="", colorDim="Model", linetypeDim=NU
     geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
     {if((!(nrow(hist)==0)) & !is.null(linetypeDim)) geom_line(data=histFull,size=1,aes_string(color = colorDim),alpha = 0.5,lty="11") } +
     {if((!(nrow(hist)==0)) & is.null(linetypeDim)) geom_line(data=histFull,size=1,aes(color = source),alpha = 0.5,lty="11") } +
-    {if(!(nrow(hist)==0)) geom_text(data=histLabel, aes(label = source,color = source), hjust ="inward", vjust=1.2, alpha = 0.5) } +
+    {if(!(nrow(hist)==0)) geom_text(data=histLabel, aes(label = source,color = source), hjust ="inward", vjust=1.5, alpha = 0.5) } +
     geom_line(size=1) +
     geom_point() +
     facet_wrap(facetDim,drop = FALSE, nrow = 2) +
