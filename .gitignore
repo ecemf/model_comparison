@@ -2,7 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
-R/model_comparison_EU28.html
+model_comparison.Rproj
+output/
 R/data/
 R/credentials.json
 

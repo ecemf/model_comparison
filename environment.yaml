@@ -6,7 +6,11 @@ dependencies:
   - python=3.9
   - r-dplyr
   - r-ggplot2
+  - r-ggpattern
+  - r-ggplotify
   - r-rjson
+  - r-gtable
+  - r-grid  
   - r-gridextra
   - r-svglite
   - r-tidyr
