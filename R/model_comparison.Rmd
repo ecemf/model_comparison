@@ -40,6 +40,22 @@ updateResults <- params$updateResults
 regionDisplayed <- "EU27"
 regionDisplayed <- params$regionDisplayed
 
+#chunk size and aspect ratio
+chunk <- list(
+  nRow1 = list(
+    width = 16,
+    height = 8
+  ),
+  nRow2 = list(
+    width = 16,
+    height = 8
+  ),
+  nRow3 = list(
+    width = 16,
+    height = 11.5
+  )
+)
+
 ```
 
 
@@ -167,11 +183,17 @@ if (r.updateResults):
   #copy 2019 CEDS to 2020 values
   tmp <- histData[histData$Scenario == "CEDS" & histData$Period==2019,]
   tmp$Period <- 2020
-  tmp$Scenario <- "CEDS2019"
+  tmp$Scenario <- "2019 CEDS"
   histData <- rbind(histData, tmp)
-
+  
+  #copy 2018 Eurostat to 2020 values
+  tmp <- histData[histData$Scenario == "Eurostat" & histData$Period==2018,]
+  tmp$Period <- 2020
+  tmp$Scenario <- "2018 Eurostat"
+  histData <- rbind(histData, tmp)
+  
   # filter
-  histData <- histData[histData$Scenario %in% c("CEDS","CEDS2019","EU_ReferenceScenario_2020","James_IMF"),]
+  histData <- histData[histData$Scenario %in% c("CEDS","2019 CEDS","EU_ReferenceScenario_2020","James_IMF","Eurostat","2018 Eurostat"),]
 
   #shortNames
   histData[histData$Scenario == "EU_ReferenceScenario_2020",]$Scenario <- "EU27Ref"
@@ -180,6 +202,9 @@ if (r.updateResults):
   #histData[histData$Scenario == "CEDS" & histData$Variable == "Emissions|N2O",]$Value <- histData[histData$Scenario == "CEDS" & histData$Variable == "Emissions|N2O",]$Value * 1000
   histData <- histData[!(histData$Scenario == "CEDS" & histData$Variable == "Emissions|N2O"),]
 
+  # add space in front to force position in stacked bar
+  histData$Scenario <- paste0(" ", histData$Scenario)
+  
   #merge data with hist
   df <- rbind(dfLong,histData)
 
@@ -342,15 +367,17 @@ color <- c(
   "DIAG-NZero" = "#f062e4",
 #emi
   "Energy Supply" = "#3D4849",
+  "Energy Supply - Electricity and Heat" = "#FF6600",
   "Energy Supply - Electricity"= "#ffb200",
   "Energy Supply - Heat"= "#cc0000",
+  "Energy Supply - Fuels" = "#4D4D93",
   "Energy Supply - Gases"= "#999959",
   "Energy Supply - Liquids"= "#0000cc",
   "Energy Supply - Solids"= "#0c0c0c",
   "Energy Supply - Other" = "#79a6d2",
   "Energy Demand" = "#999959",
   "Energy Demand - Transportation" = "#a1dd70",
-  "Energy Demand - Bunkers" = "#333333",
+  "Energy Demand - Bunkers" = "#ffc0cb",
   "Energy Demand - Buildings" = "#5edfff",
   "Energy Demand - Residential and Commercial" = "#5edfff",
   "Energy Demand - Other Sector" = "#999959",
@@ -358,6 +385,7 @@ color <- c(
   "Energy Demand - Industry" = "#5f6769",
   "Industrial Processes" = "#b2b2b2",
   "Other" = "#5b0d8f",
+  "Waste" = "#A52A2A",
   "AFOLU" = "#4DAF4A",
 #capture
   "CCS - Biomass" = "#008c00",
@@ -398,7 +426,7 @@ color <- c(
   "Residential and Commercial" = "#5edfff",
   "Transportation" = "#a1dd70",
   "Non-Energy Use" = "#ff9966",
-  "Bunkers" = "#333333",
+  "Bunkers" = "#ffc0cb",
 #sector fe carrier
   "Non-Energy Use - Hydrogen" = "#5ed5b0",
   "Non-Energy Use - Gases" = "#999959",
@@ -452,7 +480,12 @@ color <- c(
   "Coal w/o CCS" = "#0c0c0c",
   "Oil" = "#b30000",
   "Oil w/ CCS" = "#ff6565",
-  "Oil w/o CCS" = "#b30000"
+  "Oil w/o CCS" = "#b30000",
+  #Carbon management
+  "Direct Air Capture" = "#24A19C",
+  "Fossil" = "#cccccc",
+  "Storage" = "#D96098",
+  "Usage" = "#325288"
 )
 
 #plot aesthetics
@@ -476,7 +509,7 @@ theme_singleColumn <- function(){
 ```{r auxilir_plot_functions, echo=FALSE, include=FALSE}
 
 # function to create line plots
-linePlot <- function(data, scen=NULL, title="", colorDim="Model", linetypeDim=NULL, xdim="Period", ydim="Value", facetDim="Scenario", legend = list(nRow=NULL), min=0, max=NULL, minPeriod=2005, maxPeriod=2050, labels=NULL){
+linePlot <- function(data, scen=policyScen, title="", colorDim="Model", linetypeDim=NULL, xdim="Period", ydim="Value", facetDim="Scenario", legend = list(nRow=NULL), min=0, max=NULL, minPeriod=2005, maxPeriod=2050, labels=NULL){
 
   if(nrow(data)==0){
     return(NULL)
@@ -504,6 +537,12 @@ linePlot <- function(data, scen=NULL, title="", colorDim="Model", linetypeDim=NU
     histLabel$Scenario <- factor(histLabel$Scenario , levels = scen)
   }
 
+  if(!(is.null(labels))){
+      fullVars <- levels(data$Variable)
+      names(fullVars) <- labels
+      labelsVars <- fullVars[fullVars %in% unique(data$Variable)]
+  }
+  
   gg <- ggplot(plotData,aes_string(x=xdim ,y=ydim, color=colorDim ,linetype=linetypeDim)) +
     geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
     geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
@@ -512,7 +551,14 @@ linePlot <- function(data, scen=NULL, title="", colorDim="Model", linetypeDim=NU
     {if(!(nrow(hist)==0)) geom_text(data=histLabel, aes(label = source,color = source), hjust ="inward", vjust=1.5, alpha = 0.5) } +
     geom_line(size=1) +
     geom_point() +
-    facet_wrap(facetDim,drop = FALSE, nrow = 2) +
+    {if((facetDim=="Variable")) facet_wrap(facetDim,drop = FALSE, nrow = 2, 
+               labeller = labeller(Variable = 
+                  function(Variable, Value) {
+                    facetLabels <- setNames(names(labelsVars),labelsVars)
+                    out <- facetLabels[Variable]
+                    return(out) 
+                  }))} +
+    {if(!(facetDim=="Variable")) facet_wrap(facetDim,drop = FALSE, nrow = 2)} +
     theme_singleColumn() +
     theme(
       legend.key.size = unit(30,"pt"),
@@ -543,7 +589,7 @@ linePlot <- function(data, scen=NULL, title="", colorDim="Model", linetypeDim=NU
 
 
 # function to create bar Plots
-barPlot <- function(data, scen=NULL,total=NULL,period=c(2020,2030,2050),title="", legend = list(nRow=NULL), min=0, max=NULL, labels=NULL, pattern=NULL){
+barPlot <- function(data, scen=policyScen,total=NULL,period=c(2020,2030,2050),title="", legend = list(nRow=NULL), min=0, max=NULL, labels=NULL, pattern=NULL, facet = list(nRow=3)){
 
   if(nrow(data)==0){
     return(NULL)
@@ -554,9 +600,10 @@ barPlot <- function(data, scen=NULL,total=NULL,period=c(2020,2030,2050),title=""
   plotData$Scenario <- factor(plotData$Scenario , levels = scen)
   plotData$Model <- factor(plotData$Model, level = levels(plotData$Model)[!levels(plotData$Model) == c("reference")])
 
-  total <- total[(total$Period %in% period),]
-  total$Model <- factor(total$Model, level = levels(plotData$Model))
-  #total$Model <- factor(total$Model)
+  plotTotal <- total[((total$Period %in% period) & (total$Scenario %in% scen)),]
+  plotTotal$Scenario <- factor(plotTotal$Scenario , levels = scen)
+  plotTotal$Model <- factor(plotTotal$Model, level = levels(plotData$Model))
+  #plotTotal$Model <- factor(plotTotal$Model)
 
   hist <- data[(data$Model=="reference") & (data$Period %in% period),]
 
@@ -571,55 +618,63 @@ barPlot <- function(data, scen=NULL,total=NULL,period=c(2020,2030,2050),title=""
     histFull$Scenario <- factor(histFull$Scenario , levels = scen)
     histFull$Model <- as.character(histFull$Model) #remove factor
   }
-  
-  # if(!(nrow(hist)==0)){
-  #   tmp <- hist %>%
-  #     group_by(Model, Scenario, Region) %>%
-  #     filter(Period == max(Period))
-  #   tmp$Model <- paste0(tmp$Period, " ", tmp$Scenario)
-  #   tmp$Period <- 2020
-  #   histFull <- NULL
-  #   for(sc in scen){
-  #     tmp$Scenario <- sc
-  #     histFull <- rbind(histFull,tmp)
-  #   }
-  #   histFull$Scenario <- factor(histFull$Scenario , levels = scen)
-  #   #histFull$Model <- factor(histFull$Model, levels = c(unique(histFull$Model),levels(plotData$Model)))
-  # }
 
   if(!(is.null(labels))){
       fullVars <- levels(data$Variable)
       names(fullVars) <- labels
-      labelsVars <- fullVars[unique(data$Variable)]
+      labelsVars <- fullVars[fullVars %in% unique(data$Variable)]
   }
 
   if(!(is.null(pattern))){
       fullVars <- levels(data$Variable)
       names(fullVars) <- pattern
-      patternVars <- fullVars[unique(data$Variable)]
+      patternVars <- fullVars[fullVars %in% unique(data$Variable)]
   }
 
   gg <- ggplot(plotData,aes(x=Model,y=Value,fill=Variable,pattern=Variable)) +
     geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    {if(nrow(total)>0)geom_point(data=total,aes(x=Model,y=Value,fill="gray"), shape=23, alpha = 0.5)} +
-    {if(!(nrow(hist)==0)) geom_bar(data=histFull,stat='identity')} +
+    {if(!(nrow(hist)==0) & is.null(pattern)) geom_bar(data=histFull,stat='identity')} +
+    {if(!(nrow(hist)==0) & !is.null(pattern)) geom_bar_pattern(data=histFull,stat='identity', pattern_key_scale_factor = 0.3, pattern_density=ifelse((facet$nRow==1) & (length(scen)==1), 0.5/3, 0.5), pattern_spacing = 0.03, pattern_colour = "white", pattern_fill = "white", pattern_alpha=0.4)} +
     {if(is.null(pattern)) geom_bar(stat='identity')} +
-    {if(!is.null(pattern)) geom_bar_pattern(stat='identity', pattern_key_scale_factor = 0.3, pattern_density=0.5, pattern_spacing = 0.03, pattern_colour = "white", pattern_fill = "white", pattern_alpha=0.4)} +
-    facet_wrap(~Scenario+Period, scales='free_x', nrow=2, labeller = labeller(Scenario = function(Variable, Value) {c("", "DIAG-Base","","","DIAG-NPI","","","DIAG-C80-gr5","","", "DIAG-C0to80-gr5","","","DIAG-C400-lin","","","DIAG-NZero","")}),drop = FALSE) +
+    {if(!is.null(pattern)) geom_bar_pattern(stat='identity', pattern_key_scale_factor = 0.3,  pattern_density=ifelse((facet$nRow==1) & (length(scen)==1), 0.5/3, 0.5), pattern_spacing = 0.03, pattern_colour = "white", pattern_fill = "white", pattern_alpha=0.4)} +
+    {if(nrow(plotTotal)>0)geom_point(data=plotTotal,aes(x=Model,y=Value,fill="gray"), shape=23, alpha = 0.5,show.legend = F)} +
     theme_singleColumn() +
+    facet_wrap(~Scenario+Period, scales='free_x', nrow=facet$nRow, 
+               labeller = labeller(Scenario = 
+                  function(Variable, Value) {
+                    nPer <- length(unique(plotData$Period)) 
+                    if(nPer==1){
+                      out <- Variable
+                    } else {
+                     out <- rep("",length(scen)*nPer)
+                      for (i in 1:length(scen)){
+                        out[(((i-1)*nPer)+2)] <- Variable[(((i-1)*nPer)+2)]
+                      }
+                    }
+                    return(out) 
+                  }),drop = FALSE) +
     scale_x_discrete(drop=FALSE) +
     {if(!is.null(labels)) scale_fill_manual(values = setNames(color[names(labelsVars)],labelsVars), labels = setNames(names(labelsVars),labelsVars),drop=FALSE) } +
     {if(!is.null(pattern)) scale_pattern_manual(values = setNames(c("none",names(patternVars)),c("Total",patternVars)))} +
     {if(!is.null(pattern)) guides(fill = guide_legend(override.aes = list(pattern = setNames(names(patternVars),patternVars) ) ) )} +
     {if(!is.null(pattern)) guides(pattern="none")} +
     ylab(title) +
-    theme(axis.text.x = element_text(size = 10)) +
+    {if(facet$nRow>1) theme(axis.text.x = element_text(size = 10))} +
     {if(!is.null(legend$nRow)) guides(fill = guide_legend(nrow = legend$nRow))} +
     {if(is.null(max)) expand_limits(y=c(min))} +
-    {if(!(is.null(max))) expand_limits(y=c(min,max))}
+    {if(!(is.null(max))) expand_limits(y=c(min,max))} 
+  
+  if((facet$nRow==1) & (length(scen)==1)){
+    gg <- gg + theme(panel.spacing = unit(1.5*3, "lines"))
+  }
 
-  gg <- spaceFacet(gg)
-
+  plotsPerLine <- length(scen)/facet$nRow
+  layoutPos <- NULL
+  for (i in 1:plotsPerLine){
+    layoutPos[i] <- 15 + 12*(i-1)
+  }
+  gg <- spaceFacet(gg,layout=layoutPos)
+  
   return(gg)
 }
 
@@ -664,7 +719,8 @@ filterData <- function (data, plotName, l = plotList) {
       })
     )
 
-  out$Variable <- factor(out$Variable , levels = unique(unlist((strsplit(names(unlist(plotList[[plotName]]$vars)),"\\.")))))
+  #out$Variable <- factor(out$Variable , levels = unique(unlist((strsplit(names(unlist(plotList[[plotName]]$vars)),"\\.")))))
+  out$Variable <- factor(out$Variable , levels = vars)
   out$Model <- factor(out$Model , levels = levels(data$Model))
   out$Scenario <- factor(out$Scenario , levels = levels(data$Scenario))
   #intersect(unique(unlist((strsplit(names(unlist(plotList[[plotName]]$vars)),"\\.")))),unique(out$Variable))) #order
@@ -687,13 +743,13 @@ g <-
   lapply(names(plotList),function(plot){
     print(plot)
     if(plotList[[plot]]$type == "line"){
-      d <- filterData(data=df[df$Scenario!="CEDS2019",],plotName=plot) # filtering data for plot
-      p <- do.call(linePlot, c(list(data=d,scen=policyScen),plotList[[plot]]$arg))
+      d <- filterData(data=df[!(df$Scenario %in% c(" 2019 CEDS"," 2018 Eurostat")),],plotName=plot) # filtering data for plot
+      p <- do.call(linePlot, c(list(data=d),plotList[[plot]]$arg))
     } else if (plotList[[plot]]$type == "bar"){
       d <- filterData(data=df,plotName=plot) # filtering data for plot
       totalSum <- df[(df$Scenario %in% policyScen) & (df$Variable %in%  names(plotList[[plot]]$vars)),] %>%
           group_by(Model,Scenario,Period) %>% summarize(Value = sum(Value),.groups="drop") %>% mutate(Variable="Total",Scenario = factor(Scenario, levels=policyScen))
-      p <- do.call(barPlot, c(list(data=d,scen=policyScen,total=totalSum),plotList[[plot]]$arg))
+      p <- do.call(barPlot, c(list(data=d,total=totalSum),plotList[[plot]]$arg))
     }
     return(p)
   })
@@ -710,7 +766,7 @@ names(g) <- names(plotList)
 
 ### CO2 Emissions
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`CO2 Emissions`
 
@@ -722,11 +778,25 @@ g$`CO2 Emissions`
 
 ### CO2 Emissions per source
 
-```{r, echo = FALSE, fig.width=16, fig.height=10}
+```{r, echo = FALSE, fig.width=chunk$nRow3$width, fig.height=chunk$nRow3$height}
 
 g$`CO2 emissions per source`
 
 ```
+
+
+---
+
+## NPI hist per source
+
+### NPI Historical Emissions per source
+
+```{r, echo = FALSE, fig.width=chunk$nRow1$width, fig.height=chunk$nRow1$height}
+
+g$`NPI Historical CO2 emissions per source`
+
+```
+
 
 ---
 
@@ -734,7 +804,7 @@ g$`CO2 emissions per source`
 
 ### Kyoto Gases Emissions
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`Kyoto Gases Emissions`
 
@@ -746,7 +816,7 @@ g$`Kyoto Gases Emissions`
 
 ### Kyoto Gases emissions per source
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow3$width, fig.height=chunk$nRow3$height}
 
 g$`Kyoto Gases emissions per source`
 
@@ -758,7 +828,7 @@ g$`Kyoto Gases emissions per source`
 
 ### CH4 emissions
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`CH4 Emissions`
 
@@ -770,7 +840,7 @@ g$`CH4 Emissions`
 
 ### N2O emissions
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`N2O Emissions`
 
@@ -782,7 +852,7 @@ g$`N2O Emissions`
 
 ### F-Gases emissions
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`F-Gases Emissions`
 
@@ -796,7 +866,7 @@ g$`F-Gases Emissions`
 
 ### per scenario
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`Carbon Price (per scenario)`
 
@@ -808,7 +878,7 @@ g$`Carbon Price (per scenario)`
 
 ### per model
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`Carbon Price (per model)`
 
@@ -823,7 +893,7 @@ g$`Carbon Price (per model)`
 
 ### Carbon Capture
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`Carbon Capture`
 
@@ -835,7 +905,7 @@ g$`Carbon Capture`
 
 ### Carbon Capture per source
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow3$width, fig.height=chunk$nRow3$height}
 
 g$`Carbon Capture per source`
 
@@ -847,7 +917,7 @@ g$`Carbon Capture per source`
 
 ### Carbon Removal
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`Carbon Removal`
 
@@ -859,7 +929,7 @@ g$`Carbon Removal`
 
 ### Carbon Removal - Land Use
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`Carbon Removal - Land Use`
 
@@ -873,7 +943,7 @@ g$`Carbon Removal - Land Use`
 
 ### Primary Energy
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`Primary Energy`
 
@@ -885,9 +955,21 @@ g$`Primary Energy`
 
 ### Primary Energy per source
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow3$width, fig.height=chunk$nRow3$height}
 
 g$`Primary Energy per source`
+
+```
+
+---
+
+## NPI hist per source
+
+### NPI Historical Primary Energy per source
+
+```{r, echo = FALSE, fig.width=chunk$nRow1$width, fig.height=chunk$nRow1$height}
+
+g$`NPI Historical Primary Energy per source`
 
 ```
 
@@ -897,7 +979,7 @@ g$`Primary Energy per source`
 
 ### Primary Energy Trade
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`Primary Energy Trade`
 
@@ -905,11 +987,27 @@ g$`Primary Energy Trade`
 
 ---
 
-# Primary Energy Prices
+# Primary Energy Prices {.tabset}
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+## Primary Energy Prices
+
+### Primary Energy Prices
+
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`Primary Energy Price`
+
+```
+
+---
+
+## per source
+
+### Primary Energy Prices per source
+
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
+
+g$`Primary Energy Price per source`
 
 ```
 
@@ -922,7 +1020,7 @@ g$`Primary Energy Price`
 
 ### Secondary Energy
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`Secondary Energy`
 
@@ -934,7 +1032,7 @@ g$`Secondary Energy`
 
 ### Secondary Energy per carrier
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow3$width, fig.height=chunk$nRow3$height}
 
 g$`Secondary Energy per carrier`
 
@@ -946,7 +1044,7 @@ g$`Secondary Energy per carrier`
 
 ### Secondary Energy Trade
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`Trade Secondary Energy`
 
@@ -958,7 +1056,7 @@ g$`Trade Secondary Energy`
 
 ### Secondary Energy Electricity
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow3$width, fig.height=chunk$nRow3$height}
 
 g$`Secondary Energy Electricity`
 
@@ -966,11 +1064,27 @@ g$`Secondary Energy Electricity`
 
 ---
 
-# Secondary Energy Prices
+# Secondary Energy Prices {.tabset}
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+## Secondary Energy Prices
+
+### Secondary Energy Prices
+
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`Secondary Energy Price`
+
+```
+
+---
+
+## per carrier
+
+### Secondary Energy Prices per carrier
+
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
+
+g$`Secondary Energy Price per carrier`
 
 ```
 
@@ -982,7 +1096,7 @@ g$`Secondary Energy Price`
 
 ### Final Energy
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`Final Energy`
 
@@ -994,7 +1108,7 @@ g$`Final Energy`
 
 ### Final Energy per source
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow3$width, fig.height=chunk$nRow3$height}
 
 g$`Final Energy per source`
 
@@ -1006,7 +1120,7 @@ g$`Final Energy per source`
 
 ### Final Energy per sector
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow3$width, fig.height=chunk$nRow3$height}
 
 g$`Final Energy per sector`
 
@@ -1019,7 +1133,7 @@ g$`Final Energy per sector`
 
 ### Non-Energy and Industry Final Energy per carrier
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow3$width, fig.height=chunk$nRow3$height}
 
 g$`Non-Energy and Industry Final Energy per carrier`
 
@@ -1031,7 +1145,7 @@ g$`Non-Energy and Industry Final Energy per carrier`
 
 ### Residential and Commercial Final Energy per carrier
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow3$width, fig.height=chunk$nRow3$height}
 
 g$`Residential and Commercial Final Energy per carrier`
 
@@ -1043,7 +1157,7 @@ g$`Residential and Commercial Final Energy per carrier`
 
 ### Transportation and Bunkers Final Energy per carrier
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow3$width, fig.height=chunk$nRow3$height}
 
 g$`Transportation and Bunkers Final Energy per carrier`
 
@@ -1068,7 +1182,7 @@ g$`Transportation and Bunkers Final Energy per carrier`
 
 ### Transportation Final Energy per type
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow3$width, fig.height=chunk$nRow3$height}
 
 g$`Transportation Final Energy per type`
 
@@ -1082,7 +1196,7 @@ g$`Transportation Final Energy per type`
 
 ### Industry Final Energy Prices
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`Industry Final Energy Price`
 
@@ -1094,7 +1208,7 @@ g$`Industry Final Energy Price`
 
 ### Residential and Commercial Final Energy Prices
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`Residential and Commercial Final Energy Price`
 
@@ -1106,11 +1220,48 @@ g$`Residential and Commercial Final Energy Price`
 
 ### Transportation Final Energy Prices
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`Transportation Final Energy Price`
 
 ```
+
+---
+
+## Industry per carrier
+
+### Industry Final Energy Prices per carrier
+
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
+
+g$`Industry Final Energy Price per carrier`
+
+```
+
+---
+
+## Residential and Commercial per carrier
+
+### Residential and Commercial Final Energy Prices per carrier
+
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
+
+g$`Residential and Commercial Final Energy Price per carrier`
+
+```
+
+---
+
+## Transportation per carrier
+
+### Transportation Final Energy Prices per carrier
+
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
+
+g$`Transportation Final Energy Price per carrier`
+
+```
+
 
 ---
 
@@ -1120,7 +1271,7 @@ g$`Transportation Final Energy Price`
 
 ### Population
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`Population`
 
@@ -1132,7 +1283,7 @@ g$`Population`
 
 ### GDP MER
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`GDP MER`
 
@@ -1144,7 +1295,7 @@ g$`GDP MER`
 
 ### GDP PPP
 
-```{r, echo = FALSE, fig.width=16, fig.height=8}
+```{r, echo = FALSE, fig.width=chunk$nRow2$width, fig.height=chunk$nRow2$height}
 
 g$`GDP PPP`
 
