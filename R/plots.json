@@ -12,17 +12,18 @@
     "type": "bar",
     "arg": {
       "title": "CO2 emissions per source (Mt CO2/yr)",
-      "labels":["Total","Energy and Industrial Processes","Industrial Processes","Energy",
+      "labels":["Total","Other","Energy and Industrial Processes","Industrial Processes","Energy",
         "Energy Demand", "Energy Demand - Industry","Energy Demand - Buildings", "Energy Demand - Transportation",
         "Energy Demand - Bunkers", "Energy Demand - AFOFI","Energy Demand - Other Sector",
         "Energy Supply","Energy Supply - Fuels","Energy Supply - Hydrogen","Energy Supply - Liquids","Energy Supply - Gases",
-        "Energy Supply - Solids","Energy Supply - Other","Energy Supply - Electricity and Heat","Energy Supply - Heat","Energy Supply - Electricity",
-        "Waste", "Other", "AFOLU"],
-        "pattern": ["stripe","stripe","none","stripe","stripe","none","none","none","none","none",
-          "none","stripe","stripe","none","none","none","none","none","stripe","none","none","none","none","none"]
+        "Energy Supply - Solids","Energy Supply - Other","Energy Supply - Elect and Heat","Energy Supply - Heat","Energy Supply - Electricity",
+        "Waste",  "AFOLU"],
+        "pattern": ["stripe","none","stripe","none","stripe","stripe","none","none","none","none","none",
+          "none","stripe","stripe","none","none","none","none","none","stripe","none","none","none","none"]
     },
     "vars": {
       "Emissions|CO2": {
+        "Emissions|CO2|Other": "",
         "Emissions|CO2|Energy and Industrial Processes": {
           "Emissions|CO2|Industrial Processes": "",
           "Emissions|CO2|Energy": {
@@ -50,7 +51,6 @@
           }          
         },
         "Emissions|CO2|Waste": "",
-        "Emissions|CO2|Other": "",
         "Emissions|CO2|AFOLU": ""
       }
     }
@@ -59,22 +59,24 @@
     "type": "bar",
     "arg": {
       "title": "NPI Historical CO2 emissions per source (Mt CO2/yr)",
-      "labels":["Total","Energy and Industrial Processes","Industrial Processes","Energy",
+      "labels":["Total", "Other","Energy and Industrial Processes","Industrial Processes","Energy",
         "Energy Demand", "Energy Demand - Industry","Energy Demand - Buildings", "Energy Demand - Transportation",
         "Energy Demand - Bunkers", "Energy Demand - AFOFI","Energy Demand - Other Sector",
         "Energy Supply","Energy Supply - Fuels","Energy Supply - Hydrogen","Energy Supply - Liquids","Energy Supply - Gases",
-        "Energy Supply - Solids","Energy Supply - Other","Energy Supply - Electricity and Heat","Energy Supply - Heat","Energy Supply - Electricity",
-        "Waste", "Other", "AFOLU"],
-      "pattern": ["stripe","stripe","none","stripe","stripe","none","none","none","none","none",
-          "none","stripe","stripe","none","none","none","none","none","stripe","none","none","none","none","none"],
+        "Energy Supply - Solids","Energy Supply - Other","Energy Supply - Elect and Heat","Energy Supply - Heat","Energy Supply - Electricity",
+        "Waste", "AFOLU"],
+      "pattern": ["stripe","none","stripe","none","stripe","stripe","none","none","none","none","none",
+          "none","stripe","stripe","none","none","none","none","none","stripe","none","none","none","none"],
       "scen": "DIAG-NPI",
       "facet":{
-        "nRow":1
+        "nrow":1,
+        "ncol":null
       },
       "period":[2010,2015,2020]
     },
     "vars": {
       "Emissions|CO2": {
+        "Emissions|CO2|Other": "",
         "Emissions|CO2|Energy and Industrial Processes": {
           "Emissions|CO2|Industrial Processes": "",
           "Emissions|CO2|Energy": {
@@ -102,7 +104,6 @@
           }          
         },
         "Emissions|CO2|Waste": "",
-        "Emissions|CO2|Other": "",
         "Emissions|CO2|AFOLU": ""
       }
     }
@@ -170,7 +171,7 @@
         "Energy Demand", "Energy Demand - Industry","Energy Demand - Buildings", "Energy Demand - Transportation",
         "Energy Demand - Bunkers", "Energy Demand - AFOFI","Energy Demand - Other Sector",
         "Energy Supply","Energy Supply - Fuels","Energy Supply - Hydrogen","Energy Supply - Liquids","Energy Supply - Gases",
-        "Energy Supply - Solids","Energy Supply - Other","Energy Supply - Electricity and Heat","Energy Supply - Heat","Energy Supply - Electricity"],
+        "Energy Supply - Solids","Energy Supply - Other","Energy Supply - Elect and Heat","Energy Supply - Heat","Energy Supply - Electricity"],
       "pattern": ["stripe","stripe","stripe","stripe","none","none","none","none","none","none",
         "stripe","stripe","none","none","none","none","none","stripe","none","none"]
     },
@@ -454,7 +455,11 @@
       "title": "Carbon Price (EUR_2020/t CO2)",
       "colorDim": "Scenario",
       "facetDim": "Model",
-      "maxPeriod": 2060
+      "maxPeriod": 2060,
+      "facet":{
+        "nrow":2,
+        "ncol":null
+      }      
     },
     "vars": {
       "Price|Carbon": ""
@@ -486,7 +491,11 @@
       "colorDim": "Variable",
       "facetDim": "Model",
       "linetypeDim": "Scenario",
-      "labels":["Hydrogen","Gases","Liquids","Solids","Heat","Electricity"]
+      "labels":["Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
+      "facet":{
+        "nrow":2,
+        "ncol":null
+      }      
     },
     "vars": {
       "Price|Final Energy|Industry|Hydrogen": "",
@@ -523,7 +532,11 @@
       "colorDim": "Variable",
       "facetDim": "Model",
       "linetypeDim": "Scenario",
-      "labels":["Hydrogen","Gases","Liquids","Solids","Heat","Electricity"]
+      "labels":["Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
+      "facet":{
+        "nrow":2,
+        "ncol":null
+      }      
     },
     "vars": {
       "Price|Final Energy|Residential and Commercial|Hydrogen": "",
@@ -558,7 +571,11 @@
       "colorDim": "Variable",
       "facetDim": "Model",
       "linetypeDim": "Scenario",
-      "labels":["Hydrogen","Gases","Liquids","Electricity"]
+      "labels":["Hydrogen","Gases","Liquids","Electricity"],
+      "facet":{
+        "nrow":2,
+        "ncol":null
+      }      
     },
     "vars": {
       "Price|Final Energy|Transportation|Hydrogen": "",
@@ -574,7 +591,11 @@
       "colorDim": "Variable",
       "facetDim": "Model",
       "linetypeDim": "Scenario",
-      "labels":["Biomass","Coal","Gas","Oil"]
+      "labels":["Biomass","Coal","Gas","Oil"],
+      "facet":{
+        "nrow":2,
+        "ncol":null
+      }      
     },
     "vars": {
       "Price|Primary Energy|Biomass": "",
@@ -607,7 +628,11 @@
       "colorDim": "Variable",
       "facetDim": "Model",
       "linetypeDim": "Scenario",
-      "labels":["Hydrogen","Gases","Liquids","Solids","Heat","Electricity"]
+      "labels":["Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
+      "facet":{
+        "nrow":2,
+        "ncol":null
+      }      
     },
     "vars": {
       "Price|Secondary Energy|Hydrogen": "",
@@ -702,7 +727,8 @@
           "none","none","stripe","none","none","none","none","none"],
         "scen": "DIAG-NPI",
         "facet":{
-          "nRow":1
+          "nrow":1,
+          "ncol":null
         },
         "period":[2010,2015,2020]
     },
@@ -740,7 +766,11 @@
       "colorDim": "Variable",
       "facetDim": "Model",
       "linetypeDim": "Scenario",
-      "labels":["Biomass","Coal","Gas","Oil"]      
+      "labels":["Biomass","Coal","Gas","Oil"],
+      "facet":{
+        "nrow":2,
+        "ncol":null
+      }      
     },
     "vars": {
       "Trade|Primary Energy|Biomass|Volume": "",
@@ -784,7 +814,8 @@
       "pattern": ["stripe","none","none","none","none","none","none"],
         "scen": "DIAG-NPI",
         "facet":{
-          "nRow":1
+          "nrow":1,
+          "ncol":null
         },
         "period":[2010,2015,2020]
     },
@@ -835,7 +866,11 @@
       "colorDim": "Variable",
       "facetDim": "Model",
       "linetypeDim": "Scenario",
-      "labels":["Electricity","Hydrogen","Liquids"]
+      "labels":["Electricity","Hydrogen","Liquids"],
+      "facet":{
+        "nrow":2,
+        "ncol":null
+      }      
     },
     "vars": {
       "Trade|Secondary Energy|Electricity|Volume": "",

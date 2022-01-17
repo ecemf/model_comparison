@@ -8,7 +8,7 @@ dependencies:
   - r-ggplot2
   - r-ggpattern
   - r-ggplotify
-  - r-rjson
+  - r-jsonlite
   - r-gtable
   - r-grid  
   - r-gridextra
