@@ -213,6 +213,32 @@
       "Emissions|CO2|Industry": ""
     }
   },
+  "Carbon Price (per scenario)": {
+    "type": "line",
+    "arg": {
+      "title": "Carbon Price (EUR_2020/t CO2)",
+      "maxPeriod": 2060
+    },
+    "vars": {
+      "Price|Carbon": ""
+    }
+  },
+  "Carbon Price (per model)": {
+    "type": "line",
+    "arg": {
+      "title": "Carbon Price (EUR_2020/t CO2)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "maxPeriod": 2060,
+      "facet":{
+        "nrow":2,
+        "ncol":null
+      }      
+    },
+    "vars": {
+      "Price|Carbon": ""
+    }
+  },
   "Carbon Capture": {
     "type": "line",
     "arg": {
@@ -258,6 +284,300 @@
       "Carbon Removal|Land Use": ""
     }
   },
+  "Primary Energy": {
+    "type": "line",
+    "arg": {
+      "title": "Primary Energy (EJ/yr)"
+    },
+    "vars": {
+      "Primary Energy": ""
+    }
+  },
+  "Primary Energy per source": {
+    "type": "bar",
+    "arg": {
+      "title": "Primary Energy per source (EJ/yr)",
+      "labels":["Total","Other",
+        "Biomass","Biomass w/ CCS","Biomass w/o CCS",
+        "Coal","Coal w/ CCS","Coal w/o CCS",
+        "Gas","Gas w/ CCS","Gas w/o CCS",
+        "Geothermal","Hydro","Nuclear",
+        "Oil","Oil w/ CCS","Oil w/o CCS",
+        "Solar","Wind"],
+        "pattern": ["stripe","none","stripe","none","none","stripe","none","none","stripe","none","none","none",
+          "none","none","stripe","none","none","none","none"]
+    },
+    "vars": {
+      "Primary Energy": {
+        "Primary Energy|Other": "",
+        "Primary Energy|Biomass": {
+          "Primary Energy|Biomass|w/ CCS": "",
+          "Primary Energy|Biomass|w/o CCS": ""
+        },
+        "Primary Energy|Coal": {
+          "Primary Energy|Coal|w/ CCS": "",
+          "Primary Energy|Coal|w/o CCS": ""
+        },
+        "Primary Energy|Gas": {
+          "Primary Energy|Gas|w/ CCS": "",
+          "Primary Energy|Gas|w/o CCS": ""
+        },
+        "Primary Energy|Geothermal": "",
+        "Primary Energy|Hydro": "",
+        "Primary Energy|Nuclear": "",
+        "Primary Energy|Oil": {
+          "Primary Energy|Oil|w/ CCS": "",
+          "Primary Energy|Oil|w/o CCS": ""
+        },
+        "Primary Energy|Solar": "",
+        "Primary Energy|Wind": ""
+      }
+    }
+  },
+  "NPI Historical Primary Energy per source": {
+    "type": "bar",
+    "arg": {
+      "title": "NPI Historical Primary Energy per source (EJ/yr)",
+      "labels":["Total","Other",
+        "Biomass","Biomass w/ CCS","Biomass w/o CCS",
+        "Coal","Coal w/ CCS","Coal w/o CCS",
+        "Gas","Gas w/ CCS","Gas w/o CCS",
+        "Geothermal","Hydro","Nuclear",
+        "Oil","Oil w/ CCS","Oil w/o CCS",
+        "Solar","Wind"],
+        "pattern": ["stripe","none","stripe","none","none","stripe","none","none","stripe","none","none","none",
+          "none","none","stripe","none","none","none","none"],
+        "scen": "DIAG-NPI",
+        "facet":{
+          "nrow":1,
+          "ncol":null
+        },
+        "period":[2010,2015,2020]
+    },
+    "vars": {
+      "Primary Energy": {
+        "Primary Energy|Other": "",
+        "Primary Energy|Biomass": {
+          "Primary Energy|Biomass|w/ CCS": "",
+          "Primary Energy|Biomass|w/o CCS": ""
+        },
+        "Primary Energy|Coal": {
+          "Primary Energy|Coal|w/ CCS": "",
+          "Primary Energy|Coal|w/o CCS": ""
+        },
+        "Primary Energy|Gas": {
+          "Primary Energy|Gas|w/ CCS": "",
+          "Primary Energy|Gas|w/o CCS": ""
+        },
+        "Primary Energy|Geothermal": "",
+        "Primary Energy|Hydro": "",
+        "Primary Energy|Nuclear": "",
+        "Primary Energy|Oil": {
+          "Primary Energy|Oil|w/ CCS": "",
+          "Primary Energy|Oil|w/o CCS": ""
+        },
+        "Primary Energy|Solar": "",
+        "Primary Energy|Wind": ""
+      }
+    }
+  },
+  "Primary Energy Trade": {
+    "type": "line",
+    "arg": {
+      "title": "Primary Energy Trade (EJ/yr)",
+      "colorDim": "Variable",
+      "facetDim": "Model",
+      "linetypeDim": "Scenario",
+      "labels":["Biomass","Coal","Gas","Oil"],
+      "facet":{
+        "nrow":2,
+        "ncol":null
+      }      
+    },
+    "vars": {
+      "Trade|Primary Energy|Biomass|Volume": "",
+      "Trade|Primary Energy|Coal|Volume": "",
+      "Trade|Primary Energy|Gas|Volume": "",
+      "Trade|Primary Energy|Oil|Volume": ""
+    }
+  },
+  "Primary Energy Price per source": {
+    "type": "line",
+    "arg": {
+      "title": "Primary Energy Price per source (EUR_2020/GJ)",
+      "colorDim": "Model",
+      "facetDim": "Variable",
+      "linetypeDim": "Scenario",
+      "labels":["Biomass","Coal","Gas","Oil"],
+      "scen":["DIAG-NPI","DIAG-C400-lin"]
+    },
+    "vars": {
+      "Price|Primary Energy|Biomass": "",
+      "Price|Primary Energy|Coal": "",
+      "Price|Primary Energy|Gas": "",
+      "Price|Primary Energy|Oil": ""
+    }
+  },
+  "Primary Energy Price per model": {
+    "type": "line",
+    "arg": {
+      "title": "Primary Energy Price per model (EUR_2020/GJ)",
+      "colorDim": "Variable",
+      "facetDim": "Model",
+      "linetypeDim": "Scenario",
+      "labels":["Biomass","Coal","Gas","Oil"],
+      "facet":{
+        "nrow":2,
+        "ncol":null
+      }      
+    },
+    "vars": {
+      "Price|Primary Energy|Biomass": "",
+      "Price|Primary Energy|Coal": "",
+      "Price|Primary Energy|Gas": "",
+      "Price|Primary Energy|Oil": ""
+    }
+  },
+  "Secondary Energy": {
+    "type": "line",
+    "arg": {
+      "title": "Secondary Energy (EJ/yr)"
+    },
+    "vars": {
+      "Secondary Energy": ""
+    }
+  },
+  "Secondary Energy per carrier": {
+    "type": "bar",
+    "arg": {
+      "title": "Secondary Energy per carrier (EJ/yr)",
+      "labels":["Total","Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
+      "pattern": ["stripe","none","none","none","none","none","none"]
+    },
+    "vars": {
+      "Secondary Energy": {
+        "Secondary Energy|Hydrogen": "",
+        "Secondary Energy|Gases": "",
+        "Secondary Energy|Liquids": "",
+        "Secondary Energy|Solids": "",
+        "Secondary Energy|Heat": "",
+        "Secondary Energy|Electricity": ""
+      }
+    }
+  },
+  "NPI Historical Secondary Energy per carrier": {
+    "type": "bar",
+    "arg": {
+      "title": "NPI Historical Secondary Energy per carrier (EJ/yr)",
+      "labels":["Total","Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
+      "pattern": ["stripe","none","none","none","none","none","none"],
+        "scen": "DIAG-NPI",
+        "facet":{
+          "nrow":1,
+          "ncol":null
+        },
+        "period":[2010,2015,2020]
+    },
+    "vars": {
+      "Secondary Energy": {
+        "Secondary Energy|Hydrogen": "",
+        "Secondary Energy|Gases": "",
+        "Secondary Energy|Liquids": "",
+        "Secondary Energy|Solids": "",
+        "Secondary Energy|Heat": "",
+        "Secondary Energy|Electricity": ""
+      }
+    }
+  },
+  "Trade Secondary Energy": {
+    "type": "line",
+    "arg": {
+      "title": "Trade Secondary Energy (EJ/yr)",
+      "colorDim": "Variable",
+      "facetDim": "Model",
+      "linetypeDim": "Scenario",
+      "labels":["Electricity","Hydrogen","Liquids"],
+      "facet":{
+        "nrow":2,
+        "ncol":null
+      }      
+    },
+    "vars": {
+      "Trade|Secondary Energy|Electricity|Volume": "",
+      "Trade|Secondary Energy|Hydrogen|Volume": "",
+      "Trade|Secondary Energy|Liquids|Volume": ""
+    }
+  },
+  "Secondary Energy Electricity": {
+    "type": "bar",
+    "arg": {
+      "title": "Secondary Energy Electricity (EJ/yr)",
+      "labels":["Total","Biomass","Coal","Curtailment","Gas","Geothermal","Hydro",
+        "Hydrogen","Nuclear","Oil","Solar","Wind","Wind Offshore","Wind Onshore",
+        "Trade"],
+        "pattern": ["stripe","none","none","none","none","none","none","none","none","none","none","stripe","none","none","none"]
+    },
+    "vars": {
+      "Secondary Energy|Electricity": {
+        "Secondary Energy|Electricity|Biomass": "",
+        "Secondary Energy|Electricity|Coal": "",
+        "Secondary Energy|Electricity|Curtailment": "",
+        "Secondary Energy|Electricity|Gas": "",
+        "Secondary Energy|Electricity|Geothermal": "",
+        "Secondary Energy|Electricity|Hydro": "",
+        "Secondary Energy|Electricity|Hydrogen": "",
+        "Secondary Energy|Electricity|Nuclear": "",
+        "Secondary Energy|Electricity|Oil": "",
+        "Secondary Energy|Electricity|Solar": "",
+        "Secondary Energy|Electricity|Wind": {
+          "Secondary Energy|Electricity|Wind|Offshore": "",
+          "Secondary Energy|Electricity|Wind|Onshore": ""
+        },
+        "Trade|Secondary Energy|Electricity|Volume": ""
+      }
+    }
+  },
+  "Secondary Energy Price per carrier": {
+    "type": "line",
+    "arg": {
+      "title": "Secondary Energy Price per carrier (EUR_2020/GJ)",
+      "colorDim": "Model",
+      "facetDim": "Variable",
+      "linetypeDim": "Scenario",
+      "labels":["Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
+        "scen":["DIAG-NPI","DIAG-C400-lin"]
+      },
+    "vars": {
+      "Price|Secondary Energy|Hydrogen": "",
+      "Price|Secondary Energy|Gases": "",
+      "Price|Secondary Energy|Liquids": "",
+      "Price|Secondary Energy|Solids": "",
+      "Price|Secondary Energy|Heat": "",
+      "Price|Secondary Energy|Electricity": ""
+    }
+  },
+  "Secondary Energy Price per model": {
+    "type": "line",
+    "arg": {
+      "title": "Secondary Energy Price per model (EUR_2020/GJ)",
+      "colorDim": "Variable",
+      "facetDim": "Model",
+      "linetypeDim": "Scenario",
+      "labels":["Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
+      "facet":{
+        "nrow":2,
+        "ncol":null
+      }      
+    },
+    "vars": {
+      "Price|Secondary Energy|Hydrogen": "",
+      "Price|Secondary Energy|Gases": "",
+      "Price|Secondary Energy|Liquids": "",
+      "Price|Secondary Energy|Solids": "",
+      "Price|Secondary Energy|Heat": "",
+      "Price|Secondary Energy|Electricity": ""
+    }
+  },
   "Final Energy": {
     "type": "line",
     "arg": {
@@ -267,12 +587,39 @@
       "Final Energy": ""
     }
   },
-  "Final Energy per source": {
+  "Final Energy per carrier": {
     "type": "bar",
     "arg": {
-      "title": "Final Energy per source (EJ/yr)",
+      "title": "Final Energy per carrier (EJ/yr)",
       "labels":["Total","Geothermal","Solar","Hydrogen","Gases","Liquids","Solids","Other","Heat","Electricity"],
       "pattern": ["stripe","none","none","none","none","none","none","none","none","none"]
+    },
+    "vars": {
+      "Final Energy": {
+        "Final Energy|Geothermal": "",
+        "Final Energy|Solar": "",
+        "Final Energy|Hydrogen": "",
+        "Final Energy|Gases": "",
+        "Final Energy|Liquids": "",
+        "Final Energy|Solids": "",
+        "Final Energy|Other": "",
+        "Final Energy|Heat": "",
+        "Final Energy|Electricity": ""
+      }
+    }
+  },
+  "NPI Historical Final Energy per carrier": {
+    "type": "bar",
+    "arg": {
+      "title": "NPI Historical Final Energy per carrier (EJ/yr)",
+      "labels":["Total","Geothermal","Solar","Hydrogen","Gases","Liquids","Solids","Other","Heat","Electricity"],
+      "pattern": ["stripe","none","none","none","none","none","none","none","none","none"],
+        "scen": "DIAG-NPI",
+        "facet":{
+          "nrow":1,
+          "ncol":null
+        },
+        "period":[2010,2015,2020]
     },
     "vars": {
       "Final Energy": {
@@ -292,17 +639,41 @@
     "type": "bar",
     "arg": {
       "title": "Final Energy per sector (EJ/yr)",
-      "labels":["Total","Non-Energy Use","Industry","Residential and Commercial","Transportation","Bunkers","Other Sector"],
+      "labels":["Total","Other Sector","Non-Energy Use","Industry","Residential and Commercial","Transportation","Bunkers"],
       "pattern": ["stripe","none","none","none","none","none","none"]
     },
     "vars": {
       "Final Energy": {
+        "Final Energy|Other Sector":"",
         "Final Energy|Non-Energy Use": "",
         "Final Energy|Industry": "",
         "Final Energy|Residential and Commercial": "",
         "Final Energy|Transportation":"",
-        "Final Energy|Bunkers":"",
-        "Final Energy|Other Sector":""
+        "Final Energy|Bunkers":""
+      }
+    }
+  },
+  "NPI Historical Final Energy per sector": {
+    "type": "bar",
+    "arg": {
+      "title": "NPI Historical Final Energy per sector (EJ/yr)",
+      "labels":["Total","Other Sector","Non-Energy Use","Industry","Residential and Commercial","Transportation","Bunkers"],
+      "pattern": ["stripe","none","none","none","none","none","none"],
+        "scen": "DIAG-NPI",
+        "facet":{
+          "nrow":1,
+          "ncol":null
+        },
+        "period":[2010,2015,2020]
+    },
+    "vars": {
+      "Final Energy": {
+        "Final Energy|Other Sector":"",
+        "Final Energy|Non-Energy Use": "",
+        "Final Energy|Industry": "",
+        "Final Energy|Residential and Commercial": "",
+        "Final Energy|Transportation":"",
+        "Final Energy|Bunkers":""
       }
     }
   },
@@ -311,7 +682,7 @@
     "arg": {
       "title": "Non-Energy and Industry Final Energy per carrier (EJ/yr)",
       "labels":["Non-Energy Use", "Non-Energy Use - Hydrogen","Non-Energy Use - Gases","Non-Energy Use - Liquids","Non-Energy Use - Solids","Non-Energy Use - Other",
-        "Industry","Industry - Heat","Industry - Hydrogen","Industry - Gases","Industry - Liquids","Industry - Solids","Industry - Other", "Industry - Electricity"],
+        "Industry","Industry - Hydrogen","Industry - Gases","Industry - Liquids","Industry - Solids","Industry - Other","Industry - Heat", "Industry - Electricity"],
       "pattern": ["stripe","stripe","stripe","stripe","stripe","stripe",
         "stripe","none","none","none","none","none","none","none"]
     },
@@ -324,12 +695,12 @@
         "Final Energy|Non-Energy Use|Other": ""
       },
       "Final Energy|Industry": {
-        "Final Energy|Industry|Heat": "",
         "Final Energy|Industry|Hydrogen": "",
         "Final Energy|Industry|Gases": "",
         "Final Energy|Industry|Liquids": "",
         "Final Energy|Industry|Solids": "",
         "Final Energy|Industry|Other": "",
+        "Final Energy|Industry|Heat": "",
         "Final Energy|Industry|Electricity": ""
       }
     }
@@ -359,7 +730,7 @@
       "title": "Transportation and Bunkers Final Energy per carrier (EJ/yr)",
       "labels":["Bunkers","Bunkers - Hydrogen","Bunkers - Gases","Bunkers - Liquids","Bunkers - Other", "Bunkers - Electricity",
         "Transport","Transport - Hydrogen","Transport - Gases","Transport - Liquids","Transport - Other", "Transport - Electricity"],
-      "pattern": ["none","stripe","stripe","stripe","stripe","stripe",
+      "pattern": ["stripe","stripe","stripe","stripe","stripe","stripe",
         "stripe","none","none","none","none","none"]
     },
     "vars": {
@@ -412,59 +783,6 @@
       }
     }
   },
-  "GDP MER": {
-    "type": "line",
-    "arg": {
-      "title": "GDP MER (billion EUR_2020/yr)"
-    },
-    "vars": {
-      "GDP|MER": ""
-    }
-  },
-  "GDP PPP": {
-    "type": "line",
-    "arg": {
-      "title": "GDP PPP (billion EUR_2020/yr)"
-    },
-    "vars": {
-      "GDP|PPP": ""
-    }
-  },
-  "Population": {
-    "type": "line",
-    "arg": {
-      "title": "Population (million)"
-    },
-    "vars": {
-      "Population": ""
-    }
-  },
-  "Carbon Price (per scenario)": {
-    "type": "line",
-    "arg": {
-      "title": "Carbon Price (EUR_2020/t CO2)",
-      "maxPeriod": 2060
-    },
-    "vars": {
-      "Price|Carbon": ""
-    }
-  },
-  "Carbon Price (per model)": {
-    "type": "line",
-    "arg": {
-      "title": "Carbon Price (EUR_2020/t CO2)",
-      "colorDim": "Scenario",
-      "facetDim": "Model",
-      "maxPeriod": 2060,
-      "facet":{
-        "nrow":2,
-        "ncol":null
-      }      
-    },
-    "vars": {
-      "Price|Carbon": ""
-    }
-  },
   "Industry Final Energy Price per carrier": {
     "type": "line",
     "arg": {
@@ -484,10 +802,10 @@
       "Price|Final Energy|Industry|Electricity": ""
     }
   },
-  "Industry Final Energy Price": {
+  "Industry Final Energy Price per model": {
     "type": "line",
     "arg": {
-      "title": "Industry Final Energy Price (EUR_2020/GJ)",
+      "title": "Industry Final Energy Price per model (EUR_2020/GJ)",
       "colorDim": "Variable",
       "facetDim": "Model",
       "linetypeDim": "Scenario",
@@ -525,10 +843,10 @@
       "Price|Final Energy|Residential and Commercial|Electricity": ""
     }
   },
-  "Residential and Commercial Final Energy Price": {
+  "Residential and Commercial Final Energy Price per model": {
     "type": "line",
     "arg": {
-      "title": "Residential and Commercial Final Energy Price (EUR_2020/GJ)",
+      "title": "Residential and Commercial Final Energy Price per model (EUR_2020/GJ)",
       "colorDim": "Variable",
       "facetDim": "Model",
       "linetypeDim": "Scenario",
@@ -564,10 +882,10 @@
       "Price|Final Energy|Transportation|Electricity": ""
     }
   },
-  "Transportation Final Energy Price": {
+  "Transportation Final Energy Price per model": {
     "type": "line",
     "arg": {
-      "title": "Transportation Final Energy Price (EUR_2020/GJ)",
+      "title": "Transportation Final Energy Price per model (EUR_2020/GJ)",
       "colorDim": "Variable",
       "facetDim": "Model",
       "linetypeDim": "Scenario",
@@ -584,298 +902,31 @@
       "Price|Final Energy|Transportation|Electricity": ""
     }
   },
-  "Primary Energy Price": {
+  "Population": {
     "type": "line",
     "arg": {
-      "title": "Primary Energy Price (EUR_2020/GJ)",
-      "colorDim": "Variable",
-      "facetDim": "Model",
-      "linetypeDim": "Scenario",
-      "labels":["Biomass","Coal","Gas","Oil"],
-      "facet":{
-        "nrow":2,
-        "ncol":null
-      }      
+      "title": "Population (million)"
     },
     "vars": {
-      "Price|Primary Energy|Biomass": "",
-      "Price|Primary Energy|Coal": "",
-      "Price|Primary Energy|Gas": "",
-      "Price|Primary Energy|Oil": ""
+      "Population": ""
     }
   },
-  "Primary Energy Price per source": {
+  "GDP MER": {
     "type": "line",
     "arg": {
-      "title": "Primary Energy Price per source (EUR_2020/GJ)",
-      "colorDim": "Model",
-      "facetDim": "Variable",
-      "linetypeDim": "Scenario",
-      "labels":["Biomass","Coal","Gas","Oil"],
-      "scen":["DIAG-NPI","DIAG-C400-lin"]
+      "title": "GDP MER (billion EUR_2020/yr)"
     },
     "vars": {
-      "Price|Primary Energy|Biomass": "",
-      "Price|Primary Energy|Coal": "",
-      "Price|Primary Energy|Gas": "",
-      "Price|Primary Energy|Oil": ""
+      "GDP|MER": ""
     }
   },
-  "Secondary Energy Price": {
+  "GDP PPP": {
     "type": "line",
     "arg": {
-      "title": "Secondary Energy Price (EUR_2020/GJ)",
-      "colorDim": "Variable",
-      "facetDim": "Model",
-      "linetypeDim": "Scenario",
-      "labels":["Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
-      "facet":{
-        "nrow":2,
-        "ncol":null
-      }      
+      "title": "GDP PPP (billion EUR_2020/yr)"
     },
     "vars": {
-      "Price|Secondary Energy|Hydrogen": "",
-      "Price|Secondary Energy|Gases": "",
-      "Price|Secondary Energy|Liquids": "",
-      "Price|Secondary Energy|Solids": "",
-      "Price|Secondary Energy|Heat": "",
-      "Price|Secondary Energy|Electricity": ""
-    }
-  },
-  "Secondary Energy Price per carrier": {
-    "type": "line",
-    "arg": {
-      "title": "Secondary Energy Price per carrier (EUR_2020/GJ)",
-      "colorDim": "Model",
-      "facetDim": "Variable",
-      "linetypeDim": "Scenario",
-      "labels":["Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
-        "scen":["DIAG-NPI","DIAG-C400-lin"]
-      },
-    "vars": {
-      "Price|Secondary Energy|Hydrogen": "",
-      "Price|Secondary Energy|Gases": "",
-      "Price|Secondary Energy|Liquids": "",
-      "Price|Secondary Energy|Solids": "",
-      "Price|Secondary Energy|Heat": "",
-      "Price|Secondary Energy|Electricity": ""
-    }
-  },
-  "Primary Energy": {
-    "type": "line",
-    "arg": {
-      "title": "Primary Energy (EJ/yr)"
-    },
-    "vars": {
-      "Primary Energy": ""
-    }
-  },
-  "Primary Energy per source": {
-    "type": "bar",
-    "arg": {
-      "title": "Primary Energy per source (EJ/yr)",
-      "labels":["Total",
-        "Biomass","Biomass w/ CCS","Biomass w/o CCS",
-        "Coal","Coal w/ CCS","Coal w/o CCS",
-        "Gas","Gas w/ CCS","Gas w/o CCS",
-        "Geothermal","Hydro","Nuclear",
-        "Oil","Oil w/ CCS","Oil w/o CCS",
-        "Solar","Wind","Other"],
-        "pattern": ["stripe","stripe","none","none","stripe","none","none","stripe","none","none","none",
-          "none","none","stripe","none","none","none","none","none"]
-    },
-    "vars": {
-      "Primary Energy": {
-        "Primary Energy|Biomass": {
-          "Primary Energy|Biomass|w/ CCS": "",
-          "Primary Energy|Biomass|w/o CCS": ""
-        },
-        "Primary Energy|Coal": {
-          "Primary Energy|Coal|w/ CCS": "",
-          "Primary Energy|Coal|w/o CCS": ""
-        },
-        "Primary Energy|Gas": {
-          "Primary Energy|Gas|w/ CCS": "",
-          "Primary Energy|Gas|w/o CCS": ""
-        },
-        "Primary Energy|Geothermal": "",
-        "Primary Energy|Hydro": "",
-        "Primary Energy|Nuclear": "",
-        "Primary Energy|Oil": {
-          "Primary Energy|Oil|w/ CCS": "",
-          "Primary Energy|Oil|w/o CCS": ""
-        },
-        "Primary Energy|Solar": "",
-        "Primary Energy|Wind": "",
-        "Primary Energy|Other": ""
-      }
-    }
-  },
-  "NPI Historical Primary Energy per source": {
-    "type": "bar",
-    "arg": {
-      "title": "NPI Historical Primary Energy per source (EJ/yr)",
-      "labels":["Total",
-        "Biomass","Biomass w/ CCS","Biomass w/o CCS",
-        "Coal","Coal w/ CCS","Coal w/o CCS",
-        "Gas","Gas w/ CCS","Gas w/o CCS",
-        "Geothermal","Hydro","Nuclear",
-        "Oil","Oil w/ CCS","Oil w/o CCS",
-        "Solar","Wind","Other"],
-        "pattern": ["stripe","stripe","none","none","stripe","none","none","stripe","none","none","none",
-          "none","none","stripe","none","none","none","none","none"],
-        "scen": "DIAG-NPI",
-        "facet":{
-          "nrow":1,
-          "ncol":null
-        },
-        "period":[2010,2015,2020]
-    },
-    "vars": {
-      "Primary Energy": {
-        "Primary Energy|Biomass": {
-          "Primary Energy|Biomass|w/ CCS": "",
-          "Primary Energy|Biomass|w/o CCS": ""
-        },
-        "Primary Energy|Coal": {
-          "Primary Energy|Coal|w/ CCS": "",
-          "Primary Energy|Coal|w/o CCS": ""
-        },
-        "Primary Energy|Gas": {
-          "Primary Energy|Gas|w/ CCS": "",
-          "Primary Energy|Gas|w/o CCS": ""
-        },
-        "Primary Energy|Geothermal": "",
-        "Primary Energy|Hydro": "",
-        "Primary Energy|Nuclear": "",
-        "Primary Energy|Oil": {
-          "Primary Energy|Oil|w/ CCS": "",
-          "Primary Energy|Oil|w/o CCS": ""
-        },
-        "Primary Energy|Solar": "",
-        "Primary Energy|Wind": "",
-        "Primary Energy|Other": ""
-      }
-    }
-  },
-  "Primary Energy Trade": {
-    "type": "line",
-    "arg": {
-      "title": "Primary Energy Trade (EJ/yr)",
-      "colorDim": "Variable",
-      "facetDim": "Model",
-      "linetypeDim": "Scenario",
-      "labels":["Biomass","Coal","Gas","Oil"],
-      "facet":{
-        "nrow":2,
-        "ncol":null
-      }      
-    },
-    "vars": {
-      "Trade|Primary Energy|Biomass|Volume": "",
-      "Trade|Primary Energy|Coal|Volume": "",
-      "Trade|Primary Energy|Gas|Volume": "",
-      "Trade|Primary Energy|Oil|Volume": ""
-    }
-  },
-  "Secondary Energy": {
-    "type": "line",
-    "arg": {
-      "title": "Secondary Energy (EJ/yr)"
-    },
-    "vars": {
-      "Secondary Energy": ""
-    }
-  },
-  "Secondary Energy per carrier": {
-    "type": "bar",
-    "arg": {
-      "title": "Secondary Energy per carrier (EJ/yr)",
-      "labels":["Total","Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
-      "pattern": ["stripe","none","none","none","none","none","none"]
-    },
-    "vars": {
-      "Secondary Energy": {
-        "Secondary Energy|Hydrogen": "",
-        "Secondary Energy|Gases": "",
-        "Secondary Energy|Liquids": "",
-        "Secondary Energy|Solids": "",
-        "Secondary Energy|Heat": "",
-        "Secondary Energy|Electricity": ""
-      }
-    }
-  },
-  "NPI Historical Secondary Energy per source": {
-    "type": "bar",
-    "arg": {
-      "title": "NPI Historical Secondary Energy per carrier (EJ/yr)",
-      "labels":["Total","Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
-      "pattern": ["stripe","none","none","none","none","none","none"],
-        "scen": "DIAG-NPI",
-        "facet":{
-          "nrow":1,
-          "ncol":null
-        },
-        "period":[2010,2015,2020]
-    },
-    "vars": {
-      "Secondary Energy": {
-        "Secondary Energy|Hydrogen": "",
-        "Secondary Energy|Gases": "",
-        "Secondary Energy|Liquids": "",
-        "Secondary Energy|Solids": "",
-        "Secondary Energy|Heat": "",
-        "Secondary Energy|Electricity": ""
-      }
-    }
-  },
-  "Secondary Energy Electricity": {
-    "type": "bar",
-    "arg": {
-      "title": "Secondary Energy Electricity (EJ/yr)",
-      "labels":["Total","Biomass","Coal","Curtailment","Gas","Geothermal","Hydro",
-        "Hydrogen","Nuclear","Oil","Solar","Wind","Wind Offshore","Wind Onshore",
-        "Trade"],
-        "pattern": ["stripe","none","none","none","none","none","none","none","none","none","none","stripe","none","none","none"]
-    },
-    "vars": {
-      "Secondary Energy|Electricity": {
-        "Secondary Energy|Electricity|Biomass": "",
-        "Secondary Energy|Electricity|Coal": "",
-        "Secondary Energy|Electricity|Curtailment": "",
-        "Secondary Energy|Electricity|Gas": "",
-        "Secondary Energy|Electricity|Geothermal": "",
-        "Secondary Energy|Electricity|Hydro": "",
-        "Secondary Energy|Electricity|Hydrogen": "",
-        "Secondary Energy|Electricity|Nuclear": "",
-        "Secondary Energy|Electricity|Oil": "",
-        "Secondary Energy|Electricity|Solar": "",
-        "Secondary Energy|Electricity|Wind": {
-          "Secondary Energy|Electricity|Wind|Offshore": "",
-          "Secondary Energy|Electricity|Wind|Onshore": ""
-        },
-        "Trade|Secondary Energy|Electricity|Volume": ""
-      }
-    }
-  },
-  "Trade Secondary Energy": {
-    "type": "line",
-    "arg": {
-      "title": "Trade Secondary Energy (EJ/yr)",
-      "colorDim": "Variable",
-      "facetDim": "Model",
-      "linetypeDim": "Scenario",
-      "labels":["Electricity","Hydrogen","Liquids"],
-      "facet":{
-        "nrow":2,
-        "ncol":null
-      }      
-    },
-    "vars": {
-      "Trade|Secondary Energy|Electricity|Volume": "",
-      "Trade|Secondary Energy|Hydrogen|Volume": "",
-      "Trade|Secondary Energy|Liquids|Volume": ""
+      "GDP|PPP": ""
     }
   }
 }

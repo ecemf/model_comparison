@@ -169,11 +169,6 @@ if (r.updateResults):
   # load hist data
   histDf <- read.csv("./hist/hist.csv",check.names=FALSE,stringsAsFactors=FALSE, dec = ".")
 
-  #copy EU27 for EU28 for EURef
-  tmp <- histDf[histDf$Scenario == "EU_ReferenceScenario_2020",]
-  tmp$Region <- "EU27 & UK"
-  histDf <- rbind(histDf, tmp)
-
   histDf <- histDf[histDf$Region == regionDisplayed,]
   histDf <- histDf[! names(histDf) %in% c("")] # remove columns with no names
   
@@ -188,11 +183,19 @@ if (r.updateResults):
   # histData <- rbind(histData, tmp)
   
   #copy 2018 Eurostat to 2020 values
-  tmp <- histData[histData$Scenario == "Eurostat" & histData$Period==2018,]
-  tmp$Period <- 2020
-  tmp$Scenario <- "2018 Eurostat"
-  histData <- rbind(histData, tmp)
-  
+  if(regionDisplayed=="EU27"){
+    eurostatLabel <- "2019 Eurostat"
+    tmp <- histData[histData$Scenario == "Eurostat" & histData$Period==2019,]
+    tmp$Period <- 2020
+    tmp$Scenario <- "2019 Eurostat"
+    histData <- rbind(histData, tmp)
+  } else if(regionDisplayed=="EU27 & UK"){
+    eurostatLabel <- "2018 Eurostat"
+    tmp <- histData[histData$Scenario == "Eurostat" & histData$Period==2018,]
+    tmp$Period <- 2020
+    tmp$Scenario <- "2018 Eurostat"
+    histData <- rbind(histData, tmp)
+  }  
   # #copy 2019 UNFCCC to 2020 values
   # tmp <- histData[histData$Scenario == "UNFCCC" & histData$Period==2019,]
   # tmp$Period <- 2020
@@ -206,7 +209,7 @@ if (r.updateResults):
   # histData <- histData[!(histData$Scenario == "2019 CEDS" & histData$Variable %in% varsToRemove),]
   
   # filter
-  histData <- histData[histData$Scenario %in% c("EU_ReferenceScenario_2020","James_IMF","Eurostat","2018 Eurostat"),] #,"2019 UNFCCC","UNFCCC", "CEDS","2019 CEDS"
+  histData <- histData[histData$Scenario %in% c("EU_ReferenceScenario_2020","James_IMF","Eurostat",eurostatLabel),] #,"2019 UNFCCC","UNFCCC", "CEDS","2019 CEDS"
 
   #shortNames
   histData[histData$Scenario == "EU_ReferenceScenario_2020",]$Scenario <- " EU27Ref"
@@ -236,8 +239,6 @@ Results created using data downloaded at: `r dateString`
 
 #remove unwanted models
 df <- df[!df$Model %in% c("OSeMBE v0.1.2", "test_model","MESSAGEix-GLOBIOM_1.2"),]
-
-#should we use results from MESSAGEix-GLOBIOM_1.2 or MESSAGEix-GLOBIOM 1.2 ????
 
 #rename scenarios for TIAM-ECN 1.2
 scenRename <- c(
@@ -440,15 +441,11 @@ color <- c(
   "Other Carrier" = "#79a6d2",
   "Geothermal" = "#e51900",
   "Solar" = "#ffcc00",
-  "Non-Energy Biomass" = "#005900",
-  "Non-Energy Coal" = "#b2b2b2",
-  "Non-Energy Gas" = "#b79e38",
-  "Non-Energy Oil" = "#ff6565",
 #sector
+  "Non-Energy Use" = "#ff9966",
   "Industry" = "#5f6769",
   "Residential and Commercial" = "#5edfff",
   "Transportation" = "#a1dd70",
-  "Non-Energy Use" = "#ff9966",
   "Bunkers" = "#ffc0cb",
 #sector fe carrier
   "Non-Energy Use - Hydrogen" = "#5ed5b0",
@@ -623,6 +620,10 @@ barPlot <- function(data, scen=policyScen,total=NULL,period=c(2020,2030,2050),ti
   plotData$Scenario <- factor(plotData$Scenario , levels = scen)
   plotData$Model <- factor(plotData$Model, level = levels(plotData$Model)[!levels(plotData$Model) == c("reference")])
 
+  if(nrow(plotData)==0){
+    return(NULL)
+  }
+  
   tmp <- total[(total$Period %in% period) & (total$Model == "reference"),]
   tmp$Model <- tmp$Scenario
   histTotal <- NULL
@@ -671,8 +672,8 @@ barPlot <- function(data, scen=policyScen,total=NULL,period=c(2020,2030,2050),ti
   
   gg <- ggplot(plotData,aes(x=Model,y=Value,fill=Variable,pattern=Variable)) +
     geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    {if(!(nrow(hist)==0) & is.null(pattern)) geom_bar(data=histFull,stat='identity')} +
-    {if(!(nrow(hist)==0) & !is.null(pattern)) geom_bar_pattern(data=histFull,stat='identity', pattern_key_scale_factor = 0.3, pattern_density=ifelse((numberOfLines==1), 0.5/3, 0.5), pattern_spacing = 0.03, pattern_colour = "white", pattern_fill = "white", pattern_alpha=0.4)} +
+    {if(!(nrow(hist)==0) & is.null(pattern)) geom_bar(data=histFull,stat='identity', alpha = 0.6)} +
+    {if(!(nrow(hist)==0) & !is.null(pattern)) geom_bar_pattern(data=histFull,stat='identity', pattern_key_scale_factor = 0.3, pattern_density=ifelse((numberOfLines==1), 0.5/3, 0.5), pattern_spacing = 0.03, pattern_colour = "white", pattern_fill = "white", pattern_alpha=0.4, alpha = 0.6)} +
     {if(is.null(pattern)) geom_bar(stat='identity')} +
     {if(!is.null(pattern)) geom_bar_pattern(stat='identity', pattern_key_scale_factor = 0.3,  pattern_density=ifelse((numberOfLines==1), 0.5/3, 0.5), pattern_spacing = 0.03, pattern_colour = "white", pattern_fill = "white", pattern_alpha=0.4)} +
     {if(nrow(plotTotal)>0) geom_point(data=plotTotal,aes(x=Model,y=Value,fill="gray"), shape=23, alpha = 0.5,show.legend = F)} +
@@ -719,7 +720,7 @@ spaceFacet <- function(gg,size=3,layout=c(15,27)){
   gt = ggplot_gtable(ggplot_build(gg))
   #gtable_show_layout(gt)
   for (item in layout){
-    if(layout <= length(gt$widths)){
+    if(item <= length(gt$widths)){
         gt$widths[item] = size*gt$widths[item]
     }
   }
@@ -785,12 +786,10 @@ g <-
   lapply(names(plotList),function(plot){
     print(plot)
     if(plotList[[plot]]$type == "line"){
-      d <- filterData(data=df[!(df$Scenario %in% c(" 2018 Eurostat")),],plotName=plot)   # filtering data for plot 
+      d <- filterData(data=df[!(df$Scenario %in% c(paste0(" ", eurostatLabel))),],plotName=plot)   # filtering data for plot 
       p <- do.call(linePlot, c(list(data=d),plotList[[plot]]$arg))
     } else if (plotList[[plot]]$type == "bar"){
       d <- filterData(data=df,plotName=plot)    # filtering data for plot
-      #totalSum <- df[(df$Scenario %in% policyScen) & (df$Variable %in%  names(plotList[[plot]]$vars)),] %>%
-      #     group_by(Model,Scenario,Period) %>% summarize(Value = sum(Value),.groups="drop") %>% mutate(Variable="Total",Scenario = factor(Scenario, levels=policyScen))
       totalSum <- df[(df$Variable %in%  names(plotList[[plot]]$vars)),] %>%
         group_by(Model,Scenario,Period) %>% summarize(Value = sum(Value),.groups="drop") %>% mutate(Variable="Total")
       p <- do.call(barPlot, c(list(data=d,total=totalSum),plotList[[plot]]$arg))
@@ -1035,23 +1034,23 @@ g$`Primary Energy Trade`
 
 ## Primary Energy Prices
 
-### Primary Energy Prices
-
-```{r, echo = FALSE, fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
-
-g$`Primary Energy Price`
-
-```
-
----
-
-## per source
-
 ### Primary Energy Prices per source
 
 ```{r, echo = FALSE, fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
 
 g$`Primary Energy Price per source`
+
+```
+
+---
+
+## per model
+
+### Primary Energy Prices per model
+
+```{r, echo = FALSE, fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
+
+g$`Primary Energy Price per model`
 
 ```
 
@@ -1084,6 +1083,20 @@ g$`Secondary Energy per carrier`
 
 ---
 
+
+## NPI hist per carrier
+
+### NPI Historical Secondary Energy per carrier
+
+```{r, echo = FALSE, fig.width=chunk$nrow1$width, fig.height=chunk$nrow1$height}
+
+g$`NPI Historical Secondary Energy per carrier`
+
+```
+
+
+---
+
 ## Trade
 
 ### Secondary Energy Trade
@@ -1112,23 +1125,23 @@ g$`Secondary Energy Electricity`
 
 ## Secondary Energy Prices
 
-### Secondary Energy Prices
-
-```{r, echo = FALSE, fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
-
-g$`Secondary Energy Price`
-
-```
-
----
-
-## per carrier
-
 ### Secondary Energy Prices per carrier
 
 ```{r, echo = FALSE, fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
 
 g$`Secondary Energy Price per carrier`
+
+```
+
+---
+
+## per model
+
+### Secondary Energy Prices per model
+
+```{r, echo = FALSE, fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
+
+g$`Secondary Energy Price per model`
 
 ```
 
@@ -1148,15 +1161,29 @@ g$`Final Energy`
 
 ---
 
-## per source
+## per carrier
 
-### Final Energy per source
+### Final Energy per carrier
 
 ```{r, echo = FALSE, fig.width=chunk$nrow3$width, fig.height=chunk$nrow3$height}
 
-g$`Final Energy per source`
+g$`Final Energy per carrier`
 
 ```
+
+
+---
+
+## NPI hist per carrier
+
+### NPI Historical Final Energy per carrier
+
+```{r, echo = FALSE, fig.width=chunk$nrow1$width, fig.height=chunk$nrow1$height}
+
+g$`NPI Historical Final Energy per carrier`
+
+```
+
 
 ---
 
@@ -1167,6 +1194,19 @@ g$`Final Energy per source`
 ```{r, echo = FALSE, fig.width=chunk$nrow3$width, fig.height=chunk$nrow3$height}
 
 g$`Final Energy per sector`
+
+```
+
+
+---
+
+## NPI hist per sector
+
+### NPI Historical Final Energy per sector
+
+```{r, echo = FALSE, fig.width=chunk$nrow1$width, fig.height=chunk$nrow1$height}
+
+g$`NPI Historical Final Energy per sector`
 
 ```
 
@@ -1238,42 +1278,6 @@ g$`Transportation Final Energy per type`
 
 ## Industry
 
-### Industry Final Energy Prices
-
-```{r, echo = FALSE, fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
-
-g$`Industry Final Energy Price`
-
-```
-
----
-
-## Residential and Commercial
-
-### Residential and Commercial Final Energy Prices
-
-```{r, echo = FALSE, fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
-
-g$`Residential and Commercial Final Energy Price`
-
-```
-
----
-
-## Transportation
-
-### Transportation Final Energy Prices
-
-```{r, echo = FALSE, fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
-
-g$`Transportation Final Energy Price`
-
-```
-
----
-
-## Industry per carrier
-
 ### Industry Final Energy Prices per carrier
 
 ```{r, echo = FALSE, fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
@@ -1284,7 +1288,19 @@ g$`Industry Final Energy Price per carrier`
 
 ---
 
-## Residential and Commercial per carrier
+## per model
+
+### Industry Final Energy Prices per model
+
+```{r, echo = FALSE, fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
+
+g$`Industry Final Energy Price per model`
+
+```
+
+---
+
+## Residential and Commercial
 
 ### Residential and Commercial Final Energy Prices per carrier
 
@@ -1296,13 +1312,38 @@ g$`Residential and Commercial Final Energy Price per carrier`
 
 ---
 
-## Transportation per carrier
+## per model
+
+### Residential and Commercial Final Energy Prices per model
+
+```{r, echo = FALSE, fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
+
+g$`Residential and Commercial Final Energy Price per model`
+
+```
+
+---
+
+## Transportation
 
 ### Transportation Final Energy Prices per carrier
 
 ```{r, echo = FALSE, fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
 
 g$`Transportation Final Energy Price per carrier`
+
+```
+
+
+---
+
+## per model
+
+### Transportation Final Energy Prices per model
+
+```{r, echo = FALSE, fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
+
+g$`Transportation Final Energy Price per model`
 
 ```
 
