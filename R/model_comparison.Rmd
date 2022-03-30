@@ -1,4 +1,3 @@
-
 ---
 title: "ECEMF model comparison plots"
 output:
@@ -12,6 +11,7 @@ params:
     updateResults: FALSE
     regionDisplayed: "EU27"
     scenarios: NULL
+    type: FALSE
 ---
 
 <!-- author: "Renato Rodrigues" -->
@@ -26,14 +26,71 @@ params:
   .svg-container {
     margin: auto !important;
   }
+  /* MODAL */
+  /* The Modal (background) */
+  .modal {
+    position: fixed; /* Stay in place */
+    z-index: 400; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+  
+  /* Modal Content/Box */
+  .modal-content {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    background-color: #fefefe;
+    border: 1px solid #888;
+    margin: auto;
+    max-width: 96vw;
+    max-height: 96vh;
+    transform: translate(-50%,-50%);
+  }
+  
+  /* The Close Button */
+  .close {
+    position: fixed;
+    right: 0;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .modal-img {
+    max-width: 96vw;
+      max-height: 96vh;
+  }
+  
+  .hide {
+    display:none;
+  }
+  
+  .block{
+    display:block;
+  }
+
 </style>
+
 
 Description:
 Model comparison for ECEMF - Summary plots.
 
 <!-- Options -->
-```{r options, include=FALSE}
-
+```{r Options, echo=FALSE, include=FALSE}
 # if you want to download new results set updateResults to TRUE, else the script will load the latest created csv file in the folder ./data
 updateResults <- FALSE
 updateResults <- params$updateResults
@@ -41,6 +98,12 @@ updateResults <- params$updateResults
 regionDisplayed <- "EU27"
 regionDisplayed <- params$regionDisplayed
 
+type <- FALSE
+type <- params$type
+
+selectedScenarios  <- c("DIAG-NPI", "DIAG-Base", "DIAG-C400-lin", "DIAG-NZero")
+selectedScenarios  <- params$scenarios
+  
 #chunk size and aspect ratio
 chunk <- list(
   nrow1 = list(
@@ -73,6 +136,7 @@ library(svglite)
 library(gtable)
 library(ggplotify)
 library(ggpattern)
+library(quitte)
 ```
 
 
@@ -82,7 +146,7 @@ Regions represented in the plots:
 
   if(regionDisplayed=="EU27"){
     regionsText <- paste0('
-* EU27: "REMIND 2.1", "WITCH 5.0", "OSeMBE v1.0.0" (calculated) and "Euro-Calliope 2.0" (calculated)
+* EU27: "REMIND 2.1", "WITCH 5.1", "OSeMBE v1.0.0" (calculated) and "Euro-Calliope 2.0"
 * EU27 & UK: "MEESA v1.1"
 * Europe: "IMAGE 3.2", "PROMETHEUS 1.2"   
 * Europe (excl. Turkey): "TIAM-ECN 1.2"
@@ -91,7 +155,7 @@ Regions represented in the plots:
 ')
   } else if(regionDisplayed=="EU27 & UK"){
     regionsText <- paste0('
-* EU27 & UK: "REMIND 2.1", "WITCH 5.0", "MEESA v1.1", "OSeMBE v1.0.0" (calculated) and "Euro-Calliope 2.0" (calculated)
+* EU27 & UK: "REMIND 2.1", "WITCH 5.1", "MEESA v1.1", "OSeMBE v1.0.0" (calculated) and "Euro-Calliope 2.0"
 * Europe: "IMAGE 3.2", "PROMETHEUS 1.2"   
 * Europe (excl. Turkey): "TIAM-ECN 1.2"
 * Europe (incl. Turkey): "MESSAGEix-GLOBIOM 1.2"
@@ -107,7 +171,7 @@ Regions represented in the plots:
 ```{r download_data, include=FALSE}
 if(updateResults){
   if (file.exists("credentials.json")){
-    credentials <- fromJSON(file="credentials.json")
+    credentials <- fromJSON("credentials.json")
   } else {
     stop('To download the most up to date ECEMF data, please rename the file "credentials_example.json" to "credentials.json" and fill it with your iiasa database credentials.')
   }
@@ -237,22 +301,52 @@ Results created using data downloaded at: `r dateString`
 <!-- Loading Data -->
 ```{r preparing_data, echo=FALSE, include=FALSE}
 
-#remove unwanted models
-df <- df[!df$Model %in% c("OSeMBE v0.1.2", "test_model","MESSAGEix-GLOBIOM_1.2"),]
+#check for duplicated rows
+dupl <- duplicated(df)
+if(any(dupl)){
+  print("duplicated rows")
+  print(unique(df[dupl,c(1,2)]))
+}
 
-#rename scenarios for TIAM-ECN 1.2
+#remove unwanted models
+df <- df[!df$Model %in% c("OSeMBE v0.1.2", "test_model","MESSAGEix-GLOBIOM_1.2","WITCH 5.0"),]
+
+#modelxscenario
+#unique(df[,c(1,2)])
+
+# removing duplicated scenarios 
+df <- df[!((df$Model == "Euro-Calliope 2.0") & (df$Scenario %in% c("DIAG-C400-LimBio", "DIAG-C400-LimCCS","DIAG-C400-LimNuc"))),]
+df <- df[!((df$Model == "PROMETHEUS 1.2") & (df$Scenario %in% c("DIAG-C80-gr5 "))),]
+df <- df[!((df$Model == "TIAM-ECN 1.2") & (df$Scenario %in% c("DIAG_C0to80-gr5","DIAG_C400-lin","DIAG_C80-gr5","DIAG_NPi","DIAG_NZero","DIAG_Npi","DIAG_Nzero"))),]
+df <- df[!((df$Model == "WITCH 5.1") & (df$Scenario %in% c("DIAG-NPI0"))),]
+
+#rename scenarios
 scenRename <- c(
-  "DIAG_C0to80-gr5" = "DIAG-C0to80-gr5",
-  "DIAG_C400-lin" = "DIAG-C400-lin",
-  "DIAG_C80-gr5" = "DIAG-C80-gr5" ,
-  "DIAG_NPi" = "DIAG-NPI",
-  "DIAG_Nzero" = "DIAG-NZero"#,
-#  "DIAG-Nzero" = "DIAG-NZero"
+  "DIAG-C400-limBio" = "DIAG-C400-LimBio",
+  "DIAG-C400-lin-LimBio" = "DIAG-C400-LimBio",
+  "DIAG-C400-LimBio " = "DIAG-C400-LimBio",
+  "DIAG-C400-LimBio " = "DIAG-C400-LimBio",
+  "DIAG-C400-LimBioÂ " = "DIAG-C400-LimBio",
+  "DIAG-C400-limCCS" = "DIAG-C400-LimCCS",
+  "DIAG-C400-lin-LimCCS" = "DIAG-C400-LimCCS",
+  "DIAG-C400-LimCCS" = "DIAG-C400-LimCCS",
+  "DIAG-C400-limNuclear" = "DIAG-C400-LimNuclear",
+  "DIAG-C400-LimNuc" = "DIAG-C400-LimNuclear",
+  "DIAG-C400-LimNuclear" = "DIAG-C400-LimNuclear",
+  "DIAG-C400-lin-HighVRE"="DIAG-C400-lin-HighVRE",
+  "DIAG-C400-lin-HighVRE"="DIAG-C400-lin-HighVRE",
+  "DIAG-C400-lin-HighElectrification "="DIAG-C400-lin-HighElectrification",
+  "DIAG-C400-lin-HighElectrification"= "DIAG-C400-lin-HighElectrification",
+  "DIAG-C400-lin-HighElectrification"= "DIAG-C400-lin-HighElectrification",
+  "DIAG-C400-lin-HighH2"= "DIAG-C400-lin-HighH2",
+  "DIAG-C400-lin-ResidualFossil"= "DIAG-C400-lin-ResidualFossil",
+  "DIAG-C400-lin-HighEff"= "DIAG-C400-lin-HighEff",
+  "DIAG-C400-lin-HighVRE "="DIAG-C400-lin-HighVRE"
 )
-df[df$Model == "TIAM-ECN 1.2" & df$Scenario %in% names(scenRename),]$Scenario <- scenRename[df[df$Scenario %in% names(scenRename),]$Scenario]
+df[df$Scenario %in% names(scenRename),]$Scenario <- scenRename[df[df$Scenario %in% names(scenRename),]$Scenario]
 
 #rescale results for N2O in WITCH
-df[df$Model == "WITCH 5.0" & df$Variable == "Emissions|N2O",]$Value <- df[df$Model == "WITCH 5.0" & df$Variable == "Emissions|N2O",]$Value/1000
+#df[df$Model == "WITCH 5.1" & df$Variable == "Emissions|N2O",]$Value <- df[df$Model == "WITCH 5.1" & df$Variable == "Emissions|N2O",]$Value/1000
 
 # PROMETHEUS 1.2 is providing values at millions
 df[df$Unit == "million EUR/yr",]$Value <- df[df$Unit == "million EUR/yr",]$Value / 1000
@@ -263,12 +357,79 @@ df <- df[!(df$Variable == "Price|Carbon" & df$Value < 0),]
 
 # select scenarios
 histScen <- unique(df[df$Model == "reference",]$Scenario)
-if (is.null(params$scenarios)){
+if (is.null(selectedScenarios)){
   policyScen <- c("DIAG-NPI", "DIAG-Base", "DIAG-C80-gr5", "DIAG-C0to80-gr5", "DIAG-C400-lin", "DIAG-NZero")
 } else {
-  policyScen <- params$scenarios
+  policyScen <- selectedScenarios
 }
 df <- df[(df$Scenario %in% c(histScen,policyScen)),]
+
+#Calculate extra variables
+
+for (model in unique(df$Model)){
+  if (nrow(df[df$Variable %in% c("Secondary Energy|Electricity|Wind") & df$Model == model,]) == 0){
+    tmp <- NULL
+    tmp <- df[df$Variable %in% c("Secondary Energy|Electricity|Wind|Offshore", "Secondary Energy|Electricity|Wind|Onshore"),] %>%
+          group_by(Model,Scenario,Region,Unit,Period) %>%
+          summarize(Value = sum(Value, na.rm = TRUE),.groups="drop")
+    tmp$Variable <- "Secondary Energy|Electricity|Wind"
+    tmp <- as.data.frame(tmp[,c(1,2,3,7,4,5,6)])
+    df <- rbind(df,tmp)
+  }
+}
+
+aggregateMap <- list(
+  "Secondary Energy|non VRE" = c("Secondary Energy|Electricity|Curtailment", "Secondary Energy|Electricity|Biomass", "Secondary Energy|Electricity|Coal", "Secondary Energy|Electricity|Gas", "Secondary Energy|Electricity|Geothermal", "Secondary Energy|Electricity|Hydro", "Secondary Energy|Electricity|Hydrogen", "Secondary Energy|Electricity|Nuclear", "Secondary Energy|Electricity|Oil", "Trade|Secondary Energy|Electricity|Volume"),
+  "Secondary Energy|VRE" = c("Secondary Energy|Electricity|Solar", "Secondary Energy|Electricity|Wind"),
+  "Final Energy|Fossil" = c("Final Energy|Gases|Fossil","Final Energy|Liquids|Fossil","Final Energy|Solids|Fossil"),
+  "Final Energy|Non-Energy Use|Fossil" = c("Final Energy|Non-Energy Use|Gases|Fossil","Final Energy|Non-Energy Use|Liquids|Fossil","Final Energy|Non-Energy Use|Solids|Fossil"),
+  "Final Energy|Industry|Fossil"       = c("Final Energy|Industry|Gases|Fossil","Final Energy|Industry|Liquids|Fossil","Final Energy|Industry|Solids|Fossil"),
+  "Final Energy|Residential and Commercial|Fossil" = c("Final Energy|Residential and Commercial|Gases|Fossil","Final Energy|Residential and Commercial|Liquids|Fossil","Final Energy|Residential and Commercial|Solids|Fossil"),
+  "Final Energy|Transportation|Fossil" = c("Final Energy|Transportation|Gases|Fossil","Final Energy|Transportation|Liquids|Fossil","Final Energy|Transportation|Solids|Fossil"),
+  "Final Energy|Bunkers|Fossil"        = c("Final Energy|Bunkers|Gases|Fossil","Final Energy|Bunkers|Liquids|Fossil","Final Energy|Bunkers|Solids|Fossil"),
+  "Final Energy|Other Sector|Fossil"   = c("Final Energy|Other Sector|Gases|Fossil","Final Energy|Other Sector|Liquids|Fossil","Final Energy|Other Sector|Solids|Fossil"),
+   "Primary Energy|Fossil" = c("Primary Energy|Coal","Primary Energy|Gas","Primary Energy|Oil")
+)
+df <- df[!(df$Variable %in% names(aggregateMap)),] #remove aggregated variable alreayd reported
+for(var in names(aggregateMap)){
+  tmp <- NULL
+  tmp <- df[df$Variable %in% aggregateMap[[var]],] %>%
+          group_by(Model,Scenario,Region,Unit,Period) %>%
+          summarize(Value = sum(Value, na.rm = TRUE),.groups="drop")
+  tmp$Variable <- var
+  tmp <- as.data.frame(tmp[,c(1,2,3,7,4,5,6)])
+  df <- rbind(df,tmp)
+}
+
+for (model in unique(df$Model)){
+  if (nrow(df[df$Variable %in% c("Carbon Removal|Land Use") & df$Model == model,]) != 0){
+    for(scen in unique(df$Scenario)){
+      if (nrow(df[df$Variable %in% c("Carbon Removal|Land Use") & df$Model == model & df$Scenario == scen,]) != 0){
+    df <- rbind(df,
+            df[df$Variable %in% c("Carbon Removal","Carbon Removal|Land Use") & df$Model == model  & df$Scenario == scen,] %>%
+              group_by(Model,Scenario,Region,Unit,Period) %>%
+              mutate(Value = Value - Value[Variable == 'Carbon Removal|Land Use']) %>% 
+              filter(Variable == "Carbon Removal") %>%
+              mutate(Variable = "Carbon Removal|Other")
+            )
+      }
+    }
+  }
+}
+
+GWP <- c("CO2"=1,"CH4"=28,"N2O"=265)
+
+df <- rbind(df,
+        df[df$Variable %in% c("Emissions|CH4"),] %>%
+          group_by(Model,Scenario,Region,Unit,Period) %>%
+          mutate(Value = Value * GWP["CH4"], Variable = "Emissions|Kyoto Gases|CH4")
+        )
+
+df <- rbind(df,
+        df[df$Variable %in% c("Emissions|N2O"),] %>%
+          group_by(Model,Scenario,Region,Unit,Period) %>%
+          mutate(Value = Value * GWP["N2O"]/1000, Variable = "Emissions|Kyoto Gases|N2O")
+        )
 
 #reorder scenarios
 df <- df %>%
@@ -283,23 +444,23 @@ df <- df %>%
           )
 EU27regions <- `EU27 & UK`[`EU27 & UK` != "United Kingdom"]
 
-tmp <- df[(df$Model == "Euro-Calliope 2.0" & df$Region %in% `EU27 & UK`),]
-tmp <- tmp[!(tmp$Unit %in% c("US$2010/kW/yr","billion US$2010/yr","EUR/MWh")) ,]
-tmp <- tmp %>% group_by(Model,Scenario,Variable, Unit, Period) %>%
-  summarize(Value = sum(Value))
-tmp$Region <- "EU27 & UK"
-tmp <- as.data.frame(tmp[,c(1,2,7,3,4,5,6)])
-
-df <- rbind(df,tmp)
-
-tmp <- df[(df$Model == "Euro-Calliope 2.0" & df$Region %in% EU27regions),]
-tmp <- tmp[!(tmp$Unit %in% c("US$2010/kW/yr","billion US$2010/yr","EUR/MWh")) ,]
-tmp <- tmp %>% group_by(Model,Scenario,Variable, Unit, Period) %>%
-  summarize(Value = sum(Value))
-tmp$Region <- "EU27"
-tmp <- as.data.frame(tmp[,c(1,2,7,3,4,5,6)])
-
-df <- rbind(df,tmp)
+# tmp <- df[(df$Model == "Euro-Calliope 2.0" & df$Region %in% `EU27 & UK`),]
+# tmp <- tmp[!(tmp$Unit %in% c("US$2010/kW/yr","billion US$2010/yr","EUR/MWh")) ,]
+# tmp <- tmp %>% group_by(Model,Scenario,Variable, Unit, Period) %>%
+#   summarize(Value = sum(Value))
+# tmp$Region <- "EU27 & UK"
+# tmp <- as.data.frame(tmp[,c(1,2,7,3,4,5,6)])
+# 
+# df <- rbind(df,tmp)
+#
+# tmp <- df[(df$Model == "Euro-Calliope 2.0" & df$Region %in% EU27regions),]
+# tmp <- tmp[!(tmp$Unit %in% c("US$2010/kW/yr","billion US$2010/yr","EUR/MWh")) ,]
+# tmp <- tmp %>% group_by(Model,Scenario,Variable, Unit, Period) %>%
+#   summarize(Value = sum(Value))
+# tmp$Region <- "EU27"
+# tmp <- as.data.frame(tmp[,c(1,2,7,3,4,5,6)])
+#
+#df <- rbind(df,tmp)
 
 tmp <- df[(df$Model == "OSeMBE v1.0.0" & df$Region %in% `EU27 & UK`),]
 tmp <- tmp[!(tmp$Unit %in% c("EUR_2020/GJ")) ,]
@@ -319,6 +480,17 @@ tmp <- as.data.frame(tmp[,c(1,2,7,3,4,5,6)])
 
 df <- rbind(df,tmp)
 
+#adding share variables
+df_quitte <- as.quitte(df)
+addedVars <- df_quitte %>% calc_addVariable("`Final Energy|Hydrogen Share`" = "`Final Energy|Hydrogen` / `Final Energy`", units = "%", only.new=T)
+addedVars <- rbind(addedVars,df_quitte %>% calc_addVariable("`Final Energy|Electricity Share`" = "`Final Energy|Electricity` / `Final Energy`", units = "%", only.new=T))
+addedVars <- rbind(addedVars,df_quitte %>% calc_addVariable("`Secondary Energy|VRE Share`" = "`Secondary Energy|VRE` / `Secondary Energy|Electricity`", units = "%", only.new=T))
+addedVars <- rbind(addedVars,df_quitte %>% calc_addVariable("`Primary Energy|Fossil Share`" = "`Primary Energy|Fossil` / `Primary Energy`", units = "%", only.new=T))
+addedVars <- rbind(addedVars,df_quitte %>% calc_addVariable("`Primary Energy|Biomass Share`" = "`Primary Energy|Biomass` / `Primary Energy`", units = "%", only.new=T))
+addedVars <- rbind(addedVars,df_quitte %>% calc_addVariable("`Secondary Energy|Electricity|Nuclear Share`" = "`Secondary Energy|Electricity|Nuclear` / `Secondary Energy|Electricity`", units = "%", only.new=T))
+colnames(addedVars) = colnames(df)
+df <- rbind(df,addedVars)
+
 # changing Period to numeric
 df$Period <- as.numeric(df$Period)
 
@@ -334,9 +506,9 @@ df[df$Model == "MESSAGEix-GLOBIOM",]$Model <- "MESSAGE"
 
 #select Regions
 if(regionDisplayed=="EU27"){
-  df <- df[(df$Region %in% c("EU27", "Europe", "Europe (excl. Turkey)", "Europe (incl. Turkey)")) | (df$Model == "MEESA" & df$Region == "EU27 & UK"),]
+  df <- df[((df$Region %in% c("EU27", "Europe", "Europe (excl. Turkey)", "Europe (incl. Turkey)") & !(df$Model == "Euro-Calliope") ) | (df$Model == "MEESA" & df$Region == "EU27 & UK") | (df$Model == "Euro-Calliope" & df$Region == "EU27")),]
 } else if (regionDisplayed=="EU27 & UK"){
-  df <- df[df$Region %in% c("EU27 & UK", "Europe", "Europe (excl. Turkey)", "Europe (incl. Turkey)"),] #"EU27",
+  df <- df[(df$Region %in% c("EU27 & UK", "Europe", "Europe (excl. Turkey)", "Europe (incl. Turkey)") & !(df$Model == "Euro-Calliope") ) | (df$Model == "Euro-Calliope" & df$Region == "Europe"),] 
 }
 
 #order of Models
@@ -347,12 +519,12 @@ df$Model <- factor(df$Model, levels = c("reference",modelsOrder))
 df$Scenario <- factor(df$Scenario, levels=c(histScen,policyScen))
 
 #report number of vars per model
-nVars <- NULL
-for (model in unique(df$Model)){
-  n <- length(unique(df[df$Model == model,]$Variable))
-  names(n) = model
-  nVars <- c(nVars, n)
-}
+# nVars <- NULL
+# for (model in unique(df$Model)){
+#   n <- length(unique(df[df$Model == model,]$Variable))
+#   names(n) = model
+#   nVars <- c(nVars, n)
+# }
 
 ```
 
@@ -389,6 +561,17 @@ color <- c(
   "DIAG-C0to80-gr5" = "#38c0c4",
   "DIAG-C400-lin" = "#939dff",
   "DIAG-NZero" = "#f062e4",
+
+  "DIAG-C400-LimBio" = "#005900",
+  "DIAG-C400-LimCCS" = "#999959",
+  "DIAG-C400-LimNuclear" = "#ff33ff",
+  
+  "DIAG-C400-lin-HighVRE" = "#337fff",
+  "DIAG-C400-lin-HighElectrification" = "#ffb200",
+  "DIAG-C400-lin-HighH2" = "#5ed5b0",
+  "DIAG-C400-lin-ResidualFossil" = "#cccccc",
+  "DIAG-C400-lin-HighEff" = "#2eba38",
+
 #emi
   "Energy Supply" = "#3D4849",
   "Energy Supply - Elect and Heat" = "#FF6600",
@@ -412,6 +595,7 @@ color <- c(
   "Waste" = "#A52A2A",
   "AFOLU" = "#4DAF4A",
 #capture
+  "CCS" = "#cccccc",
   "CCS - Biomass" = "#008c00",
   "CCS - Biomass Energy" = "#005900",
   "CCS - Biomass Industry" = "#377EB8",
@@ -422,7 +606,8 @@ color <- c(
   "CCS - Fossil Industrial Processes" = "#282828",
   "DAC" = "#CC6666",
   "Enhanced Weathering" = "#5b0d8f",
-  "Land Use Capture" = "#4DAF4A",
+  "Land Use" = "#4DAF4A",
+  "Other" = "#79a6d2",
 #carrier
   "Electricity" = "#ffb200",
   "Heat"        = "#cc0000",
@@ -447,6 +632,7 @@ color <- c(
   "Residential and Commercial" = "#5edfff",
   "Transportation" = "#a1dd70",
   "Bunkers" = "#ffc0cb",
+  "Other Sector" = "#999959",
 #sector fe carrier
   "Non-Energy Use - Hydrogen" = "#5ed5b0",
   "Non-Energy Use - Gases" = "#999959",
@@ -501,11 +687,35 @@ color <- c(
   "Oil" = "#b30000",
   "Oil w/ CCS" = "#ff6565",
   "Oil w/o CCS" = "#b30000",
+
+  "VRE" = "#337fff",
+  "non VRE" = "#ececec",
+
+  "Hydrogen w/ CCS"="#86e0c4",
+  "Hydrogen w/o CCS"="#5ed5b0",
+  "Electricity w/ CCS"="#ffc133",
+  "Electricity w/o CCS"="#ffb200",  
+  "Liquids w/ CCS" = "#0000ff",
+  "Liquids w/o CCS" = "#0000cc",
+
   #Carbon management
   "Direct Air Capture" = "#24A19C",
   "Fossil" = "#cccccc",
   "Storage" = "#D96098",
-  "Usage" = "#325288"
+  "Usage" = "#325288",
+  #Kyoto Gases
+  "CO2" = "#7e7e7e",
+  "CH4" = "#ffe7a0",
+  "N2O" = "#44ba97",
+  "F-Gases" = "#ff9977"
+)
+
+alpha = c(
+  #hist
+  "EU27Ref" = 0.4,
+  "Eurostat" = 1,
+  "IMF" = 1,           
+  "2019 Eurostat" = 1
 )
 
 #plot aesthetics
@@ -529,7 +739,7 @@ theme_singleColumn <- function(){
 ```{r auxilir_plot_functions, echo=FALSE, include=FALSE}
 
 # function to create line plots
-linePlot <- function(data, scen=policyScen, title="", colorDim="Model", linetypeDim=NULL, xdim="Period", ydim="Value", facetDim="Scenario", legend = list(nrow=NULL), min=0, max=NULL, minPeriod=2005, maxPeriod=2050, labels=NULL, facet = list(nrow=NULL,ncol=2)){
+linePlot <- function(data, scen=policyScen, title="", colorDim="Model", linetypeDim=NULL, xdim="Period", ydim="Value", facetDim="Scenario", legend = list(nrow=NULL), min=0, max=NULL, minPeriod=2005, maxPeriod=2050, labels=NULL, facet = list(nrow=NULL,ncol=2), percentage=FALSE){
 
   if(nrow(data)==0){
     return(NULL)
@@ -575,9 +785,12 @@ linePlot <- function(data, scen=policyScen, title="", colorDim="Model", linetype
                     out <- facetLabels[Variable]
                     return(out) 
                   }))} +
-    {if(!(nrow(hist)==0) & !(facetDim=="Model") & !is.null(linetypeDim)) geom_line(data=histFull,size=1,aes(group = source),color="black",alpha = 1,lty="11") } +
-    {if(!(nrow(hist)==0) & !(facetDim=="Model") & is.null(linetypeDim)) geom_line(data=histFull,size=1,aes(group = source),color="black",alpha = 1,lty="11") } +
-    {if(!(nrow(hist)==0) & !(facetDim=="Model")) geom_text(data=histLabel, aes(label = source),color = "black", hjust ="inward", vjust=1.5, alpha = 1) } +
+    # {if(!(nrow(hist)==0) & !(facetDim=="Model") & !is.null(linetypeDim)) geom_line(data=histFull,size=1,aes(group = source),color="black",alpha = 1,lty="11") } +
+    # {if(!(nrow(hist)==0) & !(facetDim=="Model") & is.null(linetypeDim)) geom_line(data=histFull,size=1,aes(group = source),color="black",alpha = 1,lty="11") } +
+    {if(!(nrow(hist)==0) & !(facetDim=="Model")) geom_line(data=histFull,size=1,aes(alpha = source),color="black") } + #,lty="11" 
+    {if(!(nrow(hist)==0) & !(facetDim=="Model")) geom_point(data=histFull,size=1, stroke = 1.5,shape=4,aes(alpha = source),color="black") } +
+    {if(!(nrow(hist)==0) & !(facetDim=="Model")) geom_text(data=histLabel, aes(label = source), color="black", hjust ="inward", vjust=1.5) } +
+    {if(!(nrow(hist)==0) & !(facetDim=="Model")) scale_alpha_manual(values = as.numeric(alpha[unique(histFull$source)]),guide="none") } +
     {if(!(facetDim=="Variable")) facet_wrap(facetDim,drop = FALSE, nrow=facet$nrow, ncol=facet$ncol)} +
     theme_singleColumn() +
     theme(
@@ -587,9 +800,10 @@ linePlot <- function(data, scen=policyScen, title="", colorDim="Model", linetype
     ylab(title) +
     #scale_x_continuous(breaks=seq(2010, 2050, 10)) +
     {if(!is.null(legend$nrow)) guides(color = guide_legend(nrow = legend$nrow),linetype = guide_legend(nrow = legend$nrow))} +
-    {if(is.null(max)) expand_limits(y=c(min))} +
-    {if(!(is.null(max))) expand_limits(y=c(min,max))}
-
+    {if(!(is.null(max))) coord_cartesian(ylim=c(NA, max))} +
+    {if(!(is.null(min))) expand_limits(y=c(min))} +
+    {if(percentage) scale_y_continuous(labels = scales::percent_format(accuracy = 1)) }
+  
   if(colorDim=="Variable"){
     if(!(is.null(labels))){
       fullVars <- levels(data$Variable)
@@ -803,6 +1017,196 @@ names(g) <- names(plotList)
 
 <!-- Display Plots -->
 
+```{r, echo = FALSE, results='asis', fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
+if(type=="techConstraint"){
+  
+  out = "# Summary {.tabset}\n\n";
+  out = paste0(out,"## LimBio\n\n");
+  out = paste0(out,"### Biomass Primary Energy Share\n\n");
+  
+  cat(out)
+  
+  print(g$`limBio - Biomass Primary Energy Share`)
+  
+  out = "\n\n";
+  out = paste0(out,"### Biomass Primary Energy\n\n");
+  
+  cat(out)
+  
+  print(g$`limBio - Biomass Primary Energy`)
+  
+  out = "\n\n";
+  out = paste0(out,"### Biomass Secondary Energy\n\n");
+  
+  cat(out)
+  
+  print(g$`limBio - Biomass Secondary Energy`)
+  
+  out = "\n\n";
+  out = paste0(out,"## limCCS\n\n");
+  out = paste0(out,"### Carbon Sequestration\n\n");
+  
+  cat(out)
+  
+  print(g$`limCCS - Carbon Sequestration`)
+  
+  out = "\n\n";
+  out = paste0(out,"### Carbon Sequestration per source\n\n");
+  
+  cat(out)
+  
+  print(g$`limCCS - Carbon Sequestration per source`)
+  
+  out = "\n\n";
+  out = paste0(out,"## limNuclear\n\n");
+  out = paste0(out,"### Nuclear Electricity Share\n\n");
+  
+  cat(out)
+  
+  print(g$`limNuclear - Nuclear Electricity Share`)
+  
+  out = "\n\n";
+  out = paste0(out,"### Nuclear Primary Energy\n\n");
+  
+  cat(out)
+  
+  print(g$`limNuclear - Nuclear Primary Energy`)
+  
+  out = "\n\n";
+  out = paste0(out,"### Nuclear Electricity\n\n");
+  
+  cat(out)
+  
+  print(g$`limNuclear - Nuclear Electricity`)
+   
+}
+```
+
+
+
+
+```{r, echo = FALSE, results='asis', fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
+if(type=="paradigmShift"){
+  
+  out = "# Summary {.tabset}\n\n";
+  out = paste0(out,"## HighVRE\n\n");
+  out = paste0(out,"### VRE Electricity Share\n\n");
+  
+  cat(out)
+  
+  print(g$`HighVRE - VRE Electricity Share`)
+  
+  out = "\n\n";
+  out = paste0(out,"### Total VRE Electricity\n\n");
+ 
+  cat(out)
+  
+  
+  print(g$`HighVRE - Total VRE Electricity`)
+  
+  
+  out = "\n\n";
+  out = paste0(out,"### VRE Electricity per tech\n\n");
+ 
+  cat(out)
+  
+  
+  print(g$`HighVRE - VRE Electricity per tech`)
+  
+  
+  out = "\n\n";
+  out = paste0(out,"## HighElectrification\n\n");
+  
+  out = paste0(out,"### Electricity Share in Final Energy\n\n");
+  
+  cat(out)
+  
+  print(g$`HighElectrification - Electricity Share in Final Energy`)
+  
+  
+  out = "\n\n";
+  out = paste0(out,"### Total Electricity\n\n");
+  
+  cat(out)
+  
+  print(g$`HighElectrification - Total Electricity`)
+  
+  
+  out = "\n\n";
+  out = paste0(out,"### Electricity Final Energy per sector\n\n");
+  
+  cat(out)
+  
+  print(g$`HighElectrification - Electricity Final Energy per sector`)
+  
+  
+  out = "\n\n";
+  out = paste0(out,"## HighH2\n\n");
+  out = paste0(out,"### Hydrogen Share in Final Energy\n\n");
+  
+  cat(out)
+  
+  print(g$`HighH2 - Hydrogen Share in Final Energy`)
+  
+  
+  out = "\n\n";
+  out = paste0(out,"### Total Hydrogen\n\n");
+  
+  cat(out)
+  
+  print(g$`HighH2 - Total Hydrogen`)
+  
+  out = "\n\n";
+  out = paste0(out,"### Hydrogen Final Energy per sector\n\n");
+  
+  cat(out)
+  
+  print(g$`HighH2 - Hydrogen Final Energy per sector`)
+  
+  out = "\n\n";
+  out = paste0(out,"## Residual Fossil\n\n");
+  out = paste0(out,"### Fossil Primary Energy Share\n\n");
+  
+  cat(out)
+  
+  print(g$`Residual Fossil - Fossil Primary Energy Share`)
+  
+  out = "\n\n";
+  out = paste0(out,"### Fossil Primary Energy\n\n");
+  
+  cat(out)
+  
+  print(g$`Residual Fossil - Fossil Primary Energy`)
+  
+  out = "\n\n";
+  out = paste0(out,"### Fossil Primary Energy per source\n\n");
+ 
+  cat(out)
+  
+  print(g$`Residual Fossil - Fossil Primary Energy per source`)
+  
+  out = "\n\n";
+  out = paste0(out,"## High Efficiency\n\n");
+  out = paste0(out,"### Final Energy\n\n");
+  
+  cat(out)
+  
+  print(g$`HighEff - Final Energy`)
+  
+  
+  out = "\n\n";
+  out = paste0(out,"### Final Energy per sector\n\n");
+ 
+  cat(out)
+  
+  print(g$`HighEff - Final Energy per sector`)
+
+}
+```
+
+
+---
+
 # Emissions {.tabset}
 
 ## CO2
@@ -828,18 +1232,25 @@ g$`CO2 emissions per source`
 ```
 
 
----
+<!-- --- -->
 
-## NPI hist per source
+<!-- ## NPI hist per source -->
 
-### NPI Historical Emissions per source
+<!-- ### NPI Historical Emissions per source -->
 
-```{r, echo = FALSE, fig.width=chunk$nrow1$width, fig.height=chunk$nrow1$height}
 
-g$`NPI Historical CO2 emissions per source`
-
+```{r, echo = FALSE, results='asis', fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
+if(type=="NPIhist"){
+  
+  out = "---\n\n";
+  out = paste0(out,"## NPI hist per source\n\n");
+  out = paste0(out,"### NPI Historical Emissions per source\n\n");
+  
+  cat(out)
+  
+  print(g$`NPI Historical CO2 emissions per source`)
+}
 ```
-
 
 ---
 
@@ -864,6 +1275,20 @@ g$`Kyoto Gases Emissions`
 g$`Kyoto Gases emissions per source`
 
 ```
+
+
+---
+
+## per gases
+
+### Kyoto Gases emissions per gases
+
+```{r, echo = FALSE, fig.width=chunk$nrow3$width, fig.height=chunk$nrow3$height}
+
+g$`Kyoto Gases emissions per gases`
+
+```
+
 
 ---
 
@@ -948,9 +1373,22 @@ g$`Carbon Capture`
 
 ### Carbon Capture per source
 
-```{r, echo = FALSE, fig.width=chunk$nrow3$width, fig.height=chunk$nrow3$height}
+```{r, echo = FALSE, fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
 
 g$`Carbon Capture per source`
+
+```
+
+
+---
+
+## Carbon Storage and Usage
+
+### Carbon Storage and Usage
+
+```{r, echo = FALSE, fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
+
+g$`Carbon Storage and Usage`
 
 ```
 
@@ -968,13 +1406,13 @@ g$`Carbon Removal`
 
 ---
 
-## Land Use
+## per type
 
-### Carbon Removal - Land Use
+### Carbon Removal per type
 
 ```{r, echo = FALSE, fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
 
-g$`Carbon Removal - Land Use`
+g$`Carbon Removal per type`
 
 ```
 
@@ -1004,17 +1442,25 @@ g$`Primary Energy per source`
 
 ```
 
----
+<!-- --- -->
 
-## NPI hist per source
+<!-- ## NPI hist per source -->
 
-### NPI Historical Primary Energy per source
+<!-- ### NPI Historical Primary Energy per source -->
 
-```{r, echo = FALSE, fig.width=chunk$nrow1$width, fig.height=chunk$nrow1$height}
-
-g$`NPI Historical Primary Energy per source`
-
+```{r, echo = FALSE, results='asis', fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
+if(type=="NPIhist"){
+  
+  out = "---\n\n";
+  out = paste0(out,"## NPI hist per source\n\n");
+  out = paste0(out,"### NPI Historical Primary Energy per source\n\n");
+  
+  cat(out)
+  
+  print(g$`NPI Historical Primary Energy per source`)
+}
 ```
+
 
 ---
 
@@ -1081,17 +1527,25 @@ g$`Secondary Energy per carrier`
 
 ```
 
----
+<!-- --- -->
 
 
-## NPI hist per carrier
+<!-- ## NPI hist per carrier -->
 
-### NPI Historical Secondary Energy per carrier
+<!-- ### NPI Historical Secondary Energy per carrier -->
 
-```{r, echo = FALSE, fig.width=chunk$nrow1$width, fig.height=chunk$nrow1$height}
 
-g$`NPI Historical Secondary Energy per carrier`
-
+```{r, echo = FALSE, results='asis', fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
+if(type=="NPIhist"){
+  
+  out = "---\n\n";
+  out = paste0(out,"## NPI hist per carrier\n\n");
+  out = paste0(out,"### NPI Historical Secondary Energy per carrier\n\n");
+  
+  cat(out)
+  
+  print(g$`NPI Historical Secondary Energy per carrier`)
+}
 ```
 
 
@@ -1118,6 +1572,29 @@ g$`Trade Secondary Energy`
 g$`Secondary Energy Electricity`
 
 ```
+
+
+<!-- --- -->
+
+<!-- ## NPI hist Electricity -->
+
+<!-- ### NPI Historical Secondary Energy Electricity -->
+
+
+```{r, echo = FALSE, results='asis', fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
+if(type=="NPIhist"){
+  
+  out = "---\n\n";
+  out = paste0(out,"## NPI hist Electricity\n\n");
+  out = paste0(out,"### NPI Historical Secondary Energy Electricity\n\n");
+  
+  cat(out)
+  
+  print(g$`NPI Historical Secondary Energy Electricity`)
+}
+```
+
+
 
 ---
 
@@ -1172,16 +1649,24 @@ g$`Final Energy per carrier`
 ```
 
 
----
+<!-- --- -->
 
-## NPI hist per carrier
+<!-- ## NPI hist per carrier -->
 
-### NPI Historical Final Energy per carrier
+<!-- ### NPI Historical Final Energy per carrier -->
 
-```{r, echo = FALSE, fig.width=chunk$nrow1$width, fig.height=chunk$nrow1$height}
 
-g$`NPI Historical Final Energy per carrier`
-
+```{r, echo = FALSE, results='asis', fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
+if(type=="NPIhist"){
+  
+  out = "---\n\n";
+  out = paste0(out,"## NPI hist per carrier\n\n");
+  out = paste0(out,"### NPI Historical Final Energy per carrier\n\n");
+  
+  cat(out)
+  
+  print(g$`NPI Historical Final Energy per carrier`)
+}
 ```
 
 
@@ -1198,17 +1683,26 @@ g$`Final Energy per sector`
 ```
 
 
----
+<!-- --- -->
 
-## NPI hist per sector
+<!-- ## NPI hist per sector -->
 
-### NPI Historical Final Energy per sector
+<!-- ### NPI Historical Final Energy per sector -->
 
-```{r, echo = FALSE, fig.width=chunk$nrow1$width, fig.height=chunk$nrow1$height}
 
-g$`NPI Historical Final Energy per sector`
-
+```{r, echo = FALSE, results='asis', fig.width=chunk$nrow2$width, fig.height=chunk$nrow2$height}
+if(type=="NPIhist"){
+  
+  out = "---\n\n";
+  out = paste0(out,"## NPI hist per sector\n\n");
+  out = paste0(out,"### NPI Historical Final Energy per sector\n\n");
+  
+  cat(out)
+  
+  print(g$`NPI Historical Final Energy per sector`)
+}
 ```
+
 
 
 ---
@@ -1387,6 +1881,50 @@ g$`GDP PPP`
 ```
 
 ---
+
+
+
+<!-- modal code -->
+<script type="text/javascript">
+
+$(document).ready(function () {
+
+$("img").attr("title", "click to see in fullscreen")
+  
+$("body").append(
+'<!-- The Modal -->\
+<div id="myModal" class="modal hide">\
+  <!-- Modal content -->\
+  <div class="modal-content">\
+    <span class="close">&times;</span>\
+    <div class="modal-card">\
+      <img class="modal-img"\
+        alt="">\
+    </div>\
+  </div>\
+</div>').ready(function(){
+
+  $("img").click(function(){
+    src = $(this).attr("src");
+    $(".modal-img").attr("src", src);
+    $(".modal").removeClass("hide").addClass("block");              
+  });
+
+  $(".modal .close").click(function () {
+      console.log(this);
+    $(".modal").removeClass("block").addClass("hide");
+  });
+
+  $(window).click(function (event) {
+    if (event.target == myModal) {
+      $(".modal").removeClass("block").addClass("hide");
+    }
+  });
+
+  });
+});
+
+</script>
 
 
 
