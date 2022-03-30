@@ -12,14 +12,58 @@
     "type": "bar",
     "arg": {
       "title": "CO2 emissions per source (Mt CO2/yr)",
-      "labels":["Total","Other","Energy and Industrial Processes","Industrial Processes","Energy",
-        "Energy Demand", "Energy Demand - Industry","Energy Demand - Buildings", "Energy Demand - Transportation",
-        "Energy Demand - Bunkers", "Energy Demand - AFOFI","Energy Demand - Other Sector",
-        "Energy Supply","Energy Supply - Fuels","Energy Supply - Hydrogen","Energy Supply - Liquids","Energy Supply - Gases",
-        "Energy Supply - Solids","Energy Supply - Other","Energy Supply - Elect and Heat","Energy Supply - Heat","Energy Supply - Electricity",
-        "Waste",  "AFOLU"],
-        "pattern": ["stripe","none","stripe","none","stripe","stripe","none","none","none","none","none",
-          "none","stripe","stripe","none","none","none","none","none","stripe","none","none","none","none"]
+      "labels": [
+        "Total",
+        "Other",
+        "Energy and Industrial Processes",
+        "Industrial Processes",
+        "Energy",
+        "Energy Demand",
+        "Energy Demand - Industry",
+        "Energy Demand - Buildings",
+        "Energy Demand - Transportation",
+        "Energy Demand - Bunkers",
+        "Energy Demand - AFOFI",
+        "Energy Demand - Other Sector",
+        "Energy Supply",
+        "Energy Supply - Fuels",
+        "Energy Supply - Hydrogen",
+        "Energy Supply - Liquids",
+        "Energy Supply - Gases",
+        "Energy Supply - Solids",
+        "Energy Supply - Other",
+        "Energy Supply - Elect and Heat",
+        "Energy Supply - Heat",
+        "Energy Supply - Electricity",
+        "Waste",
+        "AFOLU"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "stripe",
+        "none",
+        "stripe",
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "stripe",
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none"
+      ]
     },
     "vars": {
       "Emissions|CO2": {
@@ -31,24 +75,24 @@
               "Emissions|CO2|Energy|Demand|Industry": "",
               "Emissions|CO2|Energy|Demand|Residential and Commercial": "",
               "Emissions|CO2|Energy|Demand|Transportation": "",
-              "Emissions|CO2|Energy|Demand|Bunkers":"",
+              "Emissions|CO2|Energy|Demand|Bunkers": "",
               "Emissions|CO2|Energy|Demand|AFOFI": "",
               "Emissions|CO2|Energy|Demand|Other Sector": ""
             },
             "Emissions|CO2|Energy|Supply": {
-              "Emissions|CO2|Energy|Supply|Fuels":{  
+              "Emissions|CO2|Energy|Supply|Fuels": {
                 "Emissions|CO2|Energy|Supply|Hydrogen": "",
                 "Emissions|CO2|Energy|Supply|Liquids": "",
                 "Emissions|CO2|Energy|Supply|Gases": "",
                 "Emissions|CO2|Energy|Supply|Solids": "",
                 "Emissions|CO2|Energy|Supply|Other": ""
               },
-              "Emissions|CO2|Energy|Supply|Electricity and Heat":{  
+              "Emissions|CO2|Energy|Supply|Electricity and Heat": {
                 "Emissions|CO2|Energy|Supply|Heat": "",
                 "Emissions|CO2|Energy|Supply|Electricity": ""
               }
             }
-          }          
+          }
         },
         "Emissions|CO2|Waste": "",
         "Emissions|CO2|AFOLU": ""
@@ -59,20 +103,68 @@
     "type": "bar",
     "arg": {
       "title": "NPI Historical CO2 emissions per source (Mt CO2/yr)",
-      "labels":["Total", "Other","Energy and Industrial Processes","Industrial Processes","Energy",
-        "Energy Demand", "Energy Demand - Industry","Energy Demand - Buildings", "Energy Demand - Transportation",
-        "Energy Demand - Bunkers", "Energy Demand - AFOFI","Energy Demand - Other Sector",
-        "Energy Supply","Energy Supply - Fuels","Energy Supply - Hydrogen","Energy Supply - Liquids","Energy Supply - Gases",
-        "Energy Supply - Solids","Energy Supply - Other","Energy Supply - Elect and Heat","Energy Supply - Heat","Energy Supply - Electricity",
-        "Waste", "AFOLU"],
-      "pattern": ["stripe","none","stripe","none","stripe","stripe","none","none","none","none","none",
-          "none","stripe","stripe","none","none","none","none","none","stripe","none","none","none","none"],
+      "labels": [
+        "Total",
+        "Other",
+        "Energy and Industrial Processes",
+        "Industrial Processes",
+        "Energy",
+        "Energy Demand",
+        "Energy Demand - Industry",
+        "Energy Demand - Buildings",
+        "Energy Demand - Transportation",
+        "Energy Demand - Bunkers",
+        "Energy Demand - AFOFI",
+        "Energy Demand - Other Sector",
+        "Energy Supply",
+        "Energy Supply - Fuels",
+        "Energy Supply - Hydrogen",
+        "Energy Supply - Liquids",
+        "Energy Supply - Gases",
+        "Energy Supply - Solids",
+        "Energy Supply - Other",
+        "Energy Supply - Elect and Heat",
+        "Energy Supply - Heat",
+        "Energy Supply - Electricity",
+        "Waste",
+        "AFOLU"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "stripe",
+        "none",
+        "stripe",
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "stripe",
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none"
+      ],
       "scen": "DIAG-NPI",
-      "facet":{
-        "nrow":1,
-        "ncol":null
+      "facet": {
+        "nrow": 1,
+        "ncol": null
       },
-      "period":[2010,2015,2020]
+      "period": [
+        2010,
+        2015,
+        2020
+      ]
     },
     "vars": {
       "Emissions|CO2": {
@@ -84,24 +176,24 @@
               "Emissions|CO2|Energy|Demand|Industry": "",
               "Emissions|CO2|Energy|Demand|Residential and Commercial": "",
               "Emissions|CO2|Energy|Demand|Transportation": "",
-              "Emissions|CO2|Energy|Demand|Bunkers":"",
+              "Emissions|CO2|Energy|Demand|Bunkers": "",
               "Emissions|CO2|Energy|Demand|AFOFI": "",
               "Emissions|CO2|Energy|Demand|Other Sector": ""
             },
             "Emissions|CO2|Energy|Supply": {
-              "Emissions|CO2|Energy|Supply|Fuels":{  
+              "Emissions|CO2|Energy|Supply|Fuels": {
                 "Emissions|CO2|Energy|Supply|Hydrogen": "",
                 "Emissions|CO2|Energy|Supply|Liquids": "",
                 "Emissions|CO2|Energy|Supply|Gases": "",
                 "Emissions|CO2|Energy|Supply|Solids": "",
                 "Emissions|CO2|Energy|Supply|Other": ""
               },
-              "Emissions|CO2|Energy|Supply|Electricity and Heat":{  
+              "Emissions|CO2|Energy|Supply|Electricity and Heat": {
                 "Emissions|CO2|Energy|Supply|Heat": "",
                 "Emissions|CO2|Energy|Supply|Electricity": ""
               }
             }
-          }          
+          }
         },
         "Emissions|CO2|Waste": "",
         "Emissions|CO2|AFOLU": ""
@@ -121,8 +213,24 @@
     "type": "bar",
     "arg": {
       "title": "Kyoto Gases emissions per source (Mt CO2e/yr)",
-      "labels":["Total", "Energy and Industrial Processes", "Industrial Processes", "Energy", "Waste", "Other", "AFOLU"],
-      "pattern": ["stripe","stripe","none","none","none","none","none"]
+      "labels": [
+        "Total",
+        "Energy and Industrial Processes",
+        "Industrial Processes",
+        "Energy",
+        "Waste",
+        "Other",
+        "AFOLU"
+      ],
+      "pattern": [
+        "stripe",
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none"
+      ]
     },
     "vars": {
       "Emissions|Kyoto Gases": {
@@ -133,6 +241,34 @@
         "Emissions|Kyoto Gases|Waste": "",
         "Emissions|Kyoto Gases|Other": "",
         "Emissions|Kyoto Gases|AFOLU": ""
+      }
+    }
+  },
+  "Kyoto Gases emissions per gases": {
+    "type": "bar",
+    "arg": {
+      "title": "Kyoto Gases emissions per gases (Mt CO2e/yr)",
+      "labels": [
+        "Total",
+        "F-Gases",
+        "N2O",
+        "CH4",
+        "CO2"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none"
+      ]
+    },
+    "vars": {
+      "Emissions|Kyoto Gases": {
+        "Emissions|F-Gases": "",
+        "Emissions|Kyoto Gases|N2O": "",
+        "Emissions|Kyoto Gases|CH4": "",
+        "Emissions|CO2": ""
       }
     }
   },
@@ -167,40 +303,77 @@
     "type": "bar",
     "arg": {
       "title": "Energy and Industrial Processes CO2 Emissions (Mt CO2/yr)",
-      "labels":["Energy and Industrial Processes","Industrial Processes","Energy",
-        "Energy Demand", "Energy Demand - Industry","Energy Demand - Buildings", "Energy Demand - Transportation",
-        "Energy Demand - Bunkers", "Energy Demand - AFOFI","Energy Demand - Other Sector",
-        "Energy Supply","Energy Supply - Fuels","Energy Supply - Hydrogen","Energy Supply - Liquids","Energy Supply - Gases",
-        "Energy Supply - Solids","Energy Supply - Other","Energy Supply - Elect and Heat","Energy Supply - Heat","Energy Supply - Electricity"],
-      "pattern": ["stripe","stripe","stripe","stripe","none","none","none","none","none","none",
-        "stripe","stripe","none","none","none","none","none","stripe","none","none"]
+      "labels": [
+        "Energy and Industrial Processes",
+        "Industrial Processes",
+        "Energy",
+        "Energy Demand",
+        "Energy Demand - Industry",
+        "Energy Demand - Buildings",
+        "Energy Demand - Transportation",
+        "Energy Demand - Bunkers",
+        "Energy Demand - AFOFI",
+        "Energy Demand - Other Sector",
+        "Energy Supply",
+        "Energy Supply - Fuels",
+        "Energy Supply - Hydrogen",
+        "Energy Supply - Liquids",
+        "Energy Supply - Gases",
+        "Energy Supply - Solids",
+        "Energy Supply - Other",
+        "Energy Supply - Elect and Heat",
+        "Energy Supply - Heat",
+        "Energy Supply - Electricity"
+      ],
+      "pattern": [
+        "stripe",
+        "stripe",
+        "stripe",
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "stripe",
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "stripe",
+        "none",
+        "none"
+      ]
     },
     "vars": {
       "Emissions|CO2|Energy and Industrial Processes": {
         "Emissions|CO2|Industrial Processes": "",
-          "Emissions|CO2|Energy": {
+        "Emissions|CO2|Energy": {
           "Emissions|CO2|Energy|Demand": {
             "Emissions|CO2|Energy|Demand|Industry": "",
             "Emissions|CO2|Energy|Demand|Residential and Commercial": "",
             "Emissions|CO2|Energy|Demand|Transportation": "",
-            "Emissions|CO2|Energy|Demand|Bunkers":"",
+            "Emissions|CO2|Energy|Demand|Bunkers": "",
             "Emissions|CO2|Energy|Demand|AFOFI": "",
             "Emissions|CO2|Energy|Demand|Other Sector": ""
           },
           "Emissions|CO2|Energy|Supply": {
-            "Emissions|CO2|Energy|Supply|Fuels":{  
+            "Emissions|CO2|Energy|Supply|Fuels": {
               "Emissions|CO2|Energy|Supply|Hydrogen": "",
               "Emissions|CO2|Energy|Supply|Liquids": "",
               "Emissions|CO2|Energy|Supply|Gases": "",
               "Emissions|CO2|Energy|Supply|Solids": "",
               "Emissions|CO2|Energy|Supply|Other": ""
             },
-            "Emissions|CO2|Energy|Supply|Electricity and Heat":{  
+            "Emissions|CO2|Energy|Supply|Electricity and Heat": {
               "Emissions|CO2|Energy|Supply|Heat": "",
               "Emissions|CO2|Energy|Supply|Electricity": ""
             }
           }
-        }          
+        }
       }
     }
   },
@@ -230,10 +403,10 @@
       "colorDim": "Scenario",
       "facetDim": "Model",
       "maxPeriod": 2060,
-      "facet":{
-        "nrow":2,
-        "ncol":null
-      }      
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      }
     },
     "vars": {
       "Price|Carbon": ""
@@ -252,15 +425,47 @@
     "type": "bar",
     "arg": {
       "title": "Carbon Capture per source (Mt CO2/yr)",
-      "labels":["Total","Biomass","Direct Air Capture","Fossil","Industrial Processes","Storage","Usage"],
-      "pattern": ["stripe","none","none","none","none","none","none"]
+      "labels": [
+        "Total",
+        "Biomass",
+        "Direct Air Capture",
+        "Fossil",
+        "Industrial Processes"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none"
+      ]
     },
     "vars": {
       "Carbon Capture": {
         "Carbon Capture|Biomass": "",
         "Carbon Capture|Direct Air Capture": "",
         "Carbon Capture|Fossil": "",
-        "Carbon Capture|Industrial Processes": "",
+        "Carbon Capture|Industrial Processes": ""
+      }
+    }
+  },
+  "Carbon Storage and Usage": {
+    "type": "bar",
+    "arg": {
+      "title": "Carbon Storage and Usage (Mt CO2/yr)",
+      "labels": [
+        "Total",
+        "Storage",
+        "Usage"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none"
+      ]
+    },
+    "vars": {
+      "Carbon Capture": {
         "Carbon Capture|Storage": "",
         "Carbon Capture|Usage": ""
       }
@@ -273,6 +478,28 @@
     },
     "vars": {
       "Carbon Removal": ""
+    }
+  },
+  "Carbon Removal per type": {
+    "type": "bar",
+    "arg": {
+      "title": "Carbon Removal per type (Mt CO2/yr)",
+      "labels": [
+        "Total",
+        "Land Use",
+        "Other"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none"
+      ]
+    },
+    "vars": {
+      "Carbon Removal": {
+        "Carbon Removal|Land Use": "",
+        "Carbon Removal|Other": ""
+      }
     }
   },
   "Carbon Removal - Land Use": {
@@ -297,15 +524,48 @@
     "type": "bar",
     "arg": {
       "title": "Primary Energy per source (EJ/yr)",
-      "labels":["Total","Other",
-        "Biomass","Biomass w/ CCS","Biomass w/o CCS",
-        "Coal","Coal w/ CCS","Coal w/o CCS",
-        "Gas","Gas w/ CCS","Gas w/o CCS",
-        "Geothermal","Hydro","Nuclear",
-        "Oil","Oil w/ CCS","Oil w/o CCS",
-        "Solar","Wind"],
-        "pattern": ["stripe","none","stripe","none","none","stripe","none","none","stripe","none","none","none",
-          "none","none","stripe","none","none","none","none"]
+      "labels": [
+        "Total",
+        "Other",
+        "Biomass",
+        "Biomass w/ CCS",
+        "Biomass w/o CCS",
+        "Coal",
+        "Coal w/ CCS",
+        "Coal w/o CCS",
+        "Gas",
+        "Gas w/ CCS",
+        "Gas w/o CCS",
+        "Geothermal",
+        "Hydro",
+        "Nuclear",
+        "Oil",
+        "Oil w/ CCS",
+        "Oil w/o CCS",
+        "Solar",
+        "Wind"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "stripe",
+        "none",
+        "none",
+        "stripe",
+        "none",
+        "none",
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none"
+      ]
     },
     "vars": {
       "Primary Energy": {
@@ -338,21 +598,58 @@
     "type": "bar",
     "arg": {
       "title": "NPI Historical Primary Energy per source (EJ/yr)",
-      "labels":["Total","Other",
-        "Biomass","Biomass w/ CCS","Biomass w/o CCS",
-        "Coal","Coal w/ CCS","Coal w/o CCS",
-        "Gas","Gas w/ CCS","Gas w/o CCS",
-        "Geothermal","Hydro","Nuclear",
-        "Oil","Oil w/ CCS","Oil w/o CCS",
-        "Solar","Wind"],
-        "pattern": ["stripe","none","stripe","none","none","stripe","none","none","stripe","none","none","none",
-          "none","none","stripe","none","none","none","none"],
-        "scen": "DIAG-NPI",
-        "facet":{
-          "nrow":1,
-          "ncol":null
-        },
-        "period":[2010,2015,2020]
+      "labels": [
+        "Total",
+        "Other",
+        "Biomass",
+        "Biomass w/ CCS",
+        "Biomass w/o CCS",
+        "Coal",
+        "Coal w/ CCS",
+        "Coal w/o CCS",
+        "Gas",
+        "Gas w/ CCS",
+        "Gas w/o CCS",
+        "Geothermal",
+        "Hydro",
+        "Nuclear",
+        "Oil",
+        "Oil w/ CCS",
+        "Oil w/o CCS",
+        "Solar",
+        "Wind"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "stripe",
+        "none",
+        "none",
+        "stripe",
+        "none",
+        "none",
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none"
+      ],
+      "scen": "DIAG-NPI",
+      "facet": {
+        "nrow": 1,
+        "ncol": null
+      },
+      "period": [
+        2010,
+        2015,
+        2020
+      ]
     },
     "vars": {
       "Primary Energy": {
@@ -388,11 +685,16 @@
       "colorDim": "Variable",
       "facetDim": "Model",
       "linetypeDim": "Scenario",
-      "labels":["Biomass","Coal","Gas","Oil"],
-      "facet":{
-        "nrow":2,
-        "ncol":null
-      }      
+      "labels": [
+        "Biomass",
+        "Coal",
+        "Gas",
+        "Oil"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      }
     },
     "vars": {
       "Trade|Primary Energy|Biomass|Volume": "",
@@ -408,8 +710,16 @@
       "colorDim": "Model",
       "facetDim": "Variable",
       "linetypeDim": "Scenario",
-      "labels":["Biomass","Coal","Gas","Oil"],
-      "scen":["DIAG-NPI","DIAG-C400-lin"]
+      "labels": [
+        "Biomass",
+        "Coal",
+        "Gas",
+        "Oil"
+      ],
+      "scen": [
+        "DIAG-NPI",
+        "DIAG-C400-lin"
+      ]
     },
     "vars": {
       "Price|Primary Energy|Biomass": "",
@@ -425,11 +735,17 @@
       "colorDim": "Variable",
       "facetDim": "Model",
       "linetypeDim": "Scenario",
-      "labels":["Biomass","Coal","Gas","Oil"],
-      "facet":{
-        "nrow":2,
-        "ncol":null
-      }      
+      "labels": [
+        "Biomass",
+        "Coal",
+        "Gas",
+        "Oil"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      },
+      "max": 30
     },
     "vars": {
       "Price|Primary Energy|Biomass": "",
@@ -451,8 +767,24 @@
     "type": "bar",
     "arg": {
       "title": "Secondary Energy per carrier (EJ/yr)",
-      "labels":["Total","Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
-      "pattern": ["stripe","none","none","none","none","none","none"]
+      "labels": [
+        "Total",
+        "Hydrogen",
+        "Gases",
+        "Liquids",
+        "Solids",
+        "Heat",
+        "Electricity"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none"
+      ]
     },
     "vars": {
       "Secondary Energy": {
@@ -469,14 +801,34 @@
     "type": "bar",
     "arg": {
       "title": "NPI Historical Secondary Energy per carrier (EJ/yr)",
-      "labels":["Total","Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
-      "pattern": ["stripe","none","none","none","none","none","none"],
-        "scen": "DIAG-NPI",
-        "facet":{
-          "nrow":1,
-          "ncol":null
-        },
-        "period":[2010,2015,2020]
+      "labels": [
+        "Total",
+        "Hydrogen",
+        "Gases",
+        "Liquids",
+        "Solids",
+        "Heat",
+        "Electricity"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none"
+      ],
+      "scen": "DIAG-NPI",
+      "facet": {
+        "nrow": 1,
+        "ncol": null
+      },
+      "period": [
+        2010,
+        2015,
+        2020
+      ]
     },
     "vars": {
       "Secondary Energy": {
@@ -496,11 +848,15 @@
       "colorDim": "Variable",
       "facetDim": "Model",
       "linetypeDim": "Scenario",
-      "labels":["Electricity","Hydrogen","Liquids"],
-      "facet":{
-        "nrow":2,
-        "ncol":null
-      }      
+      "labels": [
+        "Electricity",
+        "Hydrogen",
+        "Liquids"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      }
     },
     "vars": {
       "Trade|Secondary Energy|Electricity|Volume": "",
@@ -512,16 +868,115 @@
     "type": "bar",
     "arg": {
       "title": "Secondary Energy Electricity (EJ/yr)",
-      "labels":["Total","Biomass","Coal","Curtailment","Gas","Geothermal","Hydro",
-        "Hydrogen","Nuclear","Oil","Solar","Wind","Wind Offshore","Wind Onshore",
-        "Trade"],
-        "pattern": ["stripe","none","none","none","none","none","none","none","none","none","none","stripe","none","none","none"]
+      "labels": [
+        "Total",
+        "Curtailment",
+        "Biomass",
+        "Coal",
+        "Gas",
+        "Geothermal",
+        "Hydro",
+        "Hydrogen",
+        "Nuclear",
+        "Oil",
+        "Solar",
+        "Wind",
+        "Wind Offshore",
+        "Wind Onshore",
+        "Trade"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "stripe",
+        "none",
+        "none",
+        "none"
+      ]
     },
     "vars": {
       "Secondary Energy|Electricity": {
+        "Secondary Energy|Electricity|Curtailment": "",
         "Secondary Energy|Electricity|Biomass": "",
         "Secondary Energy|Electricity|Coal": "",
+        "Secondary Energy|Electricity|Gas": "",
+        "Secondary Energy|Electricity|Geothermal": "",
+        "Secondary Energy|Electricity|Hydro": "",
+        "Secondary Energy|Electricity|Hydrogen": "",
+        "Secondary Energy|Electricity|Nuclear": "",
+        "Secondary Energy|Electricity|Oil": "",
+        "Secondary Energy|Electricity|Solar": "",
+        "Secondary Energy|Electricity|Wind": {
+          "Secondary Energy|Electricity|Wind|Offshore": "",
+          "Secondary Energy|Electricity|Wind|Onshore": ""
+        },
+        "Trade|Secondary Energy|Electricity|Volume": ""
+      }
+    }
+  },
+  "NPI Historical Secondary Energy Electricity": {
+    "type": "bar",
+    "arg": {
+      "title": "NPI Historical Secondary Energy Electricity (EJ/yr)",
+      "labels": [
+        "Total",
+        "Curtailment",
+        "Biomass",
+        "Coal",
+        "Gas",
+        "Geothermal",
+        "Hydro",
+        "Hydrogen",
+        "Nuclear",
+        "Oil",
+        "Solar",
+        "Wind",
+        "Wind Offshore",
+        "Wind Onshore",
+        "Trade"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "stripe",
+        "none",
+        "none",
+        "none"
+      ],
+      "scen": "DIAG-NPI",
+      "facet": {
+        "nrow": 1,
+        "ncol": null
+      },
+      "period": [
+        2010,
+        2015,
+        2020
+      ]
+    },
+    "vars": {
+      "Secondary Energy|Electricity": {
         "Secondary Energy|Electricity|Curtailment": "",
+        "Secondary Energy|Electricity|Biomass": "",
+        "Secondary Energy|Electricity|Coal": "",
         "Secondary Energy|Electricity|Gas": "",
         "Secondary Energy|Electricity|Geothermal": "",
         "Secondary Energy|Electricity|Hydro": "",
@@ -544,9 +999,19 @@
       "colorDim": "Model",
       "facetDim": "Variable",
       "linetypeDim": "Scenario",
-      "labels":["Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
-        "scen":["DIAG-NPI","DIAG-C400-lin"]
-      },
+      "labels": [
+        "Hydrogen",
+        "Gases",
+        "Liquids",
+        "Solids",
+        "Heat",
+        "Electricity"
+      ],
+      "scen": [
+        "DIAG-NPI",
+        "DIAG-C400-lin"
+      ]
+    },
     "vars": {
       "Price|Secondary Energy|Hydrogen": "",
       "Price|Secondary Energy|Gases": "",
@@ -563,11 +1028,18 @@
       "colorDim": "Variable",
       "facetDim": "Model",
       "linetypeDim": "Scenario",
-      "labels":["Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
-      "facet":{
-        "nrow":2,
-        "ncol":null
-      }      
+      "labels": [
+        "Hydrogen",
+        "Gases",
+        "Liquids",
+        "Solids",
+        "Heat",
+        "Electricity"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      }
     },
     "vars": {
       "Price|Secondary Energy|Hydrogen": "",
@@ -591,8 +1063,30 @@
     "type": "bar",
     "arg": {
       "title": "Final Energy per carrier (EJ/yr)",
-      "labels":["Total","Geothermal","Solar","Hydrogen","Gases","Liquids","Solids","Other","Heat","Electricity"],
-      "pattern": ["stripe","none","none","none","none","none","none","none","none","none"]
+      "labels": [
+        "Total",
+        "Geothermal",
+        "Solar",
+        "Hydrogen",
+        "Gases",
+        "Liquids",
+        "Solids",
+        "Other",
+        "Heat",
+        "Electricity"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none"
+      ]
     },
     "vars": {
       "Final Energy": {
@@ -612,14 +1106,40 @@
     "type": "bar",
     "arg": {
       "title": "NPI Historical Final Energy per carrier (EJ/yr)",
-      "labels":["Total","Geothermal","Solar","Hydrogen","Gases","Liquids","Solids","Other","Heat","Electricity"],
-      "pattern": ["stripe","none","none","none","none","none","none","none","none","none"],
-        "scen": "DIAG-NPI",
-        "facet":{
-          "nrow":1,
-          "ncol":null
-        },
-        "period":[2010,2015,2020]
+      "labels": [
+        "Total",
+        "Geothermal",
+        "Solar",
+        "Hydrogen",
+        "Gases",
+        "Liquids",
+        "Solids",
+        "Other",
+        "Heat",
+        "Electricity"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none"
+      ],
+      "scen": "DIAG-NPI",
+      "facet": {
+        "nrow": 1,
+        "ncol": null
+      },
+      "period": [
+        2010,
+        2015,
+        2020
+      ]
     },
     "vars": {
       "Final Energy": {
@@ -639,17 +1159,33 @@
     "type": "bar",
     "arg": {
       "title": "Final Energy per sector (EJ/yr)",
-      "labels":["Total","Other Sector","Non-Energy Use","Industry","Residential and Commercial","Transportation","Bunkers"],
-      "pattern": ["stripe","none","none","none","none","none","none"]
+      "labels": [
+        "Total",
+        "Other Sector",
+        "Non-Energy Use",
+        "Industry",
+        "Residential and Commercial",
+        "Transportation",
+        "Bunkers"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none"
+      ]
     },
     "vars": {
       "Final Energy": {
-        "Final Energy|Other Sector":"",
+        "Final Energy|Other Sector": "",
         "Final Energy|Non-Energy Use": "",
         "Final Energy|Industry": "",
         "Final Energy|Residential and Commercial": "",
-        "Final Energy|Transportation":"",
-        "Final Energy|Bunkers":""
+        "Final Energy|Transportation": "",
+        "Final Energy|Bunkers": ""
       }
     }
   },
@@ -657,23 +1193,43 @@
     "type": "bar",
     "arg": {
       "title": "NPI Historical Final Energy per sector (EJ/yr)",
-      "labels":["Total","Other Sector","Non-Energy Use","Industry","Residential and Commercial","Transportation","Bunkers"],
-      "pattern": ["stripe","none","none","none","none","none","none"],
-        "scen": "DIAG-NPI",
-        "facet":{
-          "nrow":1,
-          "ncol":null
-        },
-        "period":[2010,2015,2020]
+      "labels": [
+        "Total",
+        "Other Sector",
+        "Non-Energy Use",
+        "Industry",
+        "Residential and Commercial",
+        "Transportation",
+        "Bunkers"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none"
+      ],
+      "scen": "DIAG-NPI",
+      "facet": {
+        "nrow": 1,
+        "ncol": null
+      },
+      "period": [
+        2010,
+        2015,
+        2020
+      ]
     },
     "vars": {
       "Final Energy": {
-        "Final Energy|Other Sector":"",
+        "Final Energy|Other Sector": "",
         "Final Energy|Non-Energy Use": "",
         "Final Energy|Industry": "",
         "Final Energy|Residential and Commercial": "",
-        "Final Energy|Transportation":"",
-        "Final Energy|Bunkers":""
+        "Final Energy|Transportation": "",
+        "Final Energy|Bunkers": ""
       }
     }
   },
@@ -681,10 +1237,38 @@
     "type": "bar",
     "arg": {
       "title": "Non-Energy and Industry Final Energy per carrier (EJ/yr)",
-      "labels":["Non-Energy Use", "Non-Energy Use - Hydrogen","Non-Energy Use - Gases","Non-Energy Use - Liquids","Non-Energy Use - Solids","Non-Energy Use - Other",
-        "Industry","Industry - Hydrogen","Industry - Gases","Industry - Liquids","Industry - Solids","Industry - Other","Industry - Heat", "Industry - Electricity"],
-      "pattern": ["stripe","stripe","stripe","stripe","stripe","stripe",
-        "stripe","none","none","none","none","none","none","none"]
+      "labels": [
+        "Non-Energy Use",
+        "Non-Energy Use - Hydrogen",
+        "Non-Energy Use - Gases",
+        "Non-Energy Use - Liquids",
+        "Non-Energy Use - Solids",
+        "Non-Energy Use - Other",
+        "Industry",
+        "Industry - Hydrogen",
+        "Industry - Gases",
+        "Industry - Liquids",
+        "Industry - Solids",
+        "Industry - Other",
+        "Industry - Heat",
+        "Industry - Electricity"
+      ],
+      "pattern": [
+        "stripe",
+        "stripe",
+        "stripe",
+        "stripe",
+        "stripe",
+        "stripe",
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none"
+      ]
     },
     "vars": {
       "Final Energy|Non-Energy Use": {
@@ -704,13 +1288,31 @@
         "Final Energy|Industry|Electricity": ""
       }
     }
-  }, 
+  },
   "Residential and Commercial Final Energy per carrier": {
     "type": "bar",
     "arg": {
       "title": "Residential and Commercial Final Energy per carrier (EJ/yr)",
-      "labels":["Total","Hydrogen","Gases","Liquids","Solids","Other","Heat","Electricity"],
-      "pattern": ["stripe","none","none","none","none","none","none","none"]
+      "labels": [
+        "Total",
+        "Hydrogen",
+        "Gases",
+        "Liquids",
+        "Solids",
+        "Other",
+        "Heat",
+        "Electricity"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none"
+      ]
     },
     "vars": {
       "Final Energy|Residential and Commercial": {
@@ -728,10 +1330,34 @@
     "type": "bar",
     "arg": {
       "title": "Transportation and Bunkers Final Energy per carrier (EJ/yr)",
-      "labels":["Bunkers","Bunkers - Hydrogen","Bunkers - Gases","Bunkers - Liquids","Bunkers - Other", "Bunkers - Electricity",
-        "Transport","Transport - Hydrogen","Transport - Gases","Transport - Liquids","Transport - Other", "Transport - Electricity"],
-      "pattern": ["stripe","stripe","stripe","stripe","stripe","stripe",
-        "stripe","none","none","none","none","none"]
+      "labels": [
+        "Bunkers",
+        "Bunkers - Hydrogen",
+        "Bunkers - Gases",
+        "Bunkers - Liquids",
+        "Bunkers - Other",
+        "Bunkers - Electricity",
+        "Transport",
+        "Transport - Hydrogen",
+        "Transport - Gases",
+        "Transport - Liquids",
+        "Transport - Other",
+        "Transport - Electricity"
+      ],
+      "pattern": [
+        "stripe",
+        "stripe",
+        "stripe",
+        "stripe",
+        "stripe",
+        "stripe",
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none"
+      ]
     },
     "vars": {
       "Final Energy|Bunkers": {
@@ -747,15 +1373,33 @@
         "Final Energy|Transportation|Liquids": "",
         "Final Energy|Transportation|Other": "",
         "Final Energy|Transportation|Electricity": ""
-      }      
+      }
     }
   },
   "Other Sectors Final Energy per carrier": {
     "type": "bar",
     "arg": {
       "title": "Other Sectors Final Energy per carrier (EJ/yr)",
-      "labels":["Total","Hydrogen","Gases","Liquids","Solids","Other","Heat","Electricity"],
-      "pattern": ["stripe","none","none","none","none","none","none","none"]
+      "labels": [
+        "Total",
+        "Hydrogen",
+        "Gases",
+        "Liquids",
+        "Solids",
+        "Other",
+        "Heat",
+        "Electricity"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none"
+      ]
     },
     "vars": {
       "Final Energy|Other Sector": {
@@ -773,8 +1417,16 @@
     "type": "bar",
     "arg": {
       "title": "Transportation Final Energy per type (EJ/yr)",
-      "labels":["Total","Passenger","Freight"],
-      "pattern": ["stripe","none","none"]
+      "labels": [
+        "Total",
+        "Passenger",
+        "Freight"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none"
+      ]
     },
     "vars": {
       "Final Energy|Transportation": {
@@ -790,8 +1442,18 @@
       "colorDim": "Model",
       "facetDim": "Variable",
       "linetypeDim": "Scenario",
-      "labels":["Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
-      "scen":["DIAG-NPI","DIAG-C400-lin"]
+      "labels": [
+        "Hydrogen",
+        "Gases",
+        "Liquids",
+        "Solids",
+        "Heat",
+        "Electricity"
+      ],
+      "scen": [
+        "DIAG-NPI",
+        "DIAG-C400-lin"
+      ]
     },
     "vars": {
       "Price|Final Energy|Industry|Hydrogen": "",
@@ -809,11 +1471,18 @@
       "colorDim": "Variable",
       "facetDim": "Model",
       "linetypeDim": "Scenario",
-      "labels":["Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
-      "facet":{
-        "nrow":2,
-        "ncol":null
-      }      
+      "labels": [
+        "Hydrogen",
+        "Gases",
+        "Liquids",
+        "Solids",
+        "Heat",
+        "Electricity"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      }
     },
     "vars": {
       "Price|Final Energy|Industry|Hydrogen": "",
@@ -831,8 +1500,18 @@
       "colorDim": "Model",
       "facetDim": "Variable",
       "linetypeDim": "Scenario",
-      "labels":["Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
-      "scen":["DIAG-NPI","DIAG-C400-lin"]
+      "labels": [
+        "Hydrogen",
+        "Gases",
+        "Liquids",
+        "Solids",
+        "Heat",
+        "Electricity"
+      ],
+      "scen": [
+        "DIAG-NPI",
+        "DIAG-C400-lin"
+      ]
     },
     "vars": {
       "Price|Final Energy|Residential and Commercial|Hydrogen": "",
@@ -850,11 +1529,18 @@
       "colorDim": "Variable",
       "facetDim": "Model",
       "linetypeDim": "Scenario",
-      "labels":["Hydrogen","Gases","Liquids","Solids","Heat","Electricity"],
-      "facet":{
-        "nrow":2,
-        "ncol":null
-      }      
+      "labels": [
+        "Hydrogen",
+        "Gases",
+        "Liquids",
+        "Solids",
+        "Heat",
+        "Electricity"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      }
     },
     "vars": {
       "Price|Final Energy|Residential and Commercial|Hydrogen": "",
@@ -872,8 +1558,16 @@
       "colorDim": "Model",
       "facetDim": "Variable",
       "linetypeDim": "Scenario",
-      "labels":["Hydrogen","Gases","Liquids","Electricity"],
-      "scen":["DIAG-NPI","DIAG-C400-lin"]
+      "labels": [
+        "Hydrogen",
+        "Gases",
+        "Liquids",
+        "Electricity"
+      ],
+      "scen": [
+        "DIAG-NPI",
+        "DIAG-C400-lin"
+      ]
     },
     "vars": {
       "Price|Final Energy|Transportation|Hydrogen": "",
@@ -889,11 +1583,16 @@
       "colorDim": "Variable",
       "facetDim": "Model",
       "linetypeDim": "Scenario",
-      "labels":["Hydrogen","Gases","Liquids","Electricity"],
-      "facet":{
-        "nrow":2,
-        "ncol":null
-      }      
+      "labels": [
+        "Hydrogen",
+        "Gases",
+        "Liquids",
+        "Electricity"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      }
     },
     "vars": {
       "Price|Final Energy|Transportation|Hydrogen": "",
@@ -927,6 +1626,620 @@
     },
     "vars": {
       "GDP|PPP": ""
+    }
+  },
+  "limBio - Biomass Primary Energy Share": {
+    "type": "line",
+    "arg": {
+      "title": "Biomass Primary Energy Share (%)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "labels": [
+        "Biomass"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-LimBio"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      },
+      "percentage": true
+    },
+    "vars": {
+      "Primary Energy|Biomass Share": ""
+    }
+  },
+  "limBio - Biomass Primary Energy": {
+    "type": "line",
+    "arg": {
+      "title": "Biomass Primary Energy (EJ/yr)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "labels": [
+        "Biomass"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-LimBio"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      }
+    },
+    "vars": {
+      "Primary Energy|Biomass": ""
+    }
+  },
+  "limBio - Biomass Secondary Energy": {
+    "type": "bar",
+    "arg": {
+      "title": "Biomass Secondary Energy (EJ/yr)",
+      "labels": [
+        "Hydrogen",
+        "Hydrogen w/ CCS",
+        "Hydrogen w/o CCS",
+        "Gases",
+        "Liquids",
+        "Liquids w/ CCS",
+        "Liquids w/o CCS",
+        "Solids",
+        "Heat",
+        "Electricity",
+        "Electricity w/ CCS",
+        "Electricity w/o CCS"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "stripe",
+        "none",
+        "none"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-LimBio"
+      ]
+    },
+    "vars": {
+      "Secondary Energy|Hydrogen|Biomass": {
+        "Secondary Energy|Hydrogen|Biomass|w/ CCS": "",
+        "Secondary Energy|Hydrogen|Biomass|w/o CCS": ""
+      },
+      "Secondary Energy|Gases|Biomass": "",
+      "Secondary Energy|Liquids|Biomass": {
+        "Secondary Energy|Liquids|Biomass|w/ CCS": "",
+        "Secondary Energy|Liquids|Biomass|w/o CCS": ""
+      },
+      "Secondary Energy|Solids|Biomass": "",
+      "Secondary Energy|Heat|Biomass": "",
+      "Secondary Energy|Electricity|Biomass": {
+        "Secondary Energy|Electricity|Biomass|w/ CCS": "",
+        "Secondary Energy|Electricity|Biomass|w/o CCS": ""
+      }
+    }
+  },
+  "limCCS - Carbon Sequestration": {
+    "type": "line",
+    "arg": {
+      "title": "Carbon Sequestration - CCS (Mt CO2/yr)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "labels": [
+        "CCS"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-LimCCS"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      }
+    },
+    "vars": {
+      "Carbon Sequestration|CCS": ""
+    }
+  },
+  "limCCS - Carbon Sequestration per source": {
+    "type": "bar",
+    "arg": {
+      "title": "Carbon Sequestration per source (Mt CO2/yr)",
+      "labels": [
+        "Total",
+        "Biomass",
+        "Fossil"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-LimCCS"
+      ]
+    },
+    "vars": {
+      "Carbon Sequestration|CCS": {
+        "Carbon Sequestration|CCS|Biomass": "",
+        "Carbon Sequestration|CCS|Fossil": ""
+      }
+    }
+  },
+  "limNuclear - Nuclear Electricity Share": {
+    "type": "line",
+    "arg": {
+      "title": "Nuclear Electricity Share (%)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "labels": [
+        "Nuclear"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-LimNuclear"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      },
+      "percentage": true
+    },
+    "vars": {
+      "Secondary Energy|Electricity|Nuclear Share": ""
+    }
+  },
+  "limNuclear - Nuclear Primary Energy": {
+    "type": "line",
+    "arg": {
+      "title": "Nuclear Primary Energy (EJ/yr)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "labels": [
+        "Nuclear"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-LimNuclear"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      }
+    },
+    "vars": {
+      "Primary Energy|Nuclear": ""
+    }
+  },
+  "limNuclear - Nuclear Electricity": {
+    "type": "line",
+    "arg": {
+      "title": "Nuclear Electricity (EJ/yr)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "labels": [
+        "Nuclear"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-LimNuclear"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      }
+    },
+    "vars": {
+      "Secondary Energy|Electricity|Nuclear": ""
+    }
+  },
+  "HighVRE - VRE Electricity Share": {
+    "type": "line",
+    "arg": {
+      "title": "VRE Electricity Share (%)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "labels": [
+        "VRE"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-lin-HighVRE"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      },
+      "percentage": true
+    },
+    "vars": {
+      "Secondary Energy|VRE Share": ""
+    }
+  },
+  "HighVRE - Total VRE Electricity": {
+    "type": "line",
+    "arg": {
+      "title": "Total VRE Electricity (EJ/yr)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "labels": [
+        "VRE"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-lin-HighVRE"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      }
+    },
+    "vars": {
+      "Secondary Energy|VRE": ""
+    }
+  },
+  "HighVRE - VRE Electricity per tech": {
+    "type": "bar",
+    "arg": {
+      "title": "VRE Electricity per tech (EJ/yr)",
+      "labels": [
+        "non VRE",
+        "Solar",
+        "Wind",
+        "Wind Offshore",
+        "Wind Onshore"
+      ],
+      "pattern": [
+        "none",
+        "none",
+        "stripe",
+        "none",
+        "none"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-lin-HighVRE"
+      ],
+      "facet": {
+        "nrow": 1,
+        "ncol": null
+      }
+    },
+    "vars": {
+      "Secondary Energy|non VRE": "",
+      "Secondary Energy|Electricity|Solar": "",
+      "Secondary Energy|Electricity|Wind": {
+        "Secondary Energy|Electricity|Wind|Offshore": "",
+        "Secondary Energy|Electricity|Wind|Onshore": ""
+      }
+    }
+  },
+  "HighElectrification - Electricity Share in Final Energy": {
+    "type": "line",
+    "arg": {
+      "title": "Electricity Share in Final Energy (%)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "labels": [
+        "VRE"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-lin-HighElectrification"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      },
+      "percentage": true
+    },
+    "vars": {
+      "Final Energy|Electricity Share": ""
+    }
+  },
+  "HighElectrification - Total Electricity": {
+    "type": "line",
+    "arg": {
+      "title": "Total Electricity (EJ/yr)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "labels": [
+        "VRE"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-lin-HighElectrification"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      }
+    },
+    "vars": {
+      "Secondary Energy|Electricity": ""
+    }
+  },
+  "HighElectrification - Electricity Final Energy per sector": {
+    "type": "bar",
+    "arg": {
+      "title": "Electricity Final Energy per sector (EJ/yr)",
+      "labels": [
+        "Industry",
+        "Residential and Commercial",
+        "Transportation",
+        "Bunkers",
+        "Other Sector"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-lin-HighElectrification"
+      ],
+      "facet": {
+        "nrow": 1,
+        "ncol": null
+      }
+    },
+    "vars": {
+      "Final Energy|Industry|Electricity": "",
+      "Final Energy|Residential and Commercial|Electricity": "",
+      "Final Energy|Transportation|Electricity": "",
+      "Final Energy|Bunkers|Electricity": "",
+      "Final Energy|Other Sector|Electricity": ""
+    }
+  },
+  "HighH2 - Hydrogen Share in Final Energy": {
+    "type": "line",
+    "arg": {
+      "title": "Hydrogen Share in Final Energy (%)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "labels": [
+        "VRE"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-lin-HighH2"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      },
+      "percentage": true
+    },
+    "vars": {
+      "Final Energy|Hydrogen Share": ""
+    }
+  },
+  "HighH2 - Total Hydrogen": {
+    "type": "line",
+    "arg": {
+      "title": "Total Hydrogen (EJ/yr)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "labels": [
+        "VRE"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-lin-HighH2"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      }
+    },
+    "vars": {
+      "Secondary Energy|Hydrogen": ""
+    }
+  },
+  "HighH2 - Hydrogen Final Energy per sector": {
+    "type": "bar",
+    "arg": {
+      "title": "Hydrogen Final Energy per sector (EJ/yr)",
+      "labels": [
+        "Non-Energy Use",
+        "Industry",
+        "Residential and Commercial",
+        "Transportation",
+        "Bunkers",
+        "Other Sector"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-lin-HighH2"
+      ],
+      "facet": {
+        "nrow": 1,
+        "ncol": null
+      }
+    },
+    "vars": {
+      "Final Energy|Non-Energy Use|Hydrogen": "",
+      "Final Energy|Industry|Hydrogen": "",
+      "Final Energy|Residential and Commercial|Hydrogen": "",
+      "Final Energy|Transportation|Hydrogen": "",
+      "Final Energy|Bunkers|Hydrogen": "",
+      "Final Energy|Other Sector|Hydrogen": ""
+    }
+  },
+  "Residual Fossil - Fossil Primary Energy Share": {
+    "type": "line",
+    "arg": {
+      "title": "Fossil Primary Energy Share (%)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "labels": [
+        "Fossil"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-lin-ResidualFossil"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      },
+      "percentage": true
+    },
+    "vars": {
+      "Primary Energy|Fossil Share": ""
+    }
+  },
+  "Residual Fossil - Fossil Primary Energy": {
+    "type": "line",
+    "arg": {
+      "title": "Fossil Final Energy (EJ/yr)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "labels": [
+        "Fossil"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-lin-ResidualFossil"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      }
+    },
+    "vars": {
+      "Primary Energy|Fossil": ""
+    }
+  },
+  "Residual Fossil - Fossil Primary Energy per source": {
+    "type": "bar",
+    "arg": {
+      "title": "Fossil Primary Energy per source (EJ/yr)",
+      "labels": [
+        "Coal",
+        "Gas",
+        "Oil"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-lin-ResidualFossil"
+      ],
+      "facet": {
+        "nrow": 1,
+        "ncol": null
+      }
+    },
+    "vars": {
+      "Primary Energy|Coal": "",
+      "Primary Energy|Gas": "",
+      "Primary Energy|Oil": ""
+    }
+  },
+  "Residual Fossil - Fossil Final Energy": {
+    "type": "line",
+    "arg": {
+      "title": "Fossil Final Energy (EJ/yr)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "labels": [
+        "Fossil"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-lin-ResidualFossil"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      }
+    },
+    "vars": {
+      "Final Energy|Fossil": ""
+    }
+  },
+  "Residual Fossil - Fossil Final Energy per sector": {
+    "type": "bar",
+    "arg": {
+      "title": "Fossil Final Energy per sector (EJ/yr)",
+      "labels": [
+        "Non-Energy Use",
+        "Industry",
+        "Residential and Commercial",
+        "Transportation",
+        "Bunkers",
+        "Other Sector"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-lin-ResidualFossil"
+      ],
+      "facet": {
+        "nrow": 1,
+        "ncol": null
+      }
+    },
+    "vars": {
+      "Final Energy|Non-Energy Use|Fossil": "",
+      "Final Energy|Industry|Fossil": "",
+      "Final Energy|Residential and Commercial|Fossil": "",
+      "Final Energy|Transportation|Fossil": "",
+      "Final Energy|Bunkers|Fossil": "",
+      "Final Energy|Other Sector|Fossil": ""
+    }
+  },
+  "HighEff - Final Energy": {
+    "type": "line",
+    "arg": {
+      "title": "Final Energy (EJ/yr)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-lin-HighEff"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      }
+    },
+    "vars": {
+      "Final Energy": ""
+    }
+  },
+  "HighEff - Final Energy per sector": {
+    "type": "bar",
+    "arg": {
+      "title": "Final Energy per sector (EJ/yr)",
+      "labels": [
+        "Non-Energy Use",
+        "Industry",
+        "Residential and Commercial",
+        "Transportation",
+        "Bunkers",
+        "Other Sector"
+      ],
+      "scen": [
+        "DIAG-C400-lin",
+        "DIAG-C400-lin-HighEff"
+      ],
+      "facet": {
+        "nrow": 1,
+        "ncol": null
+      }
+    },
+    "vars": {
+      "Final Energy|Non-Energy Use": "",
+      "Final Energy|Industry": "",
+      "Final Energy|Residential and Commercial": "",
+      "Final Energy|Transportation": "",
+      "Final Energy|Bunkers": "",
+      "Final Energy|Other Sector": ""
     }
   }
 }
