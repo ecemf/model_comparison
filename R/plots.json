@@ -2,7 +2,8 @@
   "CO2 Emissions": {
     "type": "line",
     "arg": {
-      "title": "CO2 Emissions (Mt CO2/yr)"
+      "title": "CO2 Emissions (Mt CO2/yr)",
+      "saveFile": true
     },
     "vars": {
       "Emissions|CO2": ""
@@ -12,6 +13,7 @@
     "type": "bar",
     "arg": {
       "title": "CO2 emissions per source (Mt CO2/yr)",
+      "saveFile": true,
       "labels": [
         "Total",
         "Other",
@@ -200,6 +202,16 @@
       }
     }
   },
+   "CO2 Intensity Electricity": {
+    "type": "line",
+    "arg": {
+      "title": "Electricity CO2 Intensity (Mt CO2/yr per EJ/yr)",
+      "saveFile": true
+    },
+    "vars": {
+      "CO2 Intensity|Electricity": ""
+    }
+  },
   "Kyoto Gases Emissions": {
     "type": "line",
     "arg": {
@@ -299,7 +311,7 @@
       "Emissions|F-Gases": ""
     }
   },
-  "Energy and Industrial Processes CO2 Emissions": {
+  "Energy and Industrial Processes CO2 Emissions detailed": {
     "type": "bar",
     "arg": {
       "title": "Energy and Industrial Processes CO2 Emissions (Mt CO2/yr)",
@@ -377,13 +389,50 @@
       }
     }
   },
-  "Industry CO2 Emissions": {
+  "Energy and Industrial Processes CO2 Emissions": {
     "type": "line",
     "arg": {
-      "title": "Industry CO2 Emissions (Mt CO2/yr)"
+      "title": "Energy and Industrial Processes CO2 Emissions (Mt CO2/yr)",
+      "labels": [
+        "Energy and Industrial Processes"
+      ]
     },
     "vars": {
-      "Emissions|CO2|Industry": ""
+      "Emissions|CO2|Energy and Industrial Processes": ""
+    }
+  },
+  "Energy and Industrial Processes Kyoto Gases": {
+    "type": "bar",
+    "arg": {
+      "title": "Energy and Industrial Processes Kyoto Gases (Mt CO2e/yr)",
+      "labels": [
+        "Energy and Industrial Processes",
+        "Industrial Processes",
+        "Energy"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none"
+      ]
+    },
+    "vars": {
+      "Emissions|Kyoto Gases|Energy and Industrial Processes": {
+        "Emissions|Kyoto Gases|Industrial Processes": "",
+        "Emissions|Kyoto Gases|Energy": ""
+      }
+    }
+  },
+  "Industry and Industrial Processes CO2 Emissions": {
+    "type": "line",
+    "arg": {
+      "title": "Industry and Industrial Processes CO2 Emissions (Mt CO2/yr)"
+    },
+    "vars": {
+      "Emissions|CO2|Industry and Industrial Processes": {
+        "Emissions|CO2|Energy|Demand|Industry": "",
+        "Emissions|CO2|Industrial Processes": ""
+      }
     }
   },
   "Carbon Price (per scenario)": {
@@ -430,10 +479,14 @@
         "Biomass",
         "Direct Air Capture",
         "Fossil",
+        "Industry and Industrial Processes",
+        "Industry",
         "Industrial Processes"
       ],
       "pattern": [
         "stripe",
+        "none",
+        "none",
         "none",
         "none",
         "none",
@@ -445,7 +498,10 @@
         "Carbon Capture|Biomass": "",
         "Carbon Capture|Direct Air Capture": "",
         "Carbon Capture|Fossil": "",
-        "Carbon Capture|Industrial Processes": ""
+        "Carbon Capture|Industry and Industrial Processes": {
+          "Carbon Capture|Industry": "",
+          "Carbon Capture|Industrial Processes": ""
+        }
       }
     }
   },
@@ -456,17 +512,30 @@
       "labels": [
         "Total",
         "Storage",
+        "Biomass",
+        "Fossil",
+        "Industrial Processes",
+        "Other",
         "Usage"
       ],
       "pattern": [
         "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
         "none",
         "none"
       ]
     },
     "vars": {
       "Carbon Capture": {
-        "Carbon Capture|Storage": "",
+        "Carbon Capture|Storage": {
+          "Carbon Capture|Storage|Biomass": "",
+          "Carbon Capture|Storage|Fossil": "",
+          "Carbon Capture|Storage|Industrial Processes": "",
+          "Carbon Capture|Storage|Other": ""
+        },
         "Carbon Capture|Usage": ""
       }
     }
@@ -487,17 +556,39 @@
       "labels": [
         "Total",
         "Land Use",
+        "Land Use - Afforestation",
+        "Land Use - Biochar",
+        "Land Use - Soil Carbon Management",
+        "Enhanced Weathering",
+        "Geological Storage",
+        "Materials",
+        "Ocean",
         "Other"
       ],
       "pattern": [
         "stripe",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
+        "none",
         "none",
         "none"
       ]
     },
     "vars": {
       "Carbon Removal": {
-        "Carbon Removal|Land Use": "",
+        "Carbon Removal|Land Use": {
+          "Carbon Removal|Land Use|Afforestation": "",
+          "Carbon Removal|Land Use|Biochar": "",
+          "Carbon Removal|Land Use|Soil Carbon Management": ""
+        },
+        "Carbon Removal|Enhanced Weathering": "",
+        "Carbon Removal|Geological Storage": "",
+        "Carbon Removal|Materials": "",
+        "Carbon Removal|Ocean": "",
         "Carbon Removal|Other": ""
       }
     }
@@ -1102,6 +1193,78 @@
       }
     }
   },
+  "Final Energy liquids per source": {
+    "type": "bar",
+    "arg": {
+      "title": "Final Energy liquids per source (EJ/yr)",
+      "labels": [
+        "Total",
+        "Liquids - Biomass",
+        "Liquids - Electricity",
+        "Liquids - Fossil"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none",
+        "none"
+      ]
+    },
+    "vars": {
+      "Final Energy|Liquids": {
+		  "Final Energy|Liquids|Biomass": "",
+		  "Final Energy|Liquids|Electricity": "",
+		  "Final Energy|Liquids|Fossil": ""
+	  }
+    }
+  },
+  "Final Energy gases per source": {
+    "type": "bar",
+    "arg": {
+      "title": "Final Energy gases per source (EJ/yr)",
+      "labels": [
+        "Total",
+        "Gases - Biomass",
+        "Gases - Electricity",
+        "Gases - Fossil"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none",
+        "none"
+      ]
+    },
+    "vars": {
+      "Final Energy|Gases": {
+		  "Final Energy|Gases|Biomass": "",
+		  "Final Energy|Gases|Electricity": "",
+		  "Final Energy|Gases|Fossil": ""
+	  }
+    }
+  },
+  "Final Energy solids per source": {
+    "type": "bar",
+    "arg": {
+      "title": "Final Energy solids per source (EJ/yr)",
+      "labels": [
+        "Total",
+        "Solids - Biomass",
+        "Solids - Fossil"
+      ],
+      "pattern": [
+        "stripe",
+        "none",
+        "none"
+      ]
+    },
+    "vars": {
+      "Final Energy|Solids": {
+		  "Final Energy|Solids|Biomass": "",
+		  "Final Energy|Solids|Fossil": ""
+	  }
+    }
+  },
   "NPI Historical Final Energy per carrier": {
     "type": "bar",
     "arg": {
@@ -1637,9 +1800,11 @@
       "labels": [
         "Biomass"
       ],
+      "linetypeDim": "Scenario",
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
-        "DIAG-C400-LimBio"
+        "DIAG-C400-lin-LimBio"
       ],
       "facet": {
         "nrow": 2,
@@ -1660,9 +1825,11 @@
       "labels": [
         "Biomass"
       ],
+      "linetypeDim": "Scenario",
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
-        "DIAG-C400-LimBio"
+        "DIAG-C400-lin-LimBio"
       ],
       "facet": {
         "nrow": 2,
@@ -1706,8 +1873,9 @@
         "none"
       ],
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
-        "DIAG-C400-LimBio"
+        "DIAG-C400-lin-LimBio"
       ]
     },
     "vars": {
@@ -1728,18 +1896,20 @@
       }
     }
   },
-  "limCCS - Carbon Sequestration": {
+  "limCCS - Carbon Storage": {
     "type": "line",
     "arg": {
-      "title": "Carbon Sequestration - CCS (Mt CO2/yr)",
+      "title": "Carbon Storage - CCS (Mt CO2/yr)",
       "colorDim": "Scenario",
       "facetDim": "Model",
       "labels": [
         "CCS"
       ],
+      "linetypeDim": "Scenario",
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
-        "DIAG-C400-LimCCS"
+        "DIAG-C400-lin-LimCCS"
       ],
       "facet": {
         "nrow": 2,
@@ -1747,32 +1917,39 @@
       }
     },
     "vars": {
-      "Carbon Sequestration|CCS": ""
+      "Carbon Capture|Storage": ""
     }
   },
-  "limCCS - Carbon Sequestration per source": {
+  "limCCS - Carbon Storage per source": {
     "type": "bar",
     "arg": {
-      "title": "Carbon Sequestration per source (Mt CO2/yr)",
+      "title": "Carbon Storage per source (Mt CO2/yr)",
       "labels": [
         "Total",
         "Biomass",
-        "Fossil"
+        "Fossil",
+        "Industrial Processes",
+        "Other"
       ],
       "pattern": [
         "stripe",
         "none",
+        "none",
+        "none",
         "none"
       ],
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
-        "DIAG-C400-LimCCS"
+        "DIAG-C400-in-LimCCS"
       ]
     },
     "vars": {
-      "Carbon Sequestration|CCS": {
-        "Carbon Sequestration|CCS|Biomass": "",
-        "Carbon Sequestration|CCS|Fossil": ""
+      "Carbon Capture|Storage": {
+        "Carbon Capture|Storage|Biomass": "",
+        "Carbon Capture|Storage|Fossil": "",
+        "Carbon Capture|Storage|Industrial Processes": "",
+        "Carbon Capture|Storage|Other": ""
       }
     }
   },
@@ -1785,9 +1962,11 @@
       "labels": [
         "Nuclear"
       ],
+      "linetypeDim": "Scenario",
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
-        "DIAG-C400-LimNuclear"
+        "DIAG-C400-lin-LimNuclear"
       ],
       "facet": {
         "nrow": 2,
@@ -1808,9 +1987,11 @@
       "labels": [
         "Nuclear"
       ],
+      "linetypeDim": "Scenario",
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
-        "DIAG-C400-LimNuclear"
+        "DIAG-C400-lin-LimNuclear"
       ],
       "facet": {
         "nrow": 2,
@@ -1830,9 +2011,11 @@
       "labels": [
         "Nuclear"
       ],
+      "linetypeDim": "Scenario",
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
-        "DIAG-C400-LimNuclear"
+        "DIAG-C400-lin-LimNuclear"
       ],
       "facet": {
         "nrow": 2,
@@ -1852,7 +2035,9 @@
       "labels": [
         "VRE"
       ],
+      "linetypeDim": "Scenario",
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
         "DIAG-C400-lin-HighVRE"
       ],
@@ -1875,7 +2060,9 @@
       "labels": [
         "VRE"
       ],
+      "linetypeDim": "Scenario",
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
         "DIAG-C400-lin-HighVRE"
       ],
@@ -1907,6 +2094,7 @@
         "none"
       ],
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
         "DIAG-C400-lin-HighVRE"
       ],
@@ -1924,7 +2112,7 @@
       }
     }
   },
-  "HighElectrification - Electricity Share in Final Energy": {
+  "HighElec - Electricity Share in Final Energy": {
     "type": "line",
     "arg": {
       "title": "Electricity Share in Final Energy (%)",
@@ -1933,7 +2121,9 @@
       "labels": [
         "VRE"
       ],
+      "linetypeDim": "Scenario",
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
         "DIAG-C400-lin-HighElectrification"
       ],
@@ -1947,7 +2137,7 @@
       "Final Energy|Electricity Share": ""
     }
   },
-  "HighElectrification - Total Electricity": {
+  "HighElec - Total Electricity": {
     "type": "line",
     "arg": {
       "title": "Total Electricity (EJ/yr)",
@@ -1956,7 +2146,9 @@
       "labels": [
         "VRE"
       ],
+      "linetypeDim": "Scenario",
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
         "DIAG-C400-lin-HighElectrification"
       ],
@@ -1969,7 +2161,7 @@
       "Secondary Energy|Electricity": ""
     }
   },
-  "HighElectrification - Electricity Final Energy per sector": {
+  "HighElec - Electricity Final Energy per sector": {
     "type": "bar",
     "arg": {
       "title": "Electricity Final Energy per sector (EJ/yr)",
@@ -1981,6 +2173,7 @@
         "Other Sector"
       ],
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
         "DIAG-C400-lin-HighElectrification"
       ],
@@ -2006,7 +2199,9 @@
       "labels": [
         "VRE"
       ],
+      "linetypeDim": "Scenario",
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
         "DIAG-C400-lin-HighH2"
       ],
@@ -2029,7 +2224,9 @@
       "labels": [
         "VRE"
       ],
+      "linetypeDim": "Scenario",
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
         "DIAG-C400-lin-HighH2"
       ],
@@ -2055,6 +2252,7 @@
         "Other Sector"
       ],
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
         "DIAG-C400-lin-HighH2"
       ],
@@ -2081,7 +2279,9 @@
       "labels": [
         "Fossil"
       ],
+      "linetypeDim": "Scenario",
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
         "DIAG-C400-lin-ResidualFossil"
       ],
@@ -2104,7 +2304,9 @@
       "labels": [
         "Fossil"
       ],
+      "linetypeDim": "Scenario",
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
         "DIAG-C400-lin-ResidualFossil"
       ],
@@ -2127,6 +2329,7 @@
         "Oil"
       ],
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
         "DIAG-C400-lin-ResidualFossil"
       ],
@@ -2150,7 +2353,9 @@
       "labels": [
         "Fossil"
       ],
+      "linetypeDim": "Scenario",
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
         "DIAG-C400-lin-ResidualFossil"
       ],
@@ -2176,6 +2381,7 @@
         "Other Sector"
       ],
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
         "DIAG-C400-lin-ResidualFossil"
       ],
@@ -2199,7 +2405,9 @@
       "title": "Final Energy (EJ/yr)",
       "colorDim": "Scenario",
       "facetDim": "Model",
+      "linetypeDim": "Scenario",
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
         "DIAG-C400-lin-HighEff"
       ],
@@ -2225,6 +2433,7 @@
         "Other Sector"
       ],
       "scen": [
+        "DIAG-NPI",
         "DIAG-C400-lin",
         "DIAG-C400-lin-HighEff"
       ],
