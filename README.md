@@ -32,15 +32,17 @@ pkgs <- c("dplyr",
           "ggplot2",
           "ggpattern",
           "ggplotify",
-          "rjson",
           "gtable",
           "grid ", 
           "gridextra",
           "svglite",
           "tidyr",
           "rmarkdown",
-          "reticulate")
-		  
+          "reticulate",
+	  "jsonlite",
+	  "quitte"
+	  )
+	  	  
 install.packages(pkgs)
 ```
 
