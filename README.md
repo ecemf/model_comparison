@@ -16,12 +16,9 @@ Then, activate the conda environment:
 
     conda activate model_comparison
 
-Rename the file `credentials_example.json` to `credentials.json` and fill it with your IIASA database credentials to download the most up to date data.
-
 Use Rscript command to run render the document using R Markdown:
 
     Rscript render.R
-
 
 ## Installation - if you already have an R environment
 
@@ -46,11 +43,25 @@ pkgs <- c("dplyr",
 install.packages(pkgs)
 ```
 
- - Rename the file `credentials_example.json` to `credentials.json` and fill it with your IIASA database credentials to download the most up to date data.
  - Set `updateResults` to true in the rmd file to download data directly from the iiasa database. The downloaded data will be saved to your local data folder. You can set the option back to FALSE afterwards (`updateResults = FALSE`) to use local data instead.
  - Use Rscript command to run render the document using R Markdown::
 
     Rscript render.R
+
+## Set the credentials for accessing the ECEMF Scenario Explorer database
+
+This project uses the Python package [pyam](https://pyam-iamc.readthedocs.io) to query
+scenario data directly from the IIASA database infrastructure.
+
+Please run the following script once in a Python console:
+
+```python
+import pyam
+pyam.iiasa.set_config("<username>", "<password>")
+```
+
+Refer to this [tutorial](https://pyam-iamc.readthedocs.io/en/stable/tutorials/iiasa_dbs.html)
+for more information!
 
 ## LICENSE
 This program is free software: you can redistribute it and/or modify it under the terms of the **GNU Affero General Public License** as published by the Free Software Foundation, **version 3** of the License or later. You can see the LICENSE details in https://www.gnu.org/licenses/agpl.txt

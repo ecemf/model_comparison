@@ -173,13 +173,6 @@ Regions represented in the plots:
 
 
 ```{r download_data, include=FALSE}
-if(updateResults){
-  if (file.exists("credentials.json")){
-    credentials <- fromJSON("credentials.json")
-  } else {
-    stop('To download the most up to date ECEMF data, please rename the file "credentials_example.json" to "credentials.json" and fill it with your iiasa database credentials.')
-  }
-}
 
 #create data folder
 if(!(file.exists("./data")))
@@ -193,9 +186,7 @@ if(!(file.exists("./data")))
 if (r.updateResults):
 
   import pyam
-  pyam.iiasa.set_config(r.credentials["login"], r.credentials["password"])
-  conn = pyam.iiasa.Connection()
-  conn.connect('ecemf_internal')
+  conn = pyam.iiasa.Connection('ecemf_internal')
 
   df = conn.query(
       model='*',
