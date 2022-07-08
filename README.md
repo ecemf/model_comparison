@@ -3,6 +3,14 @@
 This project includes:
  - `.R\model_comparison`: a R markdown script to download data directly from the IIASA database and create a model comparison html report including all participating models of the ECEMF Working Package 1.
 
+## Access to the ECEMF-internal Scenario Explorer
+
+The ECEMF project uses the IIASA Scenario Explorer infrastructure to compile and
+validate scenario data from the participating modeling teams.
+The [ECEMF-internal Scenario Explorer](https://data.ece.iiasa.ac.at/ecemf-internal)
+is accessible only for consortium members. Please reach out to the
+[IIASA Scenario Services team](https://software.ece.iiasa.ac.at) to gain access.
+
 ## Installation
 
 You can use [Anaconda](https://www.anaconda.com/products/individual)
