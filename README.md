@@ -1,7 +1,8 @@
 # Model Comparison
 
 This project includes:
- - `.R\model_comparison`: a R markdown script to download data directly from the IIASA database and create a model comparison html report including all participating models of the ECEMF Working Package 1.
+ - `main.R`: a R script to download data directly from the IIASA database and create a model comparison html report including all participating models of the ECEMF Working Package 1.
+ - `ECEMP_charts.Rmd`: a R markdown script to create charts for the ECEMP presentation using the data from the ECEMF Working Package 1.
 
 ## Access to the ECEMF-internal Scenario Explorer
 
@@ -38,8 +39,8 @@ pkgs <- c("dplyr",
           "ggpattern",
           "ggplotify",
           "gtable",
-          "grid ",
-          "gridExtra", 
+          "grid ", 
+          "gridextra",
           "svglite",
           "tidyr",
           "rmarkdown",
@@ -47,6 +48,8 @@ pkgs <- c("dplyr",
 	  "jsonlite",
 	  "quitte"
 	  )
+	  	  
+install.packages(pkgs)
 ```
 
  - Set `updateResults` to true in the rmd file to download data directly from the iiasa database. The downloaded data will be saved to your local data folder. You can set the option back to FALSE afterwards (`updateResults = FALSE`) to use local data instead.
