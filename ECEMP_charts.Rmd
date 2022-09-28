@@ -1,0 +1,594 @@
+---
+title: "ECEMP plots"
+output:
+  html_document:
+    theme: darkly
+    toc: true
+    toc_float: 
+      collapsed: false
+    toc_depth: 1
+params:
+    includePattern: true    
+---
+
+<!-- author: "Renato Rodrigues" -->
+
+<!-- the html takes ages to be created if includes pattern plots -->
+<!-- therefore pattern plots are disabled by default, see includePattern: false above, -->
+<!-- and should only be enabled (includePattern: true) when you want to create a final html version -->
+<!-- saved png and svg files are not affected by this option and will always be created in the output folder -->
+
+
+<style>
+  body {
+    background-color: #000000;
+  }
+  .main-container {
+    max-width: 95% !important;
+  }
+  .toc-content {
+    padding-left: 0px !important;
+  }
+  .svg-container {
+    margin: auto !important;
+  }
+  /* MODAL */
+  /* The Modal (background) */
+  .modal {
+    position: fixed; /* Stay in place */
+    z-index: 400; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+  
+  /* Modal Content/Box */
+  .modal-content {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    background-color: #fefefe;
+    border: 1px solid #888;
+    margin: auto;
+    max-width: 96vw;
+    max-height: 96vh;
+    transform: translate(-50%,-50%);
+  }
+  
+  /* The Close Button */
+  .close {
+    position: fixed;
+    right: 0;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .modal-img {
+    max-width: 96vw;
+      max-height: 96vh;
+  }
+  
+  .hide {
+    display:none;
+  }
+  
+  .block{
+    display:block;
+  }
+
+</style>
+
+
+Description:
+ECEMP presentation plots.
+
+
+
+```{r loading_libraries, echo=FALSE, include=FALSE}
+
+#load required libraries
+library(reticulate)
+library(jsonlite)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(gridExtra)
+library(grid)
+library(svglite)
+library(gtable)
+library(ggplotify)
+library(ggpattern)
+library(quitte)
+library("ggdark")
+
+```
+
+
+```{r chunk_options, echo=FALSE, include=FALSE}
+
+#knitr::opts_chunk$set(echo = TRUE)
+# setting global R chunk options (https://yihui.name/knitr/options/#chunk_options)
+  knitr::opts_chunk$set(dev='svglite', # svg, png,...
+                        fig.ext = ".svg",
+                        #fig.asp = .8 # default aspect ratio
+                        fig.width = 16,
+                        fig.height = 9,
+                        dpi=100
+                        )
+
+```
+
+
+```{r loading_data, echo=FALSE, include=FALSE}
+
+source("./R/loadData.R")
+
+dataFile <- mostRecentData()
+rdsDataPath <- paste0("./data/data_", dataFile$dateString, ".rds")
+
+print("loading previously calculated data")
+df <- readRDS(rdsDataPath)
+
+#reducing number of decimal places
+df$Value <- round(df$Value,3)
+
+#Selecting region
+region <- "EU28"
+
+if(region=="EU27"){
+  df <- df[((df$Region %in% c("EU27", "Europe", "Europe (excl. Turkey)", "Europe (incl. Turkey)") & !(df$Model == "Euro-Calliope") ) | (df$Model == "MEESA" & df$Region == "EU27 & UK") | (df$Model == "Euro-Calliope" & df$Region == "EU27")),]
+} else if (region=="EU28"){
+  df <- df[(df$Region %in% c("EU27 & UK", "Europe", "Europe (excl. Turkey)", "Europe (incl. Turkey)") & !(df$Model == "Euro-Calliope") ) | (df$Model == "Euro-Calliope" & df$Region == "Europe"),] 
+} else {
+  df <- df[(df$Region %in% region),] 
+}
+
+# create output folder if it does not exist
+dir.create("./output", showWarnings = FALSE) # create the output main folder
+dir.create(paste0("./output/", dataFile$dateString), showWarnings = FALSE) 
+outputFolder <- paste0("./output/", dataFile$dateString, "/ECEMP_charts")
+dir.create(outputFolder, showWarnings = FALSE) # create the output folder
+
+```
+
+
+```{r aesthetics, echo=FALSE, include=FALSE}
+
+source("./R/aesthetics.R") # load aesthetics
+
+# overwrite colors for black theme
+color["Solids"] = "#616161"
+
+#plot aesthetics
+theme_dark <- function(){
+  dark_theme_gray(base_size = 16) +
+    theme(
+      axis.title.x = element_blank(),
+      axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5),
+      #legend.position="bottom",
+      legend.title=element_blank(),
+      legend.key.size = unit(20,"pt"),
+      legend.text = element_text(size=14, margin = margin(r = 20, unit = 'pt')),
+      panel.spacing = unit(1.5, "lines"),
+      strip.background=element_rect(fill="black") 
+    )
+}
+
+```
+
+<!-- Plots -->
+
+```{r, echo=FALSE, include=FALSE}
+
+g <- NULL
+
+```
+
+# Final Energy per sector {.tabset}
+
+## C400-lin
+
+```{r creating_final_energy_per_sector_plot, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Non-Energy Use"=c(
+    "Hydrogen"="Final Energy|Non-Energy Use|Hydrogen",
+    "Gases"   ="Final Energy|Non-Energy Use|Gases",
+    "Liquids" ="Final Energy|Non-Energy Use|Liquids",
+    "Solids"  ="Final Energy|Non-Energy Use|Solids",
+    "Other"   ="Final Energy|Non-Energy Use|Other"
+  ),
+  "Industry"=c(
+    "Hydrogen"="Final Energy|Industry|Hydrogen",
+    "Gases"   ="Final Energy|Industry|Gases",
+    "Liquids" ="Final Energy|Industry|Liquids",
+    "Solids"  ="Final Energy|Industry|Solids",
+    "Other"   ="Final Energy|Industry|Other",
+    "Heat"    ="Final Energy|Industry|Heat",
+    "Electricity"="Final Energy|Industry|Electricity"
+  ),
+  "Buildings"=c(
+    "Hydrogen"="Final Energy|Residential and Commercial|Hydrogen",
+    "Gases"   ="Final Energy|Residential and Commercial|Gases",
+    "Liquids" ="Final Energy|Residential and Commercial|Liquids",
+    "Solids"  ="Final Energy|Residential and Commercial|Solids",
+    "Other"   ="Final Energy|Residential and Commercial|Other",
+    "Heat"    ="Final Energy|Residential and Commercial|Heat",
+    "Electricity"="Final Energy|Residential and Commercial|Electricity"
+  ),
+  "Bunkers"=c(
+    "Hydrogen"="Final Energy|Bunkers|Hydrogen",
+    "Gases"   ="Final Energy|Bunkers|Gases",
+    "Liquids" ="Final Energy|Bunkers|Liquids",
+    "Other"   ="Final Energy|Bunkers|Other",
+    "Electricity"="Final Energy|Bunkers|Electricity"
+  ),
+  "Transport"=c(
+    "Hydrogen"="Final Energy|Transportation|Hydrogen",
+    "Gases"   ="Final Energy|Transportation|Gases",
+    "Liquids" ="Final Energy|Transportation|Liquids",
+    "Other"   ="Final Energy|Transportation|Other",
+    "Electricity"="Final Energy|Transportation|Electricity"
+  )
+)
+
+groups <- c(
+  "Non-Energy Use"="Industry",
+  "Industry"="Industry",
+  "Buildings"="Buildings",
+  "Bunkers"="Transport",
+  "Transport"="Transport"
+)
+
+pattern <- c(
+  "Non-Energy Use"="stripe",
+  "Industry"="none",
+  "Buildings"="none",
+  "Bunkers"="stripe",
+  "Transport"="none"
+)
+
+scenario <- c("DIAG-C400-lin")
+
+year <- c(2050)
+
+plotData <- df[df$Period %in% year & df$Scenario %in% scenario & df$Variable %in% unlist(vars),]
+
+varTosector <- NULL
+carriers <- NULL
+for(sector in names(vars)){
+  tmp <- unlist(vars[[sector]])
+  tmp2 <- rep(sector,length(tmp))
+  names(tmp2) <- tmp
+  varTosector <- c(varTosector, tmp2)
+  carrier_tmp <- setNames(names(unlist(vars[[sector]])),unlist(vars[[sector]]))
+  carriers <- c(carriers, carrier_tmp)
+}
+
+plotData$Sector <- varTosector[plotData$Variable]
+
+plotData$Group <- groups[plotData$Sector]
+
+plotData$Carrier <- carriers[plotData$Variable] 
+
+# Order
+plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$Carrier <- factor(plotData$Carrier , levels = c("Hydrogen","Gases","Liquids","Solids","Other","Heat","Electricity"))
+plotData$Sector <- factor(plotData$Sector , levels = c("Industry","Non-Energy Use","Buildings","Transport","Bunkers"))
+plotData$Group <- factor(plotData$Group , levels = c("Industry","Buildings","Transport"))
+
+g[["final_energy_per_sector_with_pattern"]] <- ggplot(plotData,aes(x=Model,y=Value,fill=Carrier,pattern=Sector)) +
+  geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
+  geom_bar_pattern(stat='identity', pattern_key_scale_factor = 0.3, pattern_density=0.3, pattern_spacing = 0.03, pattern_colour = "white", pattern_fill = "white", pattern_alpha=0.4) +
+  theme_dark() +
+  facet_wrap(~Scenario+Period+Group) +
+  scale_fill_manual(values = setNames(color[levels(plotData$Carrier)],levels(plotData$Carrier))) +
+  scale_pattern_manual(values = pattern, breaks=c("Non-Energy Use","Bunkers")) +
+  guides(fill  = guide_legend(order = 1, override.aes = list(pattern = "none")),
+         pattern = guide_legend(order = 2, override.aes = list(fill = NA))) +
+  ylab("Final Energy per sector (EJ/yr)") 
+
+g[["final_energy_per_sector"]] <- ggplot(plotData,aes(x=Model,y=Value,fill=Carrier,pattern=Sector)) +
+  geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
+  geom_bar(stat='identity') +
+  theme_dark() +
+  facet_wrap(~Scenario+Period+Group) +
+  scale_fill_manual(values = setNames(color[levels(plotData$Carrier)],levels(plotData$Carrier))) +
+  ylab("Final Energy per sector (EJ/yr)") 
+
+ggsave(paste0(outputFolder,"/FE_perSector_C400-lin_2050.svg"), g[["final_energy_per_sector_with_pattern"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_perSector_C400-lin_2050.png"), g[["final_energy_per_sector_with_pattern"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+
+```
+
+```{r Final_energy_per_sector, echo=FALSE, fig.width=12, fig.height=8}
+
+  if(params$includePattern){
+    g[["final_energy_per_sector_with_pattern"]]
+  } else {
+    g[["final_energy_per_sector"]]
+  }
+
+```
+
+---
+
+
+
+
+# Final Energy Electricity shares {.tabset}
+
+
+```{r creating_final_energy_elec_share_plots, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Total"=c(
+    "Final Energy|Electricity Share"
+  ),
+  "Industry"=c(
+    "Final Energy|Industry|Electricity Share"
+  ),
+  "Buildings"=c(
+    "Final Energy|Residential and Commercial|Electricity Share"
+  ),
+  "Transport"=c(
+    "Final Energy|Transportation|Electricity Share"
+  )
+)
+
+scenario <- c("DIAG-C400-lin")
+
+year <- sort(unique(df$Period)[unique(df$Period) >= 2005 & unique(df$Period) <= 2050])
+
+plotData <- df[df$Period %in% year & df$Scenario %in% scenario & df$Variable %in% unlist(vars),]
+
+varTosector <- setNames(names(unlist(vars)),unlist(vars))
+plotData$Sector <- varTosector[plotData$Variable]
+
+# Order
+plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$Sector <- factor(plotData$Sector , levels = c("Total","Industry","Buildings","Transport"))
+
+g[["final_energy_elec_share"]] <- ggplot(plotData,aes(x=Period,y=Value,color=Model)) +
+    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
+    geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
+    geom_line(size=1) +
+    geom_point() +
+    theme_dark() +
+    facet_wrap(~Sector+Scenario) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2)) +
+    scale_color_manual(values = setNames(color[levels(plotData$Model)],levels(plotData$Model))) +
+    ylab("Final Energy Electricity shares (%)")
+
+
+ggsave(paste0(outputFolder,"/FE_electShare_C400-lin_2050.svg"), g[["final_energy_elec_share"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_electShare_C400-lin_2050.png"), g[["final_energy_elec_share"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+
+
+### total Electricity share
+
+vars <- list(
+  "Final Energy|Electricity Share"
+)
+
+scenario <- c("DIAG-C400-lin")
+
+year <- sort(unique(df$Period)[unique(df$Period) >= 2005 & unique(df$Period) <= 2050])
+
+plotData <- df[df$Period %in% year & df$Scenario %in% scenario & df$Variable %in% unlist(vars),]
+
+# Order
+plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+g[["final_energy_elec_share_total"]] <- ggplot(plotData,aes(x=Period,y=Value,color=Model)) +
+    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
+    geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
+    geom_line(size=1) +
+    geom_point() +
+    theme_dark() +
+    facet_wrap(~Scenario) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2)) +
+    scale_color_manual(values = setNames(color[levels(plotData$Model)],levels(plotData$Model))) +
+    ylab("Final Energy Electricity shares (%)")
+
+ggsave(paste0(outputFolder,"/FE_electShare_total_C400-lin_2050.svg"), g[["final_energy_elec_share_total"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_electShare_total_C400-lin_2050.png"), g[["final_energy_elec_share_total"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+
+
+### Electricity share per sector
+
+vars <- list(
+  "Industry"=c(
+    "Final Energy|Industry|Electricity Share"
+  ),
+  "Buildings"=c(
+    "Final Energy|Residential and Commercial|Electricity Share"
+  ),
+  "Transport"=c(
+    "Final Energy|Transportation|Electricity Share"
+  )
+)
+
+scenario <- c("DIAG-C400-lin")
+
+year <- sort(unique(df$Period)[unique(df$Period) >= 2005 & unique(df$Period) <= 2050])
+
+plotData <- df[df$Period %in% year & df$Scenario %in% scenario & df$Variable %in% unlist(vars),]
+
+varTosector <- setNames(names(unlist(vars)),unlist(vars))
+plotData$Sector <- varTosector[plotData$Variable]
+
+# Order
+plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$Sector <- factor(plotData$Sector , levels = c("Industry","Buildings","Transport"))
+
+g[["final_energy_elec_share_sector"]] <- ggplot(plotData,aes(x=Period,y=Value,color=Model)) +
+    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
+    geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
+    geom_line(size=1) +
+    geom_point() +
+    theme_dark() +
+    facet_wrap(~Sector+Scenario) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2)) +
+    scale_color_manual(values = setNames(color[levels(plotData$Model)],levels(plotData$Model))) +
+    ylab("Final Energy Electricity shares (%)") +
+  theme(legend.position="bottom")
+
+
+ggsave(paste0(outputFolder,"/FE_electShare_perSector_C400-lin_2050.svg"), g[["final_energy_elec_share_sector"]] , device="svg", width = 12, height = 6, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_electShare_perSector_C400-lin_2050.png"), g[["final_energy_elec_share_sector"]] , device="png", width = 12, height = 6, dpi=100, units = "in")
+
+
+# merge plot
+
+g[["final_energy_elec_share_panel"]] <- grid.arrange(
+  g[["final_energy_elec_share_total"]] + theme(plot.margin=margin(10,70,10,70)) + ylab(NULL) + ggtitle("Final Energy Electricity shares (%)") + theme(plot.title = element_text(hjust = 0.5)),
+  g[["final_energy_elec_share_sector"]] + theme(legend.position = "none") + ylab(NULL),
+  #widths = c(8, 6, 2),
+  layout_matrix = rbind(c(1, 1, 1, 1),
+                        c(1, 1, 1, 1),
+                        c(2, 2, 2, 2),
+                        c(2, 2, 2, 2))
+)
+
+ggsave(paste0(outputFolder,"/FE_electShare_panel_C400-lin_2050.svg"), g[["final_energy_elec_share_panel"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_electShare_panel_C400-lin_2050.png"), g[["final_energy_elec_share_panel"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+
+
+```
+
+## Panel
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  plot(g[["final_energy_elec_share_panel"]])
+
+```
+
+## Total
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_elec_share_total"]]
+
+```
+
+## Sector
+
+```{r, echo=FALSE, fig.width=12, fig.height=6}
+
+  g[["final_energy_elec_share_sector"]]
+
+```
+
+## Facets
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_elec_share"]]
+
+```
+
+
+
+# Kyoto gases {.tabset}
+
+## C400-lin
+
+```{r creating_emissions_per_gases_plot, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "F-Gases"="Emissions|F-Gases",
+  "N2O"="Emissions|Kyoto Gases|N2O",
+  "CH4"="Emissions|Kyoto Gases|CH4",
+  "CO2"="Emissions|CO2"
+)
+
+scenario <- c("DIAG-C400-lin")
+
+year <- c(2050)
+
+plotData <- df[df$Period %in% year & df$Scenario %in% scenario & df$Variable %in% unlist(vars),]
+
+# Order
+plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$Variable <- factor(plotData$Variable , levels = unlist(vars))
+
+g[["Emissions_per_gases"]] <- ggplot(plotData,aes(x=Model,y=Value,fill=Variable)) +
+  geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
+  geom_bar(stat='identity') +
+  theme_dark() +
+  facet_wrap(~Scenario+Period) +
+  scale_fill_manual(values = setNames(color[names(vars)],vars), labels=setNames(names(vars),vars)) +
+  ylab("Emissions per gases (Mt CO2e/yr)") +
+  scale_x_discrete(drop=FALSE)
+
+ggsave(paste0(outputFolder,"/Emissions_per_gases_C400-lin_2050.svg"), g[["Emissions_per_gases"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/Emissions_per_gases_C400-lin_2050.png"), g[["Emissions_per_gases"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+
+```
+
+```{r emissions_per_gases, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["Emissions_per_gases"]]
+  
+```
+
+
+<!-- modal code -->
+<script type="text/javascript">
+
+$(document).ready(function () {
+
+$("img").attr("title", "click to see in fullscreen")
+  
+$("body").append(
+'<!-- The Modal -->\
+<div id="myModal" class="modal hide">\
+  <!-- Modal content -->\
+  <div class="modal-content">\
+    <span class="close">&times;</span>\
+    <div class="modal-card">\
+      <img class="modal-img"\
+        alt="">\
+    </div>\
+  </div>\
+</div>').ready(function(){
+
+  $("img").click(function(){
+    src = $(this).attr("src");
+    $(".modal-img").attr("src", src);
+    $(".modal").removeClass("hide").addClass("block");              
+  });
+
+  $(".modal .close").click(function () {
+      console.log(this);
+    $(".modal").removeClass("block").addClass("hide");
+  });
+
+  $(window).click(function (event) {
+    if (event.target == myModal) {
+      $(".modal").removeClass("block").addClass("hide");
+    }
+  });
+
+  });
+});
+
+</script>
+
+
+

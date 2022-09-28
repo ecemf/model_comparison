@@ -38,7 +38,9 @@
         "Energy Supply - Heat",
         "Energy Supply - Electricity",
         "Waste",
-        "AFOLU"
+        "AFOLU",
+		"AFOLU - Agriculture",
+		"AFOLU - LULUCF"
       ],
       "pattern": [
         "stripe",
@@ -64,6 +66,8 @@
         "none",
         "none",
         "none",
+        "stripe",
+		"none",
         "none"
       ]
     },
@@ -97,7 +101,10 @@
           }
         },
         "Emissions|CO2|Waste": "",
-        "Emissions|CO2|AFOLU": ""
+        "Emissions|CO2|AFOLU":{
+			"Emissions|CO2|AFOLU|Agriculture":"",
+			"Emissions|CO2|AFOLU|Land":""			
+		}
       }
     }
   },
@@ -129,7 +136,9 @@
         "Energy Supply - Heat",
         "Energy Supply - Electricity",
         "Waste",
-        "AFOLU"
+        "AFOLU",
+		"AFOLU - Agriculture",
+		"AFOLU - LULUCF"
       ],
       "pattern": [
         "stripe",
@@ -155,6 +164,8 @@
         "none",
         "none",
         "none",
+		"stripe",
+		"none",
         "none"
       ],
       "scen": "DIAG-NPI",
@@ -198,7 +209,10 @@
           }
         },
         "Emissions|CO2|Waste": "",
-        "Emissions|CO2|AFOLU": ""
+        "Emissions|CO2|AFOLU":{
+			"Emissions|CO2|AFOLU|Agriculture":"",
+			"Emissions|CO2|AFOLU|Land":""			
+		}
       }
     }
   },
@@ -232,7 +246,9 @@
         "Energy",
         "Waste",
         "Other",
-        "AFOLU"
+        "AFOLU",
+		"AFOLU - Agriculture",
+		"AFOLU - LULUCF"
       ],
       "pattern": [
         "stripe",
@@ -241,6 +257,8 @@
         "none",
         "none",
         "none",
+        "none",
+		"none",
         "none"
       ]
     },
@@ -252,7 +270,10 @@
         },
         "Emissions|Kyoto Gases|Waste": "",
         "Emissions|Kyoto Gases|Other": "",
-        "Emissions|Kyoto Gases|AFOLU": ""
+        "Emissions|Kyoto Gases|AFOLU": {
+			"Emissions|Kyoto Gases|AFOLU|Agriculture":"",
+			"Emissions|Kyoto Gases|AFOLU|Land":""			
+		}
       }
     }
   },
@@ -1265,6 +1286,32 @@
 	  }
     }
   },
+  "Final Energy solids, liquids and gases per source": {
+    "type": "bar",
+    "arg": {
+      "title": "Final Energy solids, liquids and gases per source (EJ/yr)",
+      "labels": [
+        "Gases - Electricity",
+        "Liquids - Electricity",
+        "Gases - Biomass",
+        "Liquids - Biomass",
+        "Solids - Biomass",
+        "Gases - Fossil",
+		"Liquids - Fossil",
+		"Solids - Fossil"
+      ]
+    },
+    "vars": {
+      "Final Energy|Gases|Electricity": "",
+      "Final Energy|Liquids|Electricity": "",
+	  "Final Energy|Gases|Biomass": "",
+      "Final Energy|Liquids|Biomass": "",
+      "Final Energy|Solids|Biomass": "",
+      "Final Energy|Gases|Fossil": "",
+      "Final Energy|Liquids|Fossil": "",
+	  "Final Energy|Solids|Fossil": ""
+	}
+  },
   "NPI Historical Final Energy per carrier": {
     "type": "bar",
     "arg": {
@@ -1896,6 +1943,31 @@
       }
     }
   },
+  "limBio - est. Biomass Electricity and Heat PE Share": {
+    "type": "line",
+    "arg": {
+      "title": "est. Biomass Electricity and Heat PE Share (%)",
+      "colorDim": "Scenario",
+      "facetDim": "Model",
+      "labels": [
+        "Biomass"
+      ],
+      "linetypeDim": "Scenario",
+      "scen": [
+        "DIAG-NPI",
+        "DIAG-C400-lin",
+        "DIAG-C400-lin-LimBio"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      },
+      "percentage": true
+    },
+    "vars": {
+      "est|Primary Energy|Biomass|Electricity and Heat Share": ""
+    }
+  },
   "limCCS - Carbon Storage": {
     "type": "line",
     "arg": {
@@ -2112,7 +2184,7 @@
       }
     }
   },
-  "HighElec - Electricity Share in Final Energy": {
+  "HighElec - Electricity Share in Final Energy per model": {
     "type": "line",
     "arg": {
       "title": "Electricity Share in Final Energy (%)",
@@ -2131,12 +2203,105 @@
         "nrow": 2,
         "ncol": null
       },
-      "percentage": true
+      "percentage": true,
+	  "max": 1
     },
     "vars": {
       "Final Energy|Electricity Share": ""
     }
   },
+  "HighElec - Electricity Share in Final Energy per scenario": {
+    "type": "line",
+    "arg": {
+      "title": "Electricity Share in Final Energy (%)",
+      "colorDim": "Model",
+      "facetDim": "Scenario",
+      "scen": [
+        "DIAG-NPI",
+        "DIAG-C400-lin",
+        "DIAG-NZero",
+        "DIAG-C400-lin-HighElectrification"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      },
+      "percentage": true,
+	  "max": 1
+    },
+    "vars": {
+      "Final Energy|Electricity Share": ""
+    }
+  },
+  "HighElec - Electricity Share in Industry Final Energy per scenario": {
+    "type": "line",
+    "arg": {
+      "title": "Electricity Share in Industry Final Energy (%)",
+      "colorDim": "Model",
+      "facetDim": "Scenario",
+      "scen": [
+        "DIAG-NPI",
+        "DIAG-C400-lin",
+        "DIAG-NZero",
+        "DIAG-C400-lin-HighElectrification"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      },
+      "percentage": true,
+	  "max": 1
+    },
+    "vars": {
+      "Final Energy|Industry|Electricity Share": ""
+    }
+  },  
+  "HighElec - Electricity Share in Residential and Commercial Final Energy per scenario": {
+    "type": "line",
+    "arg": {
+      "title": "Electricity Share in Residential and Commercial Final Energy (%)",
+      "colorDim": "Model",
+      "facetDim": "Scenario",
+      "scen": [
+        "DIAG-NPI",
+        "DIAG-C400-lin",
+        "DIAG-NZero",
+        "DIAG-C400-lin-HighElectrification"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      },
+      "percentage": true,
+	  "max": 1
+    },
+    "vars": {
+      "Final Energy|Residential and Commercial|Electricity Share": ""
+    }
+  },  
+  "HighElec - Electricity Share in Transportation Final Energy per scenario": {
+    "type": "line",
+    "arg": {
+      "title": "Electricity Share in Transportation Final Energy (%)",
+      "colorDim": "Model",
+      "facetDim": "Scenario",
+      "scen": [
+        "DIAG-NPI",
+        "DIAG-C400-lin",
+        "DIAG-NZero",
+        "DIAG-C400-lin-HighElectrification"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      },
+      "percentage": true,
+	  "max": 1
+    },
+    "vars": {
+      "Final Energy|Transportation|Electricity Share": ""
+    }
+  },  
   "HighElec - Total Electricity": {
     "type": "line",
     "arg": {
@@ -2190,12 +2355,11 @@
       "Final Energy|Other Sector|Electricity": ""
     }
   },
-  "HighH2 - Hydrogen Share in Final Energy": {
+  "HighH2 - Hydrogen Share in Final Energy per model": {
     "type": "line",
     "arg": {
-      "title": "Hydrogen Share in Final Energy (%)",
+      "title": "Hydrogen Share in Final Energy per model (%)",
       "colorDim": "Scenario",
-      "facetDim": "Model",
       "labels": [
         "VRE"
       ],
@@ -2209,12 +2373,105 @@
         "nrow": 2,
         "ncol": null
       },
-      "percentage": true
+      "percentage": true,
+	  "max": 1
     },
     "vars": {
       "Final Energy|Hydrogen Share": ""
     }
   },
+  "HighH2 - Hydrogen Share in Final Energy per scenario": {
+    "type": "line",
+    "arg": {
+      "title": "Hydrogen Share in Final Energy (%)",
+      "colorDim": "Model",
+      "facetDim": "Scenario",
+      "scen": [
+        "DIAG-NPI",
+        "DIAG-C400-lin",
+        "DIAG-NZero",
+        "DIAG-C400-lin-HighElectrification"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      },
+      "percentage": true,
+	  "max": 1
+    },
+    "vars": {
+      "Final Energy|Hydrogen Share": ""
+    }
+  },
+  "HighH2 - Hydrogen Share in Industry Final Energy per scenario": {
+    "type": "line",
+    "arg": {
+      "title": "Hydrogen Share in Industry Final Energy (%)",
+      "colorDim": "Model",
+      "facetDim": "Scenario",
+      "scen": [
+        "DIAG-NPI",
+        "DIAG-C400-lin",
+        "DIAG-NZero",
+        "DIAG-C400-lin-HighElectrification"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      },
+      "percentage": true,
+	  "max": 1
+    },
+    "vars": {
+      "Final Energy|Industry|Hydrogen Share": ""
+    }
+  },  
+  "HighH2 - Hydrogen Share in Residential and Commercial Final Energy per scenario": {
+    "type": "line",
+    "arg": {
+      "title": "Hydrogen Share in Residential and Commercial Final Energy (%)",
+      "colorDim": "Model",
+      "facetDim": "Scenario",
+      "scen": [
+        "DIAG-NPI",
+        "DIAG-C400-lin",
+        "DIAG-NZero",
+        "DIAG-C400-lin-HighElectrification"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      },
+      "percentage": true,
+	  "max": 1
+    },
+    "vars": {
+      "Final Energy|Residential and Commercial|Hydrogen Share": ""
+    }
+  },  
+  "HighH2 - Hydrogen Share in Transportation Final Energy per scenario": {
+    "type": "line",
+    "arg": {
+      "title": "Hydrogen Share in Transportation Final Energy (%)",
+      "colorDim": "Model",
+      "facetDim": "Scenario",
+      "scen": [
+        "DIAG-NPI",
+        "DIAG-C400-lin",
+        "DIAG-NZero",
+        "DIAG-C400-lin-HighElectrification"
+      ],
+      "facet": {
+        "nrow": 2,
+        "ncol": null
+      },
+      "percentage": true,
+	  "max": 1
+    },
+    "vars": {
+      "Final Energy|Transportation|Hydrogen Share": ""
+    }
+  },  
   "HighH2 - Total Hydrogen": {
     "type": "line",
     "arg": {

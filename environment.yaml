@@ -16,5 +16,6 @@ dependencies:
   - r-tidyr
   - r-rmarkdown
   - r-reticulate
+  - r-quitte
   - pyam
 prefix: /Users/wusher/miniconda3/envs/model_comparison

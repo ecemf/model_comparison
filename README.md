@@ -38,8 +38,8 @@ pkgs <- c("dplyr",
           "ggpattern",
           "ggplotify",
           "gtable",
-          "grid ", 
-          "gridextra",
+          "grid ",
+          "gridExtra", 
           "svglite",
           "tidyr",
           "rmarkdown",
@@ -47,8 +47,6 @@ pkgs <- c("dplyr",
 	  "jsonlite",
 	  "quitte"
 	  )
-	  	  
-install.packages(pkgs)
 ```
 
  - Set `updateResults` to true in the rmd file to download data directly from the iiasa database. The downloaded data will be saved to your local data folder. You can set the option back to FALSE afterwards (`updateResults = FALSE`) to use local data instead.
