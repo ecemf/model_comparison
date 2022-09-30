@@ -4,6 +4,7 @@
 .Ruserdata
 model_comparison.Rproj
 output/
-R/data/
+data/
 R/credentials.json
+ECEMP_charts.html
 

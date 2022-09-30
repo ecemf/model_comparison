@@ -8,7 +8,7 @@ output:
       collapsed: false
     toc_depth: 1
 params:
-    includePattern: true    
+    includePattern: false    
 ---
 
 <!-- author: "Renato Rodrigues" -->
@@ -173,17 +173,23 @@ source("./R/aesthetics.R") # load aesthetics
 color["Solids"] = "#616161"
 
 #plot aesthetics
+baseSize <- 24
+
 theme_dark <- function(){
-  dark_theme_gray(base_size = 16) +
+  dark_theme_gray(base_size = baseSize) +
     theme(
       axis.title.x = element_blank(),
+      axis.title.y = element_blank(),
       axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5),
       #legend.position="bottom",
       legend.title=element_blank(),
-      legend.key.size = unit(20,"pt"),
-      legend.text = element_text(size=14, margin = margin(r = 20, unit = 'pt')),
+      legend.key.size = unit(20/16*baseSize,"pt"),
+      legend.text = element_text(size=10/16*baseSize), #, margin = margin(r = 20, unit = 'pt')
       panel.spacing = unit(1.5, "lines"),
-      strip.background=element_rect(fill="black") 
+      strip.background=element_rect(fill="black"),
+      panel.background = element_rect(fill="#1f1f1f"),
+      panel.grid.minor = element_line(size = 0.5, linetype="dotted"),
+      panel.grid.major = element_line(size = 1)
     )
 }
 
@@ -196,6 +202,127 @@ theme_dark <- function(){
 g <- NULL
 
 ```
+
+# CO2 Emissions {.tabset}
+
+## C400-lin
+
+```{r creating_co2_emissions_plot, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Emissions|CO2"
+)
+
+scenario <- c("DIAG-C400-lin")
+
+year <- sort(unique(df$Period)[unique(df$Period) >= 2005 & unique(df$Period) <= 2050])
+
+plotData <- df[df$Period %in% year & df$Scenario %in% scenario & df$Variable %in% unlist(vars),]
+
+# Order
+plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+g[["CO2 Emissions"]] <- ggplot(plotData,aes(x=Period,y=Value,color=Model)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1) +
+    geom_point() +
+    theme_dark() +
+    #facet_wrap(~Scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$Model)],levels(plotData$Model))) #+
+    #ylab("CO2 Emissions (Mt CO2/yr)")
+
+ggsave(paste0(outputFolder,"/CO2_Emissions_C400.svg"), g[["CO2 Emissions"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/CO2_Emissions_C400.png"), g[["CO2 Emissions"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+```
+
+```{r co2_emissions, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["CO2 Emissions"]]
+
+```
+
+## C400 and NPI
+
+```{r creating_co2_emissions_per_sector_plot, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Emissions|CO2"
+)
+
+scenario <- c("DIAG-NPI", "DIAG-C400-lin")
+
+year <- sort(unique(df$Period)[unique(df$Period) >= 2005 & unique(df$Period) <= 2050])
+
+plotData <- df[df$Period %in% year & df$Scenario %in% scenario & df$Variable %in% unlist(vars),]
+
+# Order
+plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+g[["CO2 Emissions per scenario"]] <- ggplot(plotData,aes(x=Period,y=Value,color=Model,linetype=Scenario)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1) +
+    geom_point() +
+    theme_dark() +
+    scale_color_manual(values = setNames(color[levels(plotData$Model)],levels(plotData$Model))) +
+    scale_linetype_manual(values = c("DIAG-NPI"="dashed", "DIAG-C400-lin"="solid")) +
+    guides(color  = guide_legend(order = 2),
+         linetype = guide_legend(order = 1)) #+
+    #ylab("CO2 Emissions (Mt CO2/yr)")
+
+ggsave(paste0(outputFolder,"/CO2_Emissions_per_scenario.svg"), g[["CO2 Emissions per scenario"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/CO2_Emissions_per_scenario.png"), g[["CO2 Emissions per scenario"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+```
+
+
+```{r co2_emissions_per_sector, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["CO2 Emissions per scenario"]]
+
+```
+
+
+
+# Primary Energy Biomass {.tabset}
+
+## C400-lin
+
+```{r creating_pe_biomass_plot, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Primary Energy|Biomass"
+)
+
+scenario <- c("DIAG-C400-lin")
+
+year <- sort(unique(df$Period)[unique(df$Period) >= 2005 & unique(df$Period) <= 2050])
+
+plotData <- df[df$Period %in% year & df$Scenario %in% scenario & df$Variable %in% unlist(vars),]
+
+# Order
+plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+g[["PE Biomass"]] <- ggplot(plotData,aes(x=Period,y=Value,color=Model)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1) +
+    geom_point() +
+    theme_dark() +
+    #facet_wrap(~Scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$Model)],levels(plotData$Model))) #+
+    #ylab("Primary Energy Biomass (EJ/yr)")
+
+ggsave(paste0(outputFolder,"/PE_Biomass_C400.svg"), g[["PE Biomass"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/PE_Biomass_C400.png"), g[["PE Biomass"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+```
+
+```{r pe_biomass, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["PE Biomass"]]
+
+```
+
 
 # Final Energy per sector {.tabset}
 
@@ -291,26 +418,26 @@ plotData$Sector <- factor(plotData$Sector , levels = c("Industry","Non-Energy Us
 plotData$Group <- factor(plotData$Group , levels = c("Industry","Buildings","Transport"))
 
 g[["final_energy_per_sector_with_pattern"]] <- ggplot(plotData,aes(x=Model,y=Value,fill=Carrier,pattern=Sector)) +
-  geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
+  geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
   geom_bar_pattern(stat='identity', pattern_key_scale_factor = 0.3, pattern_density=0.3, pattern_spacing = 0.03, pattern_colour = "white", pattern_fill = "white", pattern_alpha=0.4) +
   theme_dark() +
-  facet_wrap(~Scenario+Period+Group) +
+  facet_wrap(~Group) +
   scale_fill_manual(values = setNames(color[levels(plotData$Carrier)],levels(plotData$Carrier))) +
   scale_pattern_manual(values = pattern, breaks=c("Non-Energy Use","Bunkers")) +
   guides(fill  = guide_legend(order = 1, override.aes = list(pattern = "none")),
-         pattern = guide_legend(order = 2, override.aes = list(fill = NA))) +
-  ylab("Final Energy per sector (EJ/yr)") 
+         pattern = guide_legend(order = 2, override.aes = list(fill = NA))) #+
+  #ylab("Final Energy per sector (EJ/yr)")
 
 g[["final_energy_per_sector"]] <- ggplot(plotData,aes(x=Model,y=Value,fill=Carrier,pattern=Sector)) +
-  geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
+  geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
   geom_bar(stat='identity') +
   theme_dark() +
-  facet_wrap(~Scenario+Period+Group) +
-  scale_fill_manual(values = setNames(color[levels(plotData$Carrier)],levels(plotData$Carrier))) +
-  ylab("Final Energy per sector (EJ/yr)") 
+  facet_wrap(~Group) +
+  scale_fill_manual(values = setNames(color[levels(plotData$Carrier)],levels(plotData$Carrier))) #+
+  #ylab("Final Energy per sector (EJ/yr)") 
 
-ggsave(paste0(outputFolder,"/FE_perSector_C400-lin_2050.svg"), g[["final_energy_per_sector_with_pattern"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
-ggsave(paste0(outputFolder,"/FE_perSector_C400-lin_2050.png"), g[["final_energy_per_sector_with_pattern"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_perSector_C400_2050.svg"), g[["final_energy_per_sector_with_pattern"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_perSector_C400_2050.png"), g[["final_energy_per_sector_with_pattern"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
 
 ```
 
@@ -363,19 +490,19 @@ plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","ME
 plotData$Sector <- factor(plotData$Sector , levels = c("Total","Industry","Buildings","Transport"))
 
 g[["final_energy_elec_share"]] <- ggplot(plotData,aes(x=Period,y=Value,color=Model)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
     geom_line(size=1) +
     geom_point() +
     theme_dark() +
-    facet_wrap(~Sector+Scenario) +
-    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2)) +
-    scale_color_manual(values = setNames(color[levels(plotData$Model)],levels(plotData$Model))) +
-    ylab("Final Energy Electricity shares (%)")
+    facet_wrap(~Sector) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$Model)],levels(plotData$Model))) #+
+    #ylab("Final Energy Electricity shares (%)")
 
 
-ggsave(paste0(outputFolder,"/FE_electShare_C400-lin_2050.svg"), g[["final_energy_elec_share"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
-ggsave(paste0(outputFolder,"/FE_electShare_C400-lin_2050.png"), g[["final_energy_elec_share"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_electShare_C400.svg"), g[["final_energy_elec_share"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_electShare_C400.png"), g[["final_energy_elec_share"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
 
 
 ### total Electricity share
@@ -394,18 +521,17 @@ plotData <- df[df$Period %in% year & df$Scenario %in% scenario & df$Variable %in
 plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
 
 g[["final_energy_elec_share_total"]] <- ggplot(plotData,aes(x=Period,y=Value,color=Model)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
     geom_line(size=1) +
     geom_point() +
     theme_dark() +
-    facet_wrap(~Scenario) +
-    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2)) +
-    scale_color_manual(values = setNames(color[levels(plotData$Model)],levels(plotData$Model))) +
-    ylab("Final Energy Electricity shares (%)")
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$Model)],levels(plotData$Model))) #+
+    #ylab("Final Energy Electricity shares (%)")
 
-ggsave(paste0(outputFolder,"/FE_electShare_total_C400-lin_2050.svg"), g[["final_energy_elec_share_total"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
-ggsave(paste0(outputFolder,"/FE_electShare_total_C400-lin_2050.png"), g[["final_energy_elec_share_total"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_electShare_total_C400.svg"), g[["final_energy_elec_share_total"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_electShare_total_C400.png"), g[["final_energy_elec_share_total"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
 
 
 ### Electricity share per sector
@@ -436,26 +562,25 @@ plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","ME
 plotData$Sector <- factor(plotData$Sector , levels = c("Industry","Buildings","Transport"))
 
 g[["final_energy_elec_share_sector"]] <- ggplot(plotData,aes(x=Period,y=Value,color=Model)) +
-    geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
-    geom_vline(xintercept=2020, color = "black", size=1, alpha = 0.15, linetype = "dashed") +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
     geom_line(size=1) +
     geom_point() +
     theme_dark() +
-    facet_wrap(~Sector+Scenario) +
-    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2)) +
+    facet_wrap(~Sector) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
     scale_color_manual(values = setNames(color[levels(plotData$Model)],levels(plotData$Model))) +
-    ylab("Final Energy Electricity shares (%)") +
-  theme(legend.position="bottom")
+    #ylab("Final Energy Electricity shares (%)") +
+    theme(legend.position="bottom")
 
-
-ggsave(paste0(outputFolder,"/FE_electShare_perSector_C400-lin_2050.svg"), g[["final_energy_elec_share_sector"]] , device="svg", width = 12, height = 6, dpi=100, units = "in")
-ggsave(paste0(outputFolder,"/FE_electShare_perSector_C400-lin_2050.png"), g[["final_energy_elec_share_sector"]] , device="png", width = 12, height = 6, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_electShare_per_sector_C400.svg"), g[["final_energy_elec_share_sector"]] , device="svg", width = 12, height = 6, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_electShare_per_sector_C400.png"), g[["final_energy_elec_share_sector"]] , device="png", width = 12, height = 6, dpi=100, units = "in")
 
 
 # merge plot
 
 g[["final_energy_elec_share_panel"]] <- grid.arrange(
-  g[["final_energy_elec_share_total"]] + theme(plot.margin=margin(10,70,10,70)) + ylab(NULL) + ggtitle("Final Energy Electricity shares (%)") + theme(plot.title = element_text(hjust = 0.5)),
+  g[["final_energy_elec_share_total"]] + theme(plot.margin=margin(10,70,10,70)) + ylab(NULL) + theme(plot.title = element_text(hjust = 0.5)), # + ggtitle("Final Energy Electricity shares (%)")
   g[["final_energy_elec_share_sector"]] + theme(legend.position = "none") + ylab(NULL),
   #widths = c(8, 6, 2),
   layout_matrix = rbind(c(1, 1, 1, 1),
@@ -464,8 +589,8 @@ g[["final_energy_elec_share_panel"]] <- grid.arrange(
                         c(2, 2, 2, 2))
 )
 
-ggsave(paste0(outputFolder,"/FE_electShare_panel_C400-lin_2050.svg"), g[["final_energy_elec_share_panel"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
-ggsave(paste0(outputFolder,"/FE_electShare_panel_C400-lin_2050.png"), g[["final_energy_elec_share_panel"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_electShare_panel_C400.svg"), g[["final_energy_elec_share_panel"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_electShare_panel_C400.png"), g[["final_energy_elec_share_panel"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
 
 
 ```
@@ -502,6 +627,362 @@ ggsave(paste0(outputFolder,"/FE_electShare_panel_C400-lin_2050.png"), g[["final_
 
 ```
 
+```{r creating_final_energy_elec_share_box_plots, echo=FALSE, include=FALSE}
+
+### total Electricity share Box Plot
+
+vars <- list(
+  "Final Energy|Electricity Share"
+)
+
+scenario <- c("DIAG-NPI","DIAG-C400-lin")
+
+year <- sort(unique(df$Period)[unique(df$Period) >= 2005 & unique(df$Period) <= 2050])
+
+plotData <- df[df$Period %in% year & df$Scenario %in% scenario & df$Variable %in% unlist(vars),]
+
+# Order
+plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+g[["final_energy_elec_share_total_box_plot"]] <- ggplot(plotData,aes(x=Period, y=Value, fill=Scenario, group=interaction(Period,Scenario))) +
+    geom_boxplot() + 
+    theme_dark() +
+  scale_fill_manual(values = c("DIAG-NPI"="#395B64","DIAG-C400-lin"="570A57")) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    # ylab("Final Energy Electricity shares (%)") +
+    theme(legend.position="bottom")
+
+ggsave(paste0(outputFolder,"/FE_electShare_total_per_scenario_box_plot.svg"), g[["final_energy_elec_share_total_box_plot"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_electShare_total_per_scenario_box_plot.png"), g[["final_energy_elec_share_total_box_plot"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+
+```
+
+## Total box plot
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_elec_share_total_box_plot"]]
+
+```
+
+
+
+```{r creating_final_energy_elec_share_per_sector_box_plots, echo=FALSE, include=FALSE}
+
+### total Electricity share per sector Box Plot
+
+vars <- list(
+  "Industry"=c(
+    "Final Energy|Industry|Electricity Share"
+  ),
+  "Buildings"=c(
+    "Final Energy|Residential and Commercial|Electricity Share"
+  ),
+  "Transport"=c(
+    "Final Energy|Transportation|Electricity Share"
+  )
+)
+
+scenario <- c("DIAG-NPI","DIAG-C400-lin")
+
+year <- sort(unique(df$Period)[unique(df$Period) >= 2005 & unique(df$Period) <= 2050])
+
+plotData <- df[df$Period %in% year & df$Scenario %in% scenario & df$Variable %in% unlist(vars),]
+
+varTosector <- setNames(names(unlist(vars)),unlist(vars))
+plotData$Sector <- varTosector[plotData$Variable]
+
+# Order
+plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$Sector <- factor(plotData$Sector , levels = c("Industry","Buildings","Transport"))
+
+g[["final_energy_elec_share_per_sector_box_plot"]] <- ggplot(plotData,aes(x=Period, y=Value, fill=Scenario, group=interaction(Period,Scenario))) +
+    geom_boxplot() + 
+    theme_dark() +
+    facet_wrap(~Sector) +
+    scale_fill_manual(values = c("DIAG-NPI"="#395B64","DIAG-C400-lin"="570A57")) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    #ylab("Final Energy Electricity shares (%)") +
+    theme(legend.position="bottom")
+
+ggsave(paste0(outputFolder,"/FE_electShare_per_sector_per_scenario_box_plot.svg"), g[["final_energy_elec_share_per_sector_box_plot"]] , device="svg", width = 12, height = 6, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_electShare_per_sector_per_scenario_box_plot.png"), g[["final_energy_elec_share_per_sector_box_plot"]] , device="png", width = 12, height = 6, dpi=100, units = "in")
+
+```
+
+## Per sector box plot
+
+```{r, echo=FALSE, fig.width=12, fig.height=6}
+
+  g[["final_energy_elec_share_per_sector_box_plot"]]
+
+```
+
+
+# Final Energy Hydrogen shares {.tabset}
+
+
+```{r creating_final_energy_h2_share_plots, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Total"=c(
+    "Final Energy|Hydrogen Share"
+  ),
+  "Industry"=c(
+    "Final Energy|Industry|Hydrogen Share"
+  ),
+  "Buildings"=c(
+    "Final Energy|Residential and Commercial|Hydrogen Share"
+  ),
+  "Transport"=c(
+    "Final Energy|Transportation|Hydrogen Share"
+  )
+)
+
+scenario <- c("DIAG-C400-lin")
+
+year <- sort(unique(df$Period)[unique(df$Period) >= 2005 & unique(df$Period) <= 2050])
+
+plotData <- df[df$Period %in% year & df$Scenario %in% scenario & df$Variable %in% unlist(vars),]
+
+varTosector <- setNames(names(unlist(vars)),unlist(vars))
+plotData$Sector <- varTosector[plotData$Variable]
+
+# Order
+plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$Sector <- factor(plotData$Sector , levels = c("Total","Industry","Buildings","Transport"))
+
+g[["final_energy_h2_share"]] <- ggplot(plotData,aes(x=Period,y=Value,color=Model)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1) +
+    geom_point() +
+    theme_dark() +
+    facet_wrap(~Sector) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$Model)],levels(plotData$Model))) #+
+    #ylab("Final Energy Hydrogen shares (%)")
+
+
+ggsave(paste0(outputFolder,"/FE_h2Share_C400.svg"), g[["final_energy_h2_share"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_h2Share_C400.png"), g[["final_energy_h2_share"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+
+
+### total Hydrogen share
+
+vars <- list(
+  "Final Energy|Hydrogen Share"
+)
+
+scenario <- c("DIAG-C400-lin")
+
+year <- sort(unique(df$Period)[unique(df$Period) >= 2005 & unique(df$Period) <= 2050])
+
+plotData <- df[df$Period %in% year & df$Scenario %in% scenario & df$Variable %in% unlist(vars),]
+
+# Order
+plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+g[["final_energy_h2_share_total"]] <- ggplot(plotData,aes(x=Period,y=Value,color=Model)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1) +
+    geom_point() +
+    theme_dark() +
+    #facet_wrap(~Scenario) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$Model)],levels(plotData$Model))) #+
+    #ylab("Final Energy Hydrogen shares (%)")
+
+ggsave(paste0(outputFolder,"/FE_h2Share_total_C400.svg"), g[["final_energy_h2_share_total"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_h2Share_total_C400.png"), g[["final_energy_h2_share_total"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+
+
+### Hydrogen share per sector
+
+vars <- list(
+  "Industry"=c(
+    "Final Energy|Industry|Hydrogen Share"
+  ),
+  "Buildings"=c(
+    "Final Energy|Residential and Commercial|Hydrogen Share"
+  ),
+  "Transport"=c(
+    "Final Energy|Transportation|Hydrogen Share"
+  )
+)
+
+scenario <- c("DIAG-C400-lin")
+
+year <- sort(unique(df$Period)[unique(df$Period) >= 2005 & unique(df$Period) <= 2050])
+
+plotData <- df[df$Period %in% year & df$Scenario %in% scenario & df$Variable %in% unlist(vars),]
+
+varTosector <- setNames(names(unlist(vars)),unlist(vars))
+plotData$Sector <- varTosector[plotData$Variable]
+
+# Order
+plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$Sector <- factor(plotData$Sector , levels = c("Industry","Buildings","Transport"))
+
+g[["final_energy_h2_share_sector"]] <- ggplot(plotData,aes(x=Period,y=Value,color=Model)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1) +
+    geom_point() +
+    theme_dark() +
+    facet_wrap(~Sector) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$Model)],levels(plotData$Model))) +
+    #ylab("Final Energy Hydrogen shares (%)") +
+    theme(legend.position="bottom")
+
+
+ggsave(paste0(outputFolder,"/FE_h2Share_per_sector_C400.svg"), g[["final_energy_h2_share_sector"]] , device="svg", width = 12, height = 6, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_h2Share_per_sector_C400.png"), g[["final_energy_h2_share_sector"]] , device="png", width = 12, height = 6, dpi=100, units = "in")
+
+
+# merge plot
+
+g[["final_energy_h2_share_panel"]] <- grid.arrange(
+  g[["final_energy_h2_share_total"]] + theme(plot.margin=margin(10,70,10,70)) + ylab(NULL) + theme(plot.title = element_text(hjust = 0.5)), #+ ggtitle("Final Energy Hydrogen shares (%)") 
+  g[["final_energy_h2_share_sector"]] + theme(legend.position = "none") + ylab(NULL),
+  #widths = c(8, 6, 2),
+  layout_matrix = rbind(c(1, 1, 1, 1),
+                        c(1, 1, 1, 1),
+                        c(2, 2, 2, 2),
+                        c(2, 2, 2, 2))
+)
+
+ggsave(paste0(outputFolder,"/FE_h2Share_panel_C400.svg"), g[["final_energy_h2_share_panel"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_h2Share_panel_C400.png"), g[["final_energy_h2_share_panel"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+
+
+```
+
+## Panel
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  plot(g[["final_energy_h2_share_panel"]])
+
+```
+
+## Total
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_h2_share_total"]]
+
+```
+
+## Sector
+
+```{r, echo=FALSE, fig.width=12, fig.height=6}
+
+  g[["final_energy_h2_share_sector"]]
+
+```
+
+## Facets
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_h2_share"]]
+
+```
+
+
+```{r creating_final_energy_h2_share_box_plots, echo=FALSE, include=FALSE}
+
+### total Hydrogen share Box Plot
+
+vars <- list(
+  "Final Energy|Hydrogen Share"
+)
+
+scenario <- c("DIAG-NPI","DIAG-C400-lin")
+
+year <- sort(unique(df$Period)[unique(df$Period) >= 2005 & unique(df$Period) <= 2050])
+
+plotData <- df[df$Period %in% year & df$Scenario %in% scenario & df$Variable %in% unlist(vars),]
+
+# Order
+plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+g[["final_energy_h2_share_total_box_plot"]] <- ggplot(plotData,aes(x=Period, y=Value, fill=Scenario, group=interaction(Period,Scenario))) +
+    geom_boxplot() + 
+    theme_dark() +
+    scale_fill_manual(values = c("DIAG-NPI"="#395B64","DIAG-C400-lin"="570A57")) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    #ylab("Final Energy Hydrogen shares (%)") +
+    theme(legend.position="bottom")
+
+ggsave(paste0(outputFolder,"/FE_h2Share_total_per_scenario_box_plot.svg"), g[["final_energy_h2_share_total_box_plot"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_h2Share_total_per_scenario_box_plot.png"), g[["final_energy_h2_share_total_box_plot"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+
+```
+
+## Total box plot
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_h2_share_total_box_plot"]]
+
+```
+
+
+
+```{r creating_final_energy_h2_share_per_sector_box_plots, echo=FALSE, include=FALSE}
+
+### total Hydrogen share per sector Box Plot
+
+vars <- list(
+  "Industry"=c(
+    "Final Energy|Industry|Hydrogen Share"
+  ),
+  "Buildings"=c(
+    "Final Energy|Residential and Commercial|Hydrogen Share"
+  ),
+  "Transport"=c(
+    "Final Energy|Transportation|Hydrogen Share"
+  )
+)
+
+scenario <- c("DIAG-NPI","DIAG-C400-lin")
+
+year <- sort(unique(df$Period)[unique(df$Period) >= 2005 & unique(df$Period) <= 2050])
+
+plotData <- df[df$Period %in% year & df$Scenario %in% scenario & df$Variable %in% unlist(vars),]
+
+varTosector <- setNames(names(unlist(vars)),unlist(vars))
+plotData$Sector <- varTosector[plotData$Variable]
+
+# Order
+plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$Sector <- factor(plotData$Sector , levels = c("Industry","Buildings","Transport"))
+
+g[["final_energy_h2_share_per_sector_box_plot"]] <- ggplot(plotData,aes(x=Period, y=Value, fill=Scenario, group=interaction(Period,Scenario))) +
+    geom_boxplot() + 
+    theme_dark() +
+    facet_wrap(~Sector) +
+    scale_fill_manual(values = c("DIAG-NPI"="#395B64","DIAG-C400-lin"="570A57")) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    #ylab("Final Energy Hydrogen shares (%)") +
+    theme(legend.position="bottom")
+
+ggsave(paste0(outputFolder,"/FE_h2Share_per_sector_per_scenario_box_plot.svg"), g[["final_energy_h2_share_per_sector_box_plot"]] , device="svg", width = 12, height = 6, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/FE_h2Share_per_Sector_per_scenario_box_plot.png"), g[["final_energy_h2_share_per_sector_box_plot"]] , device="png", width = 12, height = 6, dpi=100, units = "in")
+
+```
+
+## Per sector box plot
+
+```{r, echo=FALSE, fig.width=12, fig.height=6}
+
+  g[["final_energy_h2_share_per_sector_box_plot"]]
+
+```
 
 
 # Kyoto gases {.tabset}
@@ -527,17 +1008,23 @@ plotData <- df[df$Period %in% year & df$Scenario %in% scenario & df$Variable %in
 plotData$Model <- factor(plotData$Model , levels = c("Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
 plotData$Variable <- factor(plotData$Variable , levels = unlist(vars))
 
+total <- plotData %>%
+      group_by(Model,Scenario,Region,Period) %>%
+      summarize(Value = sum(Value, na.rm = TRUE),.groups="drop")
+
 g[["Emissions_per_gases"]] <- ggplot(plotData,aes(x=Model,y=Value,fill=Variable)) +
-  geom_hline(yintercept=0, color = "black", size=1, alpha = 0.15) +
+  geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
   geom_bar(stat='identity') +
+  geom_point(data=total,aes(x=Model,y=Value), shape=23,fill="black",color="white", alpha = 0.7,show.legend = F, size = 2, stroke = 2) +
   theme_dark() +
-  facet_wrap(~Scenario+Period) +
+#  facet_wrap(~Scenario+Period) +
   scale_fill_manual(values = setNames(color[names(vars)],vars), labels=setNames(names(vars),vars)) +
-  ylab("Emissions per gases (Mt CO2e/yr)") +
+ # ylab("Emissions per gases (Mt CO2e/yr)") +
   scale_x_discrete(drop=FALSE)
 
-ggsave(paste0(outputFolder,"/Emissions_per_gases_C400-lin_2050.svg"), g[["Emissions_per_gases"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
-ggsave(paste0(outputFolder,"/Emissions_per_gases_C400-lin_2050.png"), g[["Emissions_per_gases"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/Emissions_per_gases_C400_2050.svg"), g[["Emissions_per_gases"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+ggsave(paste0(outputFolder,"/Emissions_per_gases_C400_2050.png"), g[["Emissions_per_gases"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+
 
 ```
 
