@@ -70,8 +70,8 @@ createPlot <- function(origDf,plotArgs,plotName,region,scenarios,scenName,indivF
       {if(!is.null(legend$nrow)) guides(color = guide_legend(nrow = legend$nrow),linetype = guide_legend(nrow = legend$nrow))} +
       {if(!(is.null(max))) coord_cartesian(ylim=c(NA, max))} +
       {if(!(is.null(min))) expand_limits(y=c(min))} +
-      {if((percentage = TRUE) & (is.null(max))) scale_y_continuous(labels = scales::percent_format(accuracy = 1)) } + 
-      {if((percentage = TRUE) & !(is.null(max)))  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, max, by = 0.2)) }
+      {if((percentage == TRUE) & (is.null(max))) scale_y_continuous(labels = scales::percent_format(accuracy = 1)) } + 
+      {if((percentage == TRUE) & !(is.null(max)))  scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, max, by = 0.2)) }
     
     if(colorDim=="Variable"){
       if(!(is.null(labels))){
