@@ -25,7 +25,7 @@ Then, activate the conda environment:
 
     conda activate model_comparison
 
-Use Rscript command to run render the document using R Markdown:
+Use Rscript command to run the R Markdown document creation:
 
     Rscript main.R
 
