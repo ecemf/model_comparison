@@ -27,7 +27,7 @@ Then, activate the conda environment:
 
 Use Rscript command to run render the document using R Markdown:
 
-    Rscript render.R
+    Rscript main.R
 
 ## Installation - if you already have an R environment
 
