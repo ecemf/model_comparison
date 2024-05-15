@@ -1,10 +1,17 @@
-# Model Comparison
+# ECEMF working package 1 model comparison reports
 
-This project includes:
- - `main.R`: a R script to download data directly from the IIASA database and create a model comparison html report including all participating models of the ECEMF Working Package 1.
- - `ECEMP_charts.Rmd`: a R markdown script to create charts for the ECEMP presentation using the data from the ECEMF Working Package 1.
+This repository includes code necessary to create the model comparison reports developed in the working package 1 of the ECEMF project.
+The list of supported reports are:
+- `individualCharts`: a html report containing charts for the main variables reported.  
+- `historicalCharts`: a html report containing a subset of `individualCharts`, containing charts for every reported variable with available historical data.
+- `variablesSummations`: a series of excel sheets and pdf reports describing summation checks for the reported results.
+- `modelChanges`: a html report for each model results evolution in time.
+- `policyBrief`: a html report with charts created for the 2040 policy brief.
+- `T1p3 scenarios`: a html report with charts in ECEMF format.
 
-## Access to the ECEMF-internal Scenario Explorer
+## Requirements
+
+### Access to the ECEMF-internal Scenario Explorer
 
 The ECEMF project uses the IIASA Scenario Explorer infrastructure to compile and
 validate scenario data from the participating modeling teams.
@@ -12,8 +19,9 @@ The [ECEMF-internal Scenario Explorer](https://data.ece.iiasa.ac.at/ecemf-intern
 is accessible only for consortium members. Please reach out to the
 [IIASA Scenario Services team](https://software.ece.iiasa.ac.at) to gain access.
 
-## Installation
+## Installation - Option 1
 
+Option 1)
 You can use [Anaconda](https://www.anaconda.com/products/individual)
 or [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
 to setup up a combined R and Python environment with all the dependencies needed
@@ -29,33 +37,69 @@ Use Rscript command to run the R Markdown document creation:
 
     Rscript main.R
 
-## Installation - if you already have an R environment
+## Installation - Option 2 - if you already have an R environment
 
+ - Make sure you have phyton and the `pyam` dependency installed.
  - Make sure you have R and the required libraries installed in your system. All packages can be installed via `install.packages`
 
 ```R
-pkgs <- c("dplyr",
-          "ggplot2",
-          "ggpattern",
-          "ggplotify",
-          "gtable",
-          "grid ", 
-          "gridextra",
-          "svglite",
-          "tidyr",
-          "rmarkdown",
-          "reticulate",
-	  "jsonlite",
-	  "quitte"
-	  )
-	  	  
+pkgs <- c(
+	"reticulate",
+	"quitte",
+	"openxlsx",
+	"tidyr",
+	"dplyr",
+	"piamInterfaces", 
+	"mip",
+	"svglite",
+	"ggplot2",
+	"grid",
+	"gridExtra",
+	"gtable",
+	"ggplotify",
+	"ggpattern",
+	"ggdark",
+	"jsonlite",
+	"rmarkdown",
+	"graphics",
+	"quitte",
+	"fs",
+	"RColorBrewer",
+	"knitr",
+	"kableExtra"
+	)	  	  
 install.packages(pkgs)
 ```
 
- - Set `updateResults` to true in the rmd file to download data directly from the iiasa database. The downloaded data will be saved to your local data folder. You can set the option back to FALSE afterwards (`updateResults = FALSE`) to use local data instead.
- - Use Rscript command to run render the document using R Markdown::
+## Running
 
-    Rscript render.R
+- Open the file `ECEMF_reports.R` and change the execute options at the top of the file to choose the actions you want to enable during the run.
+
+1. Download new data (`download = TRUE`)
+	Downloads data directly from the iiasa database.
+	If you don't have your credentials already stored see the section below with details about how to set your credentials to have access to the database.
+```python
+	import pyam
+	pyam.iiasa.set_config("login"", "password")`
+```
+	
+2. Execute specific report:
+	set a specific report to be created by setting it to true:
+```R	
+  report = list(
+    individualCharts =  TRUE, 
+    historicalCharts =  TRUE,
+    variablesSummations =  TRUE,
+    modelChanges = TRUE,
+    T1p3scenarios = TRUE,
+    policyBrief = TRUE
+	)
+```
+
+## Running as a slurm job
+
+- `sbatch submit.bat`
+
 
 ## Set the credentials for accessing the ECEMF Scenario Explorer database
 
@@ -74,3 +118,8 @@ for more information!
 
 ## LICENSE
 This program is free software: you can redistribute it and/or modify it under the terms of the **GNU Affero General Public License** as published by the Free Software Foundation, **version 3** of the License or later. You can see the LICENSE details in https://www.gnu.org/licenses/agpl.txt
+
+
+## AUTHOR
+
+Renato Rodrigues

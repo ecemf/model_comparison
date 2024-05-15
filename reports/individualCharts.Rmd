@@ -1,0 +1,213 @@
+---
+title: "WP1 NetZero scenario charts"
+output:
+  html_document:
+    theme: paper
+    toc: true
+    toc_float:
+      collapsed: false
+    toc_depth: 3
+params:
+  regions: c("EU27 & UK", "EU27")
+  scenario: "WP1 NetZero"
+  dataFolder: "../output"
+---
+
+
+<style>
+  .main-container {
+    max-width: 95% !important;
+  }
+  .toc-content {
+    padding-left: 0px !important;
+  }
+  .svg-container {
+    margin: auto !important;
+  }
+  img {
+    max-width: 100% !important;
+    <!-- display: block !important; -->
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  .hideChart {
+    display: none;
+  }
+</style>
+
+
+Description:
+
+ECEMF working package 1.3: `r params$scenario` scenario results.
+
+
+```{r include=FALSE}
+# Settings for knitting html from this notebook
+
+library(svglite)
+library(ggplot2)
+
+# setting global R chunk options (https://yihui.name/knitr/options/#chunk_options)
+  knitr::opts_chunk$set(dev='svglite', # svg, png,...
+                        fig.ext = ".svg",
+                        #fig.asp = .8 # default aspect ratio
+                        fig.width = 12,
+                        fig.height = 6,
+                        dpi=100,
+						dev.args = list(fix_text_size = FALSE, user_fonts = list(sans = list(plain = "../font/static/OpenSans-Regular.ttf",italic = "../font/static/OpenSans-Italic.ttf")))
+                        )
+
+```
+
+
+
+```{r loading_data, include=FALSE}
+
+g <- list()
+for(r in params$regions){
+  g[[r]] <- readRDS(paste0(params$dataFolder,"/individualCharts/charts_", r, ".rds"))
+}
+
+```
+
+
+
+```{r, include=FALSE}
+
+# Creating dashboard sections
+processText <- function(tree){
+  recursiveText <- function(subTree,title,regions,level=NULL, output=""){
+    out <- ""
+    #level <- c(level,paste0("[['", title , "']]"))
+    level <- c(level,title)
+    if(!(is.ggplot(subTree[["chart"]]))){
+    #if(!(is.ggplot(subTree))){
+      if(is.ggplot(subTree[[1]][["chart"]])){
+      #if(is.ggplot(subTree[[1]])){
+        #print(paste0("secn = ", title))
+        #print(level)
+        #out <- paste0(out,knitr::knit_expand(text="\n---\n\n"))
+        out <- paste0(out,knitr::knit_expand(text=paste0(strrep("#", length(level)), " ", title, " {.tabset}\n\n")))
+        for(varName in names(subTree)){
+          print(paste0("varName=",varName))
+          #cleanName <- gsub("^\\|+", "",gsub(paste0(level, collapse = "|"), "", var))
+          #cleanName <- ifelse(cleanName %in% c("|",""), "Total", cleanName)
+          #print(cleanName)
+          #out <- paste0(out,knitr::knit_expand(text="\n---\n\n"))
+          out <- paste0(out,knitr::knit_expand(text=paste0(strrep("#",length(level) + 1), " ", varName, "\n\n")))
+          out <- paste0(out,"```{r , echo=FALSE}\n\n")
+          for(r in regions){
+            out <- paste0(out,"g[['", r, "']]", paste(paste0("[['", level, "']]"), collapse = "") ,"[['", varName, "']][['chart']]\n\n")
+          }
+          out <- paste0(out,"```\n\n")
+          out <- paste0(out,knitr::knit_expand(text="\n---\n\n"))
+        }
+        #print(out)
+        output <- paste0(output,out)
+        #return(output)
+      } else {
+        print(paste0("main = ", title))
+        #print(level)
+        #print("next level")
+        #out <- paste0(out,knitr::knit_expand(text="\n---\n\n"))
+        out <- paste0(out,knitr::knit_expand(text=paste0(strrep("#",length(level)), " ", title, " \n\n")))
+        output <- paste0(output,out)
+        print(out)
+        #print(paste0("title = ", title, ", level =", level))
+        for(title2 in names(subTree)){
+          #print(paste0("next = ", title2))
+          #print(paste0("title2 = ", title2))
+          output <- recursiveText(subTree[[title2]],title2,regions,level,output)
+          #return(recursiveText(subTree[[title2]],title2,regions,level,paste0(output,out)))
+        }
+      }
+    }
+    return(output)
+  }
+  o <- ""
+  for(t in names(tree[[1]])){
+    o <- paste0(o,recursiveText(tree[[1]][[t]], t, names(tree)))
+  }
+  return(o)
+}
+   
+result <- ""
+result <- processText(g)
+
+#cat(result,file="output.txt", append=FALSE)
+
+```
+  
+  
+`r paste(knitr::knit(text = paste(result, collapse = '\n')))`
+
+
+```{r, include=FALSE}
+
+# javascript code for region selector
+
+  dropdownText = paste0("<div id=\'regionsSelector\' class=\'dropdown\' style=\'position: fixed; right: 10px; top: 10px;\'><button class=\'btn btn-default btn-sm dropdown-toggle\' type=\'button\' id=\'dropdownMenu1\' data-toggle=\'dropdown\' aria-haspopup=\'true\' aria-expanded=\'false\'>", names(g)[1], "<span class=\'caret\'></span></button><ul class=\'dropdown-menu dropdown-menu-right\' aria-labelledby=\'dropdownMenu1\'>")
+  i = 0
+  for(r in names(g)){
+    dropdownText = paste0(dropdownText,"<li><a data-value=\'", i, "\'>", r, "</a></li>")
+    i = i +1
+  }
+  dropdownText = paste0(dropdownText,"</ul></div>")
+  
+  jsScriptText <- ""
+  jsScriptText = paste0(jsScriptText,knitr::knit_expand(text="\n\n"))
+  jsScriptText = paste0(jsScriptText,knitr::knit_expand(text="<script type='text/javascript'>\n"))
+  jsScriptText = paste0(jsScriptText,knitr::knit_expand(text="var currRegion = 0;\n"))
+  jsScriptText = paste0(jsScriptText,knitr::knit_expand(text="var currChart = 0;\n"))
+  jsScriptText = paste0(jsScriptText,knitr::knit_expand(text=paste0("var regionsNumber = ", length(names(g)), ";\n")))
+  jsScriptText = paste0(jsScriptText,knitr::knit_expand(text=paste0("var regions = [", toString(dQuote(names(g))),"] ;\n")))
+  jsScriptText = paste0(jsScriptText,knitr::knit_expand(text=paste0("var dropdownText =", '"',  dropdownText, '"', ";\n")))
+  jsScriptText = paste0(jsScriptText,knitr::knit_expand(text="</script>"))
+ 
+#fileConn<-file("jsScriptText.txt")
+#writeLines(jsScriptText, fileConn)
+#close(fileConn)  
+  
+# fileConn<-file("dropdownText.txt")
+# writeLines(dropdownText, fileConn)
+# close(fileConn)
+  
+```
+
+`r paste(knitr::knit(text = paste(jsScriptText, collapse = '\n')))`
+
+<!-- creating the region selector -->
+<script type="text/javascript">
+  
+$(window).on( "load", function() {
+
+  $(".tab-content > .section").each(function(){
+    $charts = $(this).find("img");
+    $charts.addClass("hideChart");
+    totalCharts = $charts.length/regionsNumber;
+    for (i = 0; i < $charts.length; i++){
+        $charts.eq(i).addClass("region_" + Math.floor(i/totalCharts));
+        $charts.eq(i).addClass("chartType_" + i%totalCharts);
+    }
+    $(this).find(".chartType_" + currChart + ".region_" + currRegion).removeClass("hideChart");
+  })
+
+  $("#header").append(dropdownText);
+
+  $("#regionsSelector a").click(function() {
+    prevRegion = currRegion;
+    currRegion = $(this).data("value");
+    console.log(prevRegion + " -> " + currRegion);
+    $(".tab-content > .section").each(function(){
+      $(this).find(".chartType_" + currChart + ".region_" + prevRegion).addClass("hideChart");
+      $(this).find(".chartType_" + currChart + ".region_" + currRegion).removeClass("hideChart");
+    })
+    $("#dropdownMenu1").text($('#regionsSelector a[data-value="' + currRegion  + '"]').text());
+    $("#dropdownMenu1").append("<span class=\'caret\'></span>");
+  })
+
+});
+
+</script>
+
+

@@ -4,18 +4,29 @@ channels:
   - defaults
 dependencies:
   - python=3.9
-  - r-dplyr
-  - r-ggplot2
-  - r-ggpattern
-  - r-ggplotify
-  - r-jsonlite
-  - r-gtable
-  - r-grid  
-  - r-gridextra
-  - r-svglite
-  - r-tidyr
-  - r-rmarkdown
   - r-reticulate
   - r-quitte
+  - r-openxlsx
+  - r-tidyr
+  - r-dplyr
+  - r-piamInterfaces 
+  - r-mip
+  - r-svglite
+  - r-ggplot2
+  - r-grid
+  - r-gridExtra
+  - r-gtable
+  - r-ggplotify
+  - r-ggpattern
+  - r-ggdark
+  - r-jsonlite
+  - r-rmarkdown
+  - r-graphics
+  - r-quitte
+  - r-fs
+  - r-RColorBrewer
+  - r-knitr
+  - r-kableExtra
   - pyam
 prefix: /Users/wusher/miniconda3/envs/model_comparison
+
