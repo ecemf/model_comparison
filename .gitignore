@@ -2,9 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-model_comparison.Rproj
-output/
 data/
-R/credentials.json
-ECEMP_charts.html
-
+output/
+historical/historical.rds

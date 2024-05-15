@@ -1,0 +1,11 @@
+variable;unit;piam_variable;piam_unit;piam_factor;Definition;Comment;internal_comment;exclude_remind2_validation
+Emissions|CO2|AFOLU|Land;Mt CO2/yr;Emi|CO2|Land-Use Change;Mt CO2/yr;1;;;;
+Emissions|CO2|Energy and Industrial Processes;Mt CO2/yr;Emi|CO2|w/ Bunkers|Energy and Industrial Processes;Mt CO2/yr;1;;;;
+Emissions|CO2|Energy|Demand;Mt CO2/yr;Emi|CO2|w/ Bunkers|Energy|Demand;Mt CO2/yr;1;;;;
+Emissions|Kyoto Gases|Energy and Industrial Processes;Mt CO2e/yr;Emi|GHG|w/ Bunkers|w/o Land-Use Change;Mt CO2/yr;1;;;;
+Emissions|CO2|Industry and Industrial Processes;Mt CO2/yr;Emi|CO2|Industry;Mt CO2/yr;1;;;;
+Final Energy|Bunkers;EJ/yr;FE|Transport|Bunkers;EJ/yr;1;;;;
+Final Energy|Industry ;EJ/yr;FE|w/o Non-energy Use|Industry;EJ/yr;1;;;;
+Final Energy|Non-energy use;EJ/yr;FE|Non-energy Use|Industry;EJ/yr;1;;;;
+Final Energy|Transportation|Liquids;EJ/yr;FE|Transport|w/o Bunkers|Liquids;EJ/yr;1;;;;
+Secondary Energy|Solids;EJ/yr;SE|Solids;EJ/yr;1;;;;

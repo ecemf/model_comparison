@@ -1,0 +1,3735 @@
+---
+title: "ECEMP plots"
+output:
+  html_document:
+    theme: darkly
+    toc: true
+    toc_float: 
+      collapsed: false
+    toc_depth: 3
+params:
+  df: NULL
+  hist: NULL
+  chartsFolder: FALSE
+  save: FALSE
+---
+
+<!-- author: "Renato Rodrigues" -->
+
+<style>
+  body {
+    background-color: #000000;
+  }
+  .main-container {
+    max-width: 95% !important;
+  }
+  .toc-content {
+    padding-left: 0px !important;
+  }
+  .svg-container {
+    margin: auto !important;
+  }
+  /* MODAL */
+  /* The Modal (background) */
+  .modal {
+    position: fixed; /* Stay in place */
+    z-index: 400; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  }
+  
+  /* Modal Content/Box */
+  .modal-content {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    background-color: #fefefe;
+    border: 1px solid #888;
+    margin: auto;
+    max-width: 96vw;
+    max-height: 96vh;
+    transform: translate(-50%,-50%);
+  }
+  
+  /* The Close Button */
+  .close {
+    position: fixed;
+    right: 0;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+  
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .modal-img {
+    max-width: 96vw;
+      max-height: 96vh;
+  }
+  
+  .hide {
+    display:none;
+  }
+  
+  .block{
+    display:block;
+  }
+
+</style>
+
+
+Description:
+ECEMP presentation plots.
+
+
+```{r loading_libraries, echo=FALSE, include=FALSE}
+
+#load required libraries
+library(reticulate)
+library(jsonlite)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(gridExtra)
+library(grid)
+library(svglite)
+library(gtable)
+library(ggplotify)
+library(quitte)
+library("ggdark")
+library(knitr)
+library(kableExtra)
+library(piamInterfaces)
+library(ggpattern)
+
+```
+
+
+```{r chunk_options, echo=FALSE, include=FALSE}
+
+#knitr::opts_chunk$set(echo = TRUE)
+# setting global R chunk options (https://yihui.name/knitr/options/#chunk_options)
+  knitr::opts_chunk$set(dev='svglite', # svg, png,...
+                        fig.ext = ".svg",
+                        #fig.asp = .8 # default aspect ratio
+                        fig.width = 16,
+                        fig.height = 9,
+                        dpi=100
+                        )
+
+```
+
+
+```{r loading_data, echo=FALSE, include=FALSE}
+
+df <- params$df
+hist <- params$hist %>%
+  rename(source = model) %>%
+  select(-scenario)
+chartsFolder <- params$chartsFolder
+saveCharts <- params$save
+
+```
+
+```{r aesthetics, echo=FALSE, include=FALSE}
+
+color <- c(
+  #model
+  "IMAGE" = "#00ffff",
+  "Euro-Calliope" = "#c0c0c0",
+  "MEESA" = "#ff00ff",
+  "x MEESA" = "#ff00ff",
+  "MESSAGE" = "#800080",
+  "OSeMBE" = "#a52a2a",
+  "x OSeMBE" = "#a52a2a",
+  "PRIMES" = "#0000ff",
+  "PROMETHEUS" = "#ffd900",
+  "REMIND" = "#ff6347",
+  "LIMES" = "#ffaf47",
+  "TIAM-ECN" = "#4682b4",
+  "WITCH" = "#228b22",
+  #scenario
+  "DIAG-Base" = "#f1746e",
+  "DIAG-NPI" = "#b49f06",
+  "DIAG-C80-gr5" = "#2eba38",
+  "DIAG-C0to80-gr5" = "#38c0c4",
+  "DIAG-C400-lin" = "#939dff",
+  "DIAG-NZero" = "#f062e4",
+  
+  "DIAG-C400-lin-LimBio" = "#005900",
+  "DIAG-C400-lin-LimCCS" = "#999959",
+  "DIAG-C400-lin-LimNuclear" = "#ff33ff",
+  
+  "DIAG-C400-lin-HighVRE" = "#337fff",
+  "DIAG-C400-lin-HighElectrification" = "#ffb200",
+  "DIAG-C400-lin-HighH2" = "#5ed5b0",
+  "DIAG-C400-lin-ResidualFossil" = "#cccccc",
+  "DIAG-C400-lin-HighEff" = "#2eba38",
+  
+  #emi
+  "Energy Supply" = "#3D4849",
+  "Energy Supply - Elect and Heat" = "#FF6600",
+  "Energy Supply - Electricity"= "#ffb200",
+  "Energy Supply - Heat"= "#cc0000",
+  "Energy Supply - Fuels" = "#4D4D93",
+  "Energy Supply - Gases"= "#999959",
+  "Energy Supply - Liquids"= "#0000cc",
+  "Energy Supply - Solids"= "#0c0c0c",
+  "Energy Supply - Other" = "#79a6d2",
+  "Energy Supply - Hydrogen" = "#5ed5b0",
+  "Energy Demand" = "#999959",
+  "Energy Demand - Transportation" = "#a1dd70",
+  "Energy Demand - Bunkers" = "#ffc0cb",
+  "Energy Demand - Buildings" = "#5edfff",
+  "Energy Demand - Residential and Commercial" = "#5edfff",
+  "Energy Demand - Other Sector" = "#999959",
+  "Demand - AFOFI" = "#005900",
+  "Energy Demand - Industry" = "#5f6769",
+  "Industrial Processes" = "#5c5c5c",
+  "Other" = "#5b0d8f",
+  "Waste" = "#A52A2A",
+  "AFOLU" = "#4DAF4A",
+  "AFOLU - Agriculture" = "#357933",
+  "AFOLU - LULUCF" = "#6ec16b",
+  
+  "non CO2" = "#ffe7a0",
+  "Other Removal (e.g. DACCS)"="#CC6666",
+  "CO2 - Energy and Industrial Processes"="#5f6769",
+  "CO2 - AFOLU"="#4DAF4A",
+  "CO2 - Waste"="#A52A2A",
+  "CO2 - Other"="#5b0d8f",
+  "CO2 - Other Removal (e.g. DACCS)"="#CC6666",	
+  
+  "CO2 - Energy and Industrial Processes without bunkers" = "#5f6769",
+  "CO2 - Bunkers" = "#ffc0cb",
+  
+  #capture
+  "CCS" = "#cccccc",
+  "CCS - Biomass" = "#008c00",
+  "CCS - Biomass Energy" = "#005900",
+  "CCS - Biomass Industry" = "#377EB8",
+  "CCS - Biomass Industrial Processes" = "#79a6d2",
+  "CCS - Fossil" = "#cccccc",
+  "CCS - Fossil Energy" = "#a6a6a6",
+  "CCS - Fossil Industry" = "#4e4e4e",
+  "CCS - Fossil Industrial Processes" = "#282828",
+  "DAC" = "#CC6666",
+  "Enhanced Weathering" = "#5b0d8f",
+  "Land Use" = "#4DAF4A",
+  "Other" = "#79a6d2",
+  #carrier
+  "Electricity" = "#ffb200",
+  "Heat"        = "#cc0000",
+  "Hydrogen"    = "#5ed5b0",
+  "Gases"       = "#999959",
+  "Gases - Fossil"  = "#999959", # #a1a161",
+  "Gases - Biomass" = "#00cc00", #"#005900", # "#999959",
+  "Gases - Electricity"  = "#fef3da", #"#ffb200", # "#caca8a",
+  "Natural gas"  = "#999959", # #a1a161",
+  "Biogas" = "#00cc00", #"#005900", # "#999959",
+  "Syngas"  = "#fef3da", #"#ffb200", # "#caca8a",
+  "Ocean" = "#5ed5f0",
+  
+  "Liquids"     = "#0000cc",
+  "Liquids - Fossil"  = "#0000cc", #"#000068",
+  "Liquids - Biomass" = "#005900", #"#0000cc",
+  "Liquids - Electricity"   = "#ffb200", #"#5050ff",
+  "Solids"      = "#0c0c0c",
+  "Solids - Fossil"  = "#0c0c0c",
+  "Solids - Biomass" = "#0f3c08", #"#005900",
+  "Other Carrier" = "#79a6d2",
+  "Geothermal" = "#e51900",
+  "Solar" = "#ffcc00",
+  #sector
+  "Non-Energy Use" = "#ff9966",
+  "Industry" = "#5f6769",
+  "Residential and Commercial" = "#5edfff",
+  "Transportation" = "#a1dd70",
+  "Bunkers" = "#ffc0cb",
+  "Other Sector" = "#999959",
+  #sector fe carrier
+  "Non-Energy Use - Hydrogen" = "#5ed5b0",
+  "Non-Energy Use - Gases" = "#999959",
+  "Non-Energy Use - Liquids" = "#0000cc",
+  "Non-Energy Use - Solids" = "#0c0c0c",
+  "Non-Energy Use - Other" = "#79a6d2",
+  "Industry - Electricity" = "#ffb200",
+  "Industry - Heat" = "#cc0000",
+  "Industry - Hydrogen" = "#5ed5b0",
+  "Industry - Gases" = "#999959",
+  "Industry - Liquids" = "#0000cc",
+  "Industry - Solids" = "#0c0c0c",
+  "Industry - Other" = "#79a6d2",
+  "Transport - Electricity" = "#ffb200",
+  "Transport - Hydrogen" = "#5ed5b0",
+  "Transport - Gases" = "#999959",
+  "Transport - Liquids" = "#0000cc",
+  "Transport - Other" = "#79a6d2",
+  "Bunkers - Electricity" = "#ffb200",
+  "Bunkers - Hydrogen" = "#5ed5b0",
+  "Bunkers - Gases" = "#999959",
+  "Bunkers - Liquids" = "#0000cc",
+  "Bunkers - Other" = "#79a6d2",
+  #sector per type
+  "Passenger" = "#77c3e6",
+  "Freight" = "#37474f",
+  #tech
+  "Solar" = "#ffcc00",
+  "Solar CSP" = "#ffcc00",
+  "Solar PV" = "#ffe600",
+  "Wind" = "#337fff",
+  "Wind Offshore" = "#4d33ff",
+  "Wind Onshore" = "#337fff",
+  "Other" = "#5b0d8f",
+  "Ocean" = "#0000FF",
+  "Biomass" = "#005900",
+  "Biomass w/ CCS" = "#33ff00",
+  "Biomass w/o CCS" = "#005900",
+  "Hydro" = "#191999",
+  "Hydro Reservoir" = "#8a8aec",
+  "Hydro Pumped Storage" = "#dfdffa",
+  "Hydro Run of River" = "#191999",
+  "Geothermal" = "#e51900",
+  "Nuclear" = "#ff33ff",
+  "Gas" = "#999959",
+  "Gas CCGT" = "#7c6b2a",
+  "Gas w/ CCS" = "#b79e38",
+  "Gas w/o CCS" = "#999959",
+  "Coal" = "#0c0c0c",
+  "Coal w/ CCS" = "#5c5c5c",
+  "Coal w/o CCS" = "#0c0c0c",
+  "Oil" = "#b30000",
+  "Oil w/ CCS" = "#ff6565",
+  "Oil w/o CCS" = "#b30000",
+  
+  "VRE" = "#337fff",
+  "non VRE" = "#ececec",
+  
+  "Hydrogen w/ CCS"="#86e0c4",
+  "Hydrogen w/o CCS"="#5ed5b0",
+  "Electricity w/ CCS"="#ffc133",
+  "Electricity w/o CCS"="#ffb200",  
+  "Liquids w/ CCS" = "#0000ff",
+  "Liquids w/o CCS" = "#0000cc",
+  
+  #Carbon management
+  "Direct Air Capture" = "#24A19C",
+  "Fossil" = "#cccccc",
+  "Storage" = "#D96098",
+  "Usage" = "#325288",
+  #Kyoto Gases
+  "CO2" = "#7e7e7e",
+  "CH4" = "#ffe7a0",
+  "N2O" = "#44ba97",
+  "F-Gases" = "#ff9977"
+)
+
+alpha = c(
+  #hist
+  "EU27Ref" = 0.4,
+  "Eurostat" = 1,
+  "IMF" = 1,           
+  "2019 Eurostat" = 1
+)
+
+linetype = c(
+  "INNOPATHS"="twodash",
+  "James_IHME"= "dotted",
+  "James_IMF"="dotdash",
+  "James_WB"= "12345678",
+  "EDGE_SSP1"="1F",
+  "EDGE_SSP2"="twodash",
+  "EU_ReferenceScenario_2016"= "dotted",
+  "Eurostat"="dotdash",
+  "IEA"= "12345678",
+  "JRC"="1F",
+  "BP"="twodash",
+  "Ember"= "dotted",
+  "UNFCCC"="solid",
+  "CEDS"= "12345678",
+  "EDGAR6"="1F",
+  "WDI"="twodash"
+)
+
+#plot aesthetics
+theme_singleColumn <- function(){
+  theme_minimal(base_size = 16) +
+    theme(
+      axis.title.x = element_blank(),
+      axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5),
+#      legend.position="bottom",
+      legend.title=element_blank(),
+      legend.key.size = unit(20,"pt"),
+      legend.text = element_text(size=14, margin = margin(r = 20, unit = 'pt')),
+      panel.spacing = unit(1.5, "lines")
+    )
+}
+
+
+theme_singlePlot <- function(){
+  theme_minimal(base_size = 16*1.5) +
+    theme(
+      axis.title.x = element_blank(),
+      axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5),
+      legend.position="bottom",
+      legend.title=element_blank(),
+      legend.key.size = unit(20*2,"pt"),
+      legend.text = element_text(size=14*2)
+    )
+}
+
+# overwrite colors for black theme
+color["Solids"] = "#616161"
+
+#plot aesthetics
+baseSize <- 24
+
+theme_dark <- function(){
+  dark_theme_gray(base_size = baseSize) +
+    theme(
+      axis.title.x = element_blank(),
+      #axis.title.y = element_blank(),
+      axis.text.x = element_text(angle=90, hjust = 1, vjust = 0.5),
+      #legend.position="bottom",
+      legend.title=element_blank(),
+      legend.key.size = unit(20/16*baseSize,"pt"),
+      legend.text = element_text(size=10/16*baseSize), #, margin = margin(r = 20, unit = 'pt')
+      panel.spacing = unit(1.5, "lines"),
+      strip.background=element_rect(fill="black"),
+      panel.background = element_rect(fill="#1f1f1f"),
+      panel.grid.minor = element_line(size = 0.5, linetype="dotted"),
+      panel.grid.major = element_line(size = 1)
+    )
+}
+
+```
+
+
+<!-- Plots -->
+
+```{r, echo=FALSE, include=FALSE}
+
+g <- NULL
+
+```
+
+
+# Tables {.tabset}
+
+## Submitted results
+
+```{r, echo=FALSE}
+
+fullTable <- expand.grid(model=c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"), scenario=c("WP1 NPI", "WP1 NetZero", "WP1 NetZero-LimBio", "WP1 NetZero-LimCCS", "WP1 NetZero-LimNuc"),value=as.character("")) %>%  mutate(across(everything(), as.character))
+
+tableLong <- unique(df[df$scenario %in% c("WP1 NPI", "WP1 NetZero", "WP1 NetZero-LimBio", "WP1 NetZero-LimCCS", "WP1 NetZero-LimNuc"),c(1,2)]) %>%  mutate(across(everything(), as.character)) 
+
+tableLong$value2 <- 0
+  
+vars <- unique(df[df$scenario %in% c("WP1 NPI", "WP1 NetZero", "WP1 NetZero-LimBio", "WP1 NetZero-LimCCS", "WP1 NetZero-LimNuc"),c(1,2,4)])
+
+for(model in unique(tableLong$model)){
+  for(scen in unique(tableLong[tableLong$model==model,]$scenario)){
+    tableLong[tableLong$model==model & tableLong$scenario == scen,]$value2 <- length(unique(vars[vars$model==model & vars$scenario == scen,]$variable))
+  }
+}
+  
+
+tb <- merge(fullTable, tableLong, all = TRUE)
+tb[is.na(tb$value2),]$value2 <- ""
+tb <- tb[,c(1,2,4)]
+
+tbWide <- tb %>%
+  pivot_wider(names_from = scenario, values_from = value2)
+
+#write.csv(tbWide,file=paste0(outputFolder,"/submitted_results.csv"))
+
+tbWide %>%
+  kbl() %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+
+#unique(df[df$Scenario %in% c("WP1 NPI", "WP1 NetZero", "WP1 NetZero-LimBio", "WP1 NetZero-LimCCS", "WP1 NetZero-LimNuc"),c(1,2,4)])
+
+#vars[vars$Model=="OSeMBE",]
+
+```
+
+
+# Price Carbon {.tabset}
+
+## WP1 NetZero
+
+```{r, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Price|Carbon"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["Carbon Price"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model), na.rm=TRUE) +
+#    geom_line(data=h,size=1,aes(linetype=Source)) +
+    geom_point(aes(color=model), na.rm=TRUE) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +
+    ylab(expression(paste("€ 2020/t ", CO[2]))) + ylim(c(NA,1000))
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/Carbon_Price_WP1 NetZero.svg"), g[["Carbon Price"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/Carbon_Price_WP1 NetZero.png"), g[["Carbon Price"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+
+```
+
+```{r Carbon_Price, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["Carbon Price"]]
+
+```
+
+
+
+# Emissions {.tabset}
+
+## GHG Emissions
+
+```{r creating_co2_emissions_plot, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Emissions|Kyoto Gases"
+)
+
+scenario <- c("WP1 NPI", "WP1 NetZero", "WP1 NetZero-LimBio", "WP1 NetZero-LimCCS", "WP1 NetZero-LimNuc")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["GHG Emissions"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model,linetype=scenario)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = c("WP1 NPI"="solid", "WP1 NetZero"="dashed", "WP1 NetZero-LimCCS"="dotted", "WP1 NetZero-LimNuc"="dotdash",linetype)) +
+    ggtitle("GHG Emissions") +
+    ylab(expression(paste("Mt ", CO[2],"eq/yr")))
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/GHG_Emissions.svg"), g[["GHG Emissions"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/GHG_Emissions.png"), g[["GHG Emissions"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["GHG Emissions"]]
+
+```
+
+
+## GHG Emissions with 2040 reduction
+
+```{r , echo=FALSE, include=FALSE}
+
+emi1990 <- 4790
+
+vars <- list(
+  "Emissions|Kyoto Gases"
+)
+
+scenario <- c("WP1 NPI", "WP1 NetZero", "WP1 NetZero-LimBio", "WP1 NetZero-LimCCS", "WP1 NetZero-LimNuc")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),] %>%
+    mutate(reduction = round(1-(value / emi1990),3))
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["GHG Emissions with 2040 reduction"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model,linetype=scenario)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = c("WP1 NPI"="solid", "WP1 NetZero"="dashed", "WP1 NetZero-LimCCS"="dotted", "WP1 NetZero-LimNuc"="dotdash",linetype)) +
+    scale_y_continuous(name = expression(paste("GHG Emissions -  ", CO[2],"eq/yr")), breaks = c(round(emi1990), round(emi1990*0.6), round(emi1990*0.45), round(emi1990*0.3), round(emi1990*0.15), 0),sec.axis = sec_axis( trans=~(1-./emi1990), name="Reduction from 1990", labels = scales::percent, breaks = c(1,0.4,0.55,0.7,0.85, 0))) +
+    ggtitle("GHG Emissions") +
+    ylab(expression(paste("Mt ", CO[2],"eq/yr"))) +
+   expand_limits(y=emi1990)
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/GHG Emissions with 2040 reduction.svg"), g[["GHG Emissions with 2040 reduction"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/GHG Emissions with 2040 reduction.png"), g[["GHG Emissions with 2040 reduction"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["GHG Emissions with 2040 reduction"]]
+
+```
+
+
+
+## GHG Emissions NPI and NZero
+
+```{r, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Emissions|Kyoto Gases"
+)
+
+scenario <- c("WP1 NPI", "WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["GHG Emissions NPI and NZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model,linetype=scenario)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = c("WP1 NPI"="dashed", "WP1 NetZero"="solid",linetype)) +
+    ggtitle("GHG Emissions") +
+    ylab(expression(paste("Mt ", CO[2],"eq/yr")))
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/GHG_Emissions NPI and NZero.svg"), g[["GHG Emissions NPI and NZero"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/GHG_Emissions NPI and NZero.png"), g[["GHG Emissions NPI and NZero"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["GHG Emissions NPI and NZero"]]
+
+```
+
+
+
+## GHG Emissions NZero
+
+```{r, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Emissions|Kyoto Gases"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["GHG Emissions NZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model,linetype=scenario)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = c("WP1 NPI"="dashed", "WP1 NetZero"="solid",linetype)) +
+    ggtitle("GHG Emissions") +
+    ylab(expression(paste("Mt ", CO[2],"eq/yr")))
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/GHG_Emissions NZero.svg"), g[["GHG_Emissions NZero"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/GHG_Emissions NZero.png"), g[["GHG_Emissions NZero"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["GHG Emissions NZero"]]
+
+```
+
+
+
+## GHG Emissions NZero with 2040 reduction
+
+```{r , echo=FALSE, include=FALSE}
+
+emi1990 <- 4790
+
+vars <- list(
+  "Emissions|Kyoto Gases"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),] %>%
+    mutate(reduction = round(1-(value / emi1990),3))
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["GHG Emissions NZero with 2040 reduction"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model,linetype=scenario)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = c("WP1 NetZero"="solid",linetype)) +
+    scale_y_continuous(name = expression(paste("GHG Emissions -  ", CO[2],"eq/yr")), breaks = c(round(emi1990), round(emi1990*0.6), round(emi1990*0.45), round(emi1990*0.3), round(emi1990*0.15), 0),sec.axis = sec_axis( trans=~(1-./emi1990), name="Reduction from 1990", labels = scales::percent, breaks = c(1,0.4,0.55,0.7,0.85, 0))) +
+    ggtitle("GHG Emissions") +
+    ylab(expression(paste("Mt ", CO[2],"eq/yr"))) +
+   expand_limits(y=emi1990)
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/GHG Emissions NZero with 2040 reduction.svg"), g[["GHG Emissions NZero with 2040 reduction"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/GHG Emissions NZero with 2040 reduction.png"), g[["GHG Emissions NZero with 2040 reduction"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["GHG Emissions NZero with 2040 reduction"]]
+
+```
+
+
+## CO2 Emissions
+
+```{r, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Emissions|CO2"
+)
+
+scenario <- c("WP1 NPI", "WP1 NetZero", "WP1 NetZero-LimBio", "WP1 NetZero-LimCCS", "WP1 NetZero-LimNuc")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["CO2 Emissions"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model,linetype=scenario)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = c("WP1 NPI"="solid", "WP1 NetZero"="dashed", "WP1 NetZero-LimCCS"="dotted", "WP1 NetZero-LimNuc"="dotdash",linetype)) +
+    ggtitle("CO2 Emissions") +
+    ylab(expression(paste("Mt ", CO[2],"eq/yr")))
+
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/CO2_Emissions.svg"), g[["CO2_Emissions"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/CO2_Emissions.png"), g[["CO2_Emissions"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["CO2 Emissions"]]
+
+```
+
+
+
+## CO2 Emissions - NZero
+
+```{r, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Emissions|CO2"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["CO2 Emissions - NZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model,linetype=scenario)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = c("WP1 NPI"="dashed", "WP1 NetZero"="solid",linetype)) +
+    ggtitle("CO2 Emissions") +
+    ylab(expression(paste("Mt ", CO[2],"eq/yr")))
+
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/CO2_Emissions - NZero.svg"), g[["CO2_Emissions - NZero"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/CO2_Emissions - NZero.png"), g[["CO2_Emissions - NZero"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["CO2 Emissions - NZero"]]
+
+```
+
+
+
+## CO2 Emissions - NPi and NZero
+
+```{r, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Emissions|CO2"
+)
+
+scenario <- c("WP1 NPI", "WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["CO2 Emissions - NPi and NZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model,linetype=scenario)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = c("WP1 NPI"="dashed", "WP1 NetZero"="solid",linetype)) +
+    ggtitle("CO2 Emissions") +
+    ylab(expression(paste("Mt ", CO[2],"eq/yr")))
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/CO2_Emissions - NPi and NZero.svg"), g[["CO2 Emissions - NPi and NZero"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/CO2_Emissions - NPi and NZero.png"), g[["CO2 Emissions - NPi and NZero"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["CO2 Emissions - NPi and NZero"]]
+
+```
+
+
+
+## CO2 Energy and Industrial Processes Emissions
+
+```{r, echo=FALSE}
+
+vars <- list(
+  "Emissions|CO2|Energy and Industrial Processes"
+)
+
+scenario <- c("WP1 NPI", "WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050]) 
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+# line plot
+g[["CO2 Energy and Industrial Processes Emissions"]][["NetZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model,linetype=scenario)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = c("WP1 NPI"="dashed", "WP1 NetZero"="solid",linetype)) +
+    ggtitle(expression(paste("NetZero - ", CO[2], " Energy and Industrial Processes"))) +
+    ylab(expression(paste("Mt ", CO[2],"eq/yr")))
+  
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/CO2 Energy and Industrial Processes Emissions NZero - line.svg"), g[["CO2 Energy and Industrial Processes Emissions"]][["NetZero"]] , device="svg", width = 10, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/CO2 Energy and Industrial Processes Emissions NZero - line.png"), g[["CO2 Energy and Industrial Processes Emissions"]][["NetZero"]] , device="png", width = 10, height = 6, dpi=100, units = "in")
+}
+
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["CO2 Energy and Industrial Processes Emissions"]][["NetZero"]]
+
+```
+
+
+
+## CO2 Energy Supply Emissions 
+
+```{r, echo=FALSE}
+
+vars <- list(
+  "Emissions|CO2|Energy|Supply"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050]) 
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+# line plot
+g[["CO2 Energy Supply Emissions"]][["NetZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +  
+    ggtitle(expression(paste("NetZero - ", CO[2], " Energy Supply"))) +
+    ylab(expression(paste("Mt ", CO[2],"eq/yr")))
+  
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/CO2 Energy Supply Emissions NZero - line.svg"), g[["CO2 Energy Supply Emissions"]][["NetZero"]] , device="svg", width = 10, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/CO2 Energy Supply Emissions NZero - line.png"), g[["CO2 Energy Supply Emissions"]][["NetZero"]] , device="png", width = 10, height = 6, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["CO2 Energy Supply Emissions"]][["NetZero"]]
+
+```
+
+
+
+
+## CO2 Energy Supply Emissions NPi and NZero
+
+```{r, echo=FALSE}
+
+vars <- list(
+  "Emissions|CO2|Energy|Supply"
+)
+
+scenario <- c("WP1 NPI", "WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050]) 
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+# line plot
+g[["CO2 Energy Supply Emissions - NPi and NZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model,linetype=scenario)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = c("WP1 NPI"="dashed", "WP1 NetZero"="solid",linetype)) +
+    ggtitle(expression(paste("NPi and NetZero - ", CO[2], " Energy Supply"))) +
+    ylab(expression(paste("Mt ", CO[2],"eq/yr")))
+  
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/CO2 Energy Supply Emissions - NPi and NZero - line.svg"), g[["CO2 Energy Supply Emissions - NPi and NZero"]] , device="svg", width = 10, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/CO2 Energy Supply Emissions - NPi and NZero - line.png"), g[["CO2 Energy Supply Emissions - NPi and NZero"]] , device="png", width = 10, height = 6, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["CO2 Energy Supply Emissions - NPi and NZero"]]
+
+```
+
+
+
+## CO2 Energy Supply Electricity Emissions 
+
+```{r, echo=FALSE}
+
+vars <- list(
+  "Emissions|CO2|Energy|Supply|Electricity"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050]) 
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+# line plot
+g[["CO2 Energy Supply Electricity Emissions"]][["NetZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +  
+    ggtitle(expression(paste("NetZero - ", CO[2], " Electricity Energy Supply"))) +
+    ylab(expression(paste("Mt ", CO[2],"eq/yr")))
+  
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/CO2 Energy Supply Electricity Emissions NZero - line.svg"), g[["CO2 Energy Supply Electricity Emissions"]][["NetZero"]] , device="svg", width = 10, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/CO2 Energy Supply Electricity Emissions NZero - line.png"), g[["CO2 Energy Supply Electricity Emissions"]][["NetZero"]] , device="png", width = 10, height = 6, dpi=100, units = "in")
+}
+ 
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["CO2 Energy Supply Electricity Emissions"]][["NetZero"]]
+
+```
+
+
+
+# Energy {.tabset}
+
+
+## Final Energy
+
+```{r, echo=FALSE}
+
+vars <- list(
+  "Final Energy"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050]) 
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+h <- h[h$source == "Eurostat",]
+
+# line plot
+g[["Final Energy"]][["NetZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +  
+    ggtitle("NetZero - Final Energy") +
+    ylab("EJ/yr")
+  
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/NZero Final Energy.svg"), g[["Final Energy"]][["NetZero"]] , device="svg", width = 10, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/NZero Final Energy.png"), g[["Final Energy"]][["NetZero"]] , device="png", width = 10, height = 6, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["Final Energy"]][["NetZero"]]
+
+```
+
+
+## Final Energy Transport
+
+```{r, echo=FALSE}
+
+vars <- list(
+  "Final Energy|Transportation"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050]) 
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+h <- h[h$source == "Eurostat",]
+
+# line plot
+g[["Final Energy Transport"]][["NetZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +  
+    ggtitle("NetZero - Transport Final Energy") +
+    ylab("EJ/yr")
+  
+ 
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/NZero Final Energy Transport.svg"), g[["Final Energy Transport"]][["NetZero"]] , device="svg", width = 10, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/NZero Final Energy Transport.png"), g[["Final Energy Transport"]][["NetZero"]] , device="png", width = 10, height = 6, dpi=100, units = "in")
+}
+ 
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["Final Energy Transport"]][["NetZero"]]
+
+```
+
+## Final Energy Bunkers
+
+```{r, echo=FALSE}
+
+vars <- list(
+  "Final Energy|Bunkers"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050]) 
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+h <- h[h$source == "Eurostat",]
+
+# line plot
+g[["Final Energy Bunkers"]][["NetZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +  
+    ggtitle("NetZero - Bunkers Final Energy") +
+    ylab("EJ/yr")
+  
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/NZero Final Energy Bunkers.svg"), g[["Final Energy Bunkers"]][["NetZero"]] , device="svg", width = 10, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/NZero Final Energy Bunkers.png"), g[["Final Energy Bunkers"]][["NetZero"]] , device="png", width = 10, height = 6, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["Final Energy Bunkers"]][["NetZero"]]
+
+```
+
+
+
+## Final Energy Industry
+
+```{r, echo=FALSE}
+
+vars <- list(
+  "Final Energy|Industry"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050]) 
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+# line plot
+g[["Final Energy Industry"]][["NetZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +  
+    ggtitle("NetZero - Industry Final Energy") +
+    ylab("EJ/yr")
+  
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/NZero Final Energy Industry.svg"), g[["Final Energy Industry"]][["NetZero"]] , device="svg", width = 10, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/NZero Final Energy Industry.png"), g[["Final Energy Industry"]][["NetZero"]] , device="png", width = 10, height = 6, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["Final Energy Industry"]][["NetZero"]]
+
+```
+
+
+
+## Final Energy Non-Energy Use
+
+```{r, echo=FALSE}
+
+vars <- list(
+  "Final Energy|Non-Energy Use"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050]) 
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+# line plot
+g[["Final Energy Non-Energy Use"]][["NetZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +  
+    ggtitle("NetZero - Non-Energy Use Final Energy") +
+    ylab("EJ/yr")
+  
+ 
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/NZero Final Energy Non-Energy Use.svg"), g[["Final Energy Non-Energy Use"]][["NetZero"]] , device="svg", width = 10, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/NZero Final Energy Non-Energy Use.png"), g[["Final Energy Non-Energy Use"]][["NetZero"]] , device="png", width = 10, height = 6, dpi=100, units = "in")  
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["Final Energy Non-Energy Use"]][["NetZero"]]
+
+```
+
+
+## Final Energy Buildings
+
+```{r, echo=FALSE}
+
+vars <- list(
+  "Final Energy|Residential and Commercial"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050]) 
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+h <- h[h$source == "Eurostat",]
+
+# line plot
+g[["Final Energy Buildings"]][["NetZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +  
+    ggtitle("NetZero - Buildings Final Energy") +
+    ylab("EJ/yr")
+  
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/NZero Final Energy Buildings.svg"), g[["Final Energy Buildings"]][["NetZero"]] , device="svg", width = 10, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/NZero Final Energy Buildings.png"), g[["Final Energy Buildings"]][["NetZero"]] , device="png", width = 10, height = 6, dpi=100, units = "in")  
+}
+  
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["Final Energy Buildings"]][["NetZero"]]
+
+```
+
+
+## Final Energy per carrier
+
+
+```{r, echo=FALSE, include=FALSE}
+
+vars <- c(
+  "Other"   ="Final Energy|Other",
+  "Solids"  ="Final Energy|Solids",
+  "Liquids" ="Final Energy|Liquids",
+  "Gases"   ="Final Energy|Gases",
+  "Heat"    ="Final Energy|Heat",
+  "Hydrogen"="Final Energy|Hydrogen",
+  "Electricity"="Final Energy|Electricity"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- c(2020,2040,2050)
+
+model <- c("IMAGE", "PROMETHEUS", "PRIMES", "REMIND", "TIAM-ECN", "WITCH")
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$model %in% model & df$variable %in% unlist(vars),]
+
+# add PRIMES results by hand
+tmp <- df[df$model == "PRIMES" & df$period %in% year & df$scenario %in% scenario & df$model %in% model & df$variable %in% c("Final Energy|Liquids|Biomass", "Final Energy|Liquids|Fossil", "Final Energy|Liquids|Electricity"),]
+tmp <- tmp %>%
+  group_by(model,scenario,region,unit,period) %>%
+  summarize(value = sum(value)) %>%
+  mutate(variable = "Final Energy|Liquids") %>%
+  relocate(model,scenario,region,variable,unit,period,value)
+plotData <- rbind(plotData,tmp)
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$variable <- factor(plotData$variable , levels = vars[c("Electricity", "Heat", "Hydrogen","Gases","Liquids","Solids","Other")])
+
+g[["final_energy_per_carrier"]] <- ggplot() + 
+  geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+  geom_bar(data=plotData, aes(x=model,y=value,fill=variable),stat = "identity") +
+  theme_dark() +
+  facet_wrap(~period) +
+  scale_fill_manual(values = setNames(color[names(vars)],vars)) +
+  ggtitle("NetZero - Final Energy") +
+  ylab("EJ/yr") 
+  
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_NZero_per_carrier.svg"), g[["final_energy_per_carrier"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_NZero_per_carrier.png"), g[["final_energy_per_carrier"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r , echo=FALSE, dev="png", fig.ext = ".png", fig.width=12, fig.height=8, dpi=100}
+
+g[["final_energy_per_carrier"]]
+
+```
+
+## Final Energy pctg per carrier
+
+
+```{r, echo=FALSE, include=FALSE}
+
+vars <- c(
+  "Other"   ="Final Energy|Other",
+  "Solids"  ="Final Energy|Solids",
+  "Liquids" ="Final Energy|Liquids",
+  "Gases"   ="Final Energy|Gases",
+  "Heat"    ="Final Energy|Heat",
+  "Hydrogen"="Final Energy|Hydrogen",
+  "Electricity"="Final Energy|Electricity"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- c(2020,2040,2050)
+
+model <- c("IMAGE", "PROMETHEUS", "PRIMES", "REMIND", "TIAM-ECN", "WITCH")
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$model %in% model & df$variable %in% unlist(vars),]
+
+# add PRIMES results by hand
+tmp <- df[df$model == "PRIMES" & df$period %in% year & df$scenario %in% scenario & df$model %in% model & df$variable %in% c("Final Energy|Liquids|Biomass", "Final Energy|Liquids|Fossil", "Final Energy|Liquids|Electricity"),]
+tmp <- tmp %>%
+  group_by(model,scenario,region,unit,period) %>%
+  summarize(value = sum(value)) %>%
+  mutate(variable = "Final Energy|Liquids") %>%
+  relocate(model,scenario,region,variable,unit,period,value)
+plotData <- rbind(plotData,tmp)
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$variable <- factor(plotData$variable , levels = vars[c("Electricity", "Heat", "Hydrogen","Gases","Liquids","Solids","Other")])
+
+g[["final_energy_per_carrier_pct_stacked"]] <- ggplot() + 
+  geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+  geom_bar(data=plotData, aes(x=model,y=value,fill=variable), position = "fill",stat = "identity") +
+  theme_dark() +
+  facet_wrap(~period) +
+  scale_fill_manual(values = setNames(color[names(vars)],vars)) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  ylab("Final Energy (%)") 
+  
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_NZero_per_carrier_pct_stacked.svg"), g[["final_energy_per_carrier_pct_stacked"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_NZero_per_carrier_pct_stacked.png"), g[["final_energy_per_carrier_pct_stacked"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r , echo=FALSE, dev="png", fig.ext = ".png", fig.width=12, fig.height=8, dpi=100}
+
+g[["final_energy_per_carrier_pct_stacked"]]
+
+```
+
+
+
+## Final Energy Electricity
+
+```{r, echo=FALSE}
+
+vars <- list(
+  "Final Energy|Electricity"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050]) 
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+# line plot
+g[["Final Energy Electricity"]][["NetZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +  
+    ggtitle("NetZero - Final Energy Electricity") +
+    ylab("EJ/yr")
+
+if(saveCharts){  
+  ggsave(paste0(chartsFolder,"/svg/Final Energy Electricity NZero - line.svg"), g[["Final Energy Electricity"]][["NetZero"]] , device="svg", width = 10, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/Final Energy Electricity NZero - line.png"), g[["Final Energy Electricity"]][["NetZero"]] , device="png", width = 10, height = 6, dpi=100, units = "in")  
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["Final Energy Electricity"]][["NetZero"]]
+
+```
+
+
+## Secondary Energy Electricity
+
+```{r, echo=FALSE}
+
+vars <- list(
+  "Secondary Energy|Electricity"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050]) 
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+# line plot
+g[["Secondary Energy Electricity"]][["NetZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +  
+    ggtitle("NetZero - Secondary Energy Electricity") +
+    ylab("EJ/yr")
+  
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/Secondary Energy Electricity NZero - line.svg"), g[["Secondary Energy Electricity"]][["NetZero"]] , device="svg", width = 10, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/Secondary Energy Electricity NZero - line.png"), g[["Secondary Energy Electricity"]][["NetZero"]] , device="png", width = 10, height = 6, dpi=100, units = "in")  
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["Secondary Energy Electricity"]][["NetZero"]]
+
+```
+
+
+
+
+# Tech scenarios {.tabset}
+
+
+## limBio
+
+```{r creating_PE_Biomass_C400_C400LimBio_plot, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Primary Energy|Biomass"
+)
+
+scenario <- c("WP1 NetZero", "WP1 NetZero-LimBio")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["PE Biomass WP1 NetZero-LimBio"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model,linetype=scenario)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = c("WP1 NetZero-LimBio"="dashed", "WP1 NetZero"="solid",linetype)) +
+    guides(color  = guide_legend(order = 2),
+         linetype = guide_legend(order = 1)) 
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/PE Biomass WP1 NetZero-LimBio.svg"), g[["PE Biomass WP1 NetZero-LimBio"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/PE Biomass WP1 NetZero-LimBio.png"), g[["PE Biomass WP1 NetZero-LimBio"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r PE_Biomass_C400_C400LimBio, echo=FALSE, fig.width=12, fig.height=8}
+
+g[["PE Biomass WP1 NetZero-LimBio"]] 
+
+```
+
+
+
+
+# Final Energy per sector {.tabset}
+
+## NetZero
+
+```{r creating_split_final_energy_per_sector_plot, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Non-Energy Use"=c(
+    "Hydrogen"="Final Energy|Non-Energy Use|Hydrogen",
+    "Gases"   ="Final Energy|Non-Energy Use|Gases",
+    "Liquids" ="Final Energy|Non-Energy Use|Liquids",
+    "Solids"  ="Final Energy|Non-Energy Use|Solids",
+    "Other"   ="Final Energy|Non-Energy Use|Other"
+  ),
+  "Industry"=c(
+    "Hydrogen"="Final Energy|Industry|Hydrogen",
+    "Gases"   ="Final Energy|Industry|Gases",
+    "Liquids" ="Final Energy|Industry|Liquids",
+    "Solids"  ="Final Energy|Industry|Solids",
+    "Other"   ="Final Energy|Industry|Other",
+    "Heat"    ="Final Energy|Industry|Heat",
+    "Electricity"="Final Energy|Industry|Electricity"
+  ),
+  "Buildings"=c(
+    "Hydrogen"="Final Energy|Residential and Commercial|Hydrogen",
+    "Gases"   ="Final Energy|Residential and Commercial|Gases",
+    "Liquids" ="Final Energy|Residential and Commercial|Liquids",
+    "Solids"  ="Final Energy|Residential and Commercial|Solids",
+    "Other"   ="Final Energy|Residential and Commercial|Other",
+    "Heat"    ="Final Energy|Residential and Commercial|Heat",
+    "Electricity"="Final Energy|Residential and Commercial|Electricity"
+  ),
+  "Bunkers"=c(
+    "Hydrogen"="Final Energy|Bunkers|Hydrogen",
+    "Gases"   ="Final Energy|Bunkers|Gases",
+    "Liquids" ="Final Energy|Bunkers|Liquids",
+    "Other"   ="Final Energy|Bunkers|Other",
+    "Electricity"="Final Energy|Bunkers|Electricity"
+  ),
+  "Transport"=c(
+    "Hydrogen"="Final Energy|Transportation|Hydrogen",
+    "Gases"   ="Final Energy|Transportation|Gases",
+    "Liquids" ="Final Energy|Transportation|Liquids",
+    "Other"   ="Final Energy|Transportation|Other",
+    "Electricity"="Final Energy|Transportation|Electricity"
+  )
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- c(2050)
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+varTosector <- NULL
+carriers <- NULL
+for(sector in names(vars)){
+  tmp <- unlist(vars[[sector]])
+  tmp2 <- rep(sector,length(tmp))
+  names(tmp2) <- tmp
+  varTosector <- c(varTosector, tmp2)
+  carrier_tmp <- setNames(names(unlist(vars[[sector]])),unlist(vars[[sector]]))
+  carriers <- c(carriers, carrier_tmp)
+}
+
+plotData$Sector <- varTosector[as.character(plotData$variable)]
+
+plotData$Carrier <- carriers[as.character(plotData$variable)] 
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$Carrier <- factor(plotData$Carrier , levels = c("Hydrogen","Gases","Liquids","Solids","Other","Heat","Electricity"))
+plotData$Sector <- factor(plotData$Sector , levels = c("Industry","Non-Energy Use","Buildings","Transport","Bunkers"))
+
+g[["final_energy_per_sector_split"]] <- ggplot(plotData,aes(x=model,y=value,fill=Carrier)) +
+  geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+  geom_bar(stat='identity') +
+  theme_dark() +
+  facet_wrap(~Sector, nrow = 1) +
+  scale_fill_manual(values = setNames(color[levels(plotData$Carrier)],levels(plotData$Carrier))) +
+  ylab("Final Energy per sector (EJ/yr)") 
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_perSector_split_NZero.svg"), g[["final_energy_per_sector_split"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_perSector_split_NZero.png"), g[["final_energy_per_sector_split"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+```{r Final_energy_per_sector_split, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_per_sector_split"]]
+
+```
+
+---
+
+```{r creating_final_energy_per_sector_plot, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Non-Energy Use"=c(
+    "Hydrogen"="Final Energy|Non-Energy Use|Hydrogen",
+    "Gases"   ="Final Energy|Non-Energy Use|Gases",
+    "Liquids" ="Final Energy|Non-Energy Use|Liquids",
+    "Solids"  ="Final Energy|Non-Energy Use|Solids",
+    "Other"   ="Final Energy|Non-Energy Use|Other"
+  ),
+  "Industry"=c(
+    "Hydrogen"="Final Energy|Industry|Hydrogen",
+    "Gases"   ="Final Energy|Industry|Gases",
+    "Liquids" ="Final Energy|Industry|Liquids",
+    "Solids"  ="Final Energy|Industry|Solids",
+    "Other"   ="Final Energy|Industry|Other",
+    "Heat"    ="Final Energy|Industry|Heat",
+    "Electricity"="Final Energy|Industry|Electricity"
+  ),
+  "Buildings"=c(
+    "Hydrogen"="Final Energy|Residential and Commercial|Hydrogen",
+    "Gases"   ="Final Energy|Residential and Commercial|Gases",
+    "Liquids" ="Final Energy|Residential and Commercial|Liquids",
+    "Solids"  ="Final Energy|Residential and Commercial|Solids",
+    "Other"   ="Final Energy|Residential and Commercial|Other",
+    "Heat"    ="Final Energy|Residential and Commercial|Heat",
+    "Electricity"="Final Energy|Residential and Commercial|Electricity"
+  ),
+  "Bunkers"=c(
+    "Hydrogen"="Final Energy|Bunkers|Hydrogen",
+    "Gases"   ="Final Energy|Bunkers|Gases",
+    "Liquids" ="Final Energy|Bunkers|Liquids",
+    "Other"   ="Final Energy|Bunkers|Other",
+    "Electricity"="Final Energy|Bunkers|Electricity"
+  ),
+  "Transport"=c(
+    "Hydrogen"="Final Energy|Transportation|Hydrogen",
+    "Gases"   ="Final Energy|Transportation|Gases",
+    "Liquids" ="Final Energy|Transportation|Liquids",
+    "Other"   ="Final Energy|Transportation|Other",
+    "Electricity"="Final Energy|Transportation|Electricity"
+  )
+)
+
+groups <- c(
+  "Non-Energy Use"="Industry",
+  "Industry"="Industry",
+  "Buildings"="Buildings",
+  "Bunkers"="Transport",
+  "Transport"="Transport"
+)
+
+pattern <- c(
+  "Non-Energy Use"="stripe",
+  "Industry"="none",
+  "Buildings"="none",
+  "Bunkers"="stripe",
+  "Transport"="none"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- c(2050)
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+varTosector <- NULL
+carriers <- NULL
+for(sector in names(vars)){
+  tmp <- unlist(vars[[sector]])
+  tmp2 <- rep(sector,length(tmp))
+  names(tmp2) <- tmp
+  varTosector <- c(varTosector, tmp2)
+  carrier_tmp <- setNames(names(unlist(vars[[sector]])),unlist(vars[[sector]]))
+  carriers <- c(carriers, carrier_tmp)
+}
+
+plotData$Sector <- varTosector[as.character(plotData$variable)]
+
+plotData$Group <- groups[plotData$Sector]
+
+plotData$Carrier <- carriers[as.character(plotData$variable)] 
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$Carrier <- factor(plotData$Carrier , levels = c("Hydrogen","Gases","Liquids","Solids","Other","Heat","Electricity"))
+plotData$Sector <- factor(plotData$Sector , levels = c("Industry","Non-Energy Use","Buildings","Transport","Bunkers"))
+plotData$Group <- factor(plotData$Group , levels = c("Industry","Buildings","Transport"))
+
+g[["final_energy_per_sector_with_pattern"]] <- ggplot(plotData,aes(x=model,y=value,fill=Carrier,pattern=Sector)) +
+  geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+  geom_bar_pattern(stat='identity', pattern_key_scale_factor = 0.3, pattern_density=0.3, pattern_spacing = 0.03, pattern_colour = "white", pattern_fill = "white", pattern_alpha=0.4) +
+  theme_dark() +
+  facet_wrap(~Group) +
+  scale_fill_manual(values = setNames(color[levels(plotData$Carrier)],levels(plotData$Carrier))) +
+  scale_pattern_manual(values = pattern, breaks=c("Non-Energy Use","Bunkers")) +
+  guides(fill  = guide_legend(order = 1, override.aes = list(pattern = "none")),
+         pattern = guide_legend(order = 2, override.aes = list(fill = NA))) +
+  ylab("Final Energy per sector (EJ/yr)")
+
+g[["final_energy_per_sector"]] <- ggplot(plotData,aes(x=model,y=value,fill=Carrier,pattern=Sector)) +
+  geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+  geom_bar(stat='identity') +
+  theme_dark() +
+  facet_wrap(~Group) +
+  scale_fill_manual(values = setNames(color[levels(plotData$Carrier)],levels(plotData$Carrier))) +
+  ylab("Final Energy per sector (EJ/yr)") 
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_perSector_NZero.svg"), g[["final_energy_per_sector_with_pattern"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_perSector_NZero.png"), g[["final_energy_per_sector_with_pattern"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r Final_energy_per_sector_pattern, echo=FALSE, dev="png", fig.ext = ".png", fig.width=12, fig.height=8, dpi=100}
+
+g[["final_energy_per_sector_with_pattern"]]
+
+```
+
+---
+
+```{r, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Non-Energy Use"=c(
+    "Hydrogen"="Final Energy|Non-Energy Use|Hydrogen",
+    "Gases"   ="Final Energy|Non-Energy Use|Gases",
+    "Liquids" ="Final Energy|Non-Energy Use|Liquids",
+    "Solids"  ="Final Energy|Non-Energy Use|Solids",
+    "Other"   ="Final Energy|Non-Energy Use|Other"
+  ),
+  "Industry"=c(
+    "Hydrogen"="Final Energy|Industry|Hydrogen",
+    "Gases"   ="Final Energy|Industry|Gases",
+    "Liquids" ="Final Energy|Industry|Liquids",
+    "Solids"  ="Final Energy|Industry|Solids",
+    "Other"   ="Final Energy|Industry|Other",
+    "Heat"    ="Final Energy|Industry|Heat",
+    "Electricity"="Final Energy|Industry|Electricity"
+  ),
+  "Buildings"=c(
+    "Hydrogen"="Final Energy|Residential and Commercial|Hydrogen",
+    "Gases"   ="Final Energy|Residential and Commercial|Gases",
+    "Liquids" ="Final Energy|Residential and Commercial|Liquids",
+    "Solids"  ="Final Energy|Residential and Commercial|Solids",
+    "Other"   ="Final Energy|Residential and Commercial|Other",
+    "Heat"    ="Final Energy|Residential and Commercial|Heat",
+    "Electricity"="Final Energy|Residential and Commercial|Electricity"
+  ),
+  "Bunkers"=c(
+    "Hydrogen"="Final Energy|Bunkers|Hydrogen",
+    "Gases"   ="Final Energy|Bunkers|Gases",
+    "Liquids" ="Final Energy|Bunkers|Liquids",
+    "Other"   ="Final Energy|Bunkers|Other",
+    "Electricity"="Final Energy|Bunkers|Electricity"
+  ),
+  "Transport"=c(
+    "Hydrogen"="Final Energy|Transportation|Hydrogen",
+    "Gases"   ="Final Energy|Transportation|Gases",
+    "Liquids" ="Final Energy|Transportation|Liquids",
+    "Other"   ="Final Energy|Transportation|Other",
+    "Electricity"="Final Energy|Transportation|Electricity"
+  )
+)
+
+groups <- c(
+  "Non-Energy Use"="Industry",
+  "Industry"="Industry",
+  "Buildings"="Buildings",
+  "Bunkers"="Transport",
+  "Transport"="Transport"
+)
+
+pattern <- c(
+  "Non-Energy Use"="stripe",
+  "Industry"="none",
+  "Buildings"="none",
+  "Bunkers"="stripe",
+  "Transport"="none"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- c(2020,2050)
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+varTosector <- NULL
+carriers <- NULL
+for(sector in names(vars)){
+  tmp <- unlist(vars[[sector]])
+  tmp2 <- rep(sector,length(tmp))
+  names(tmp2) <- tmp
+  varTosector <- c(varTosector, tmp2)
+  carrier_tmp <- setNames(names(unlist(vars[[sector]])),unlist(vars[[sector]]))
+  carriers <- c(carriers, carrier_tmp)
+}
+
+plotData$Sector <- varTosector[as.character(plotData$variable)]
+
+plotData$Group <- groups[plotData$Sector]
+
+plotData$Carrier <- carriers[as.character(plotData$variable)] 
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$Carrier <- factor(plotData$Carrier , levels = c("Hydrogen","Gases","Liquids","Solids","Other","Heat","Electricity"))
+plotData$Sector <- factor(plotData$Sector , levels = c("Industry","Non-Energy Use","Buildings","Transport","Bunkers"))
+plotData$Group <- factor(plotData$Group , levels = c("Industry","Buildings","Transport"))
+
+currPlotData <- plotData[plotData$Group == "Transport",]
+
+g[["final_energy_transport_with_pattern"]] <- ggplot() + #
+  geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+  geom_bar_pattern(data=currPlotData, stat='identity',aes(x=model,y=value,fill=Carrier,pattern=Sector), pattern_key_scale_factor = 0.3, pattern_density=0.3, pattern_spacing = 0.03, pattern_colour = "white", pattern_fill = "white", pattern_alpha=0.4) +
+  theme_dark() +
+  facet_wrap(~period) +
+  scale_fill_manual(values = setNames(color[levels(currPlotData$Carrier)],levels(currPlotData$Carrier))) +
+  scale_pattern_manual(values = pattern[unique(currPlotData$Sector)]) + #, breaks=c("Non-Energy Use","Bunkers")
+  guides(fill  = guide_legend(order = 1, override.aes = list(pattern = "none")) ,
+         pattern = guide_legend(order = 2, override.aes = list(fill = NA))) +
+  ylab("Transport Final Energy (EJ/yr)")
+
+g[["final_energy_transport"]] <- ggplot() +
+  geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+  geom_bar(data=currPlotData, stat='identity',aes(x=model,y=value,fill=Carrier)) +
+  theme_dark() +
+  facet_wrap(~period) +
+  scale_fill_manual(values = setNames(color[levels(currPlotData$Carrier)],levels(currPlotData$Carrier))) +
+  ylab("Transport Final Energy (EJ/yr)") 
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_transport_NZero.svg"), g[["final_energy_transport_with_pattern"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_transport_NZero.png"), g[["final_energy_transport_with_pattern"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+currPlotData <- plotData[plotData$Sector == "Transport",]
+
+g[["final_energy_transport_no_bunkers"]] <- ggplot() +
+  geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+  geom_bar(data=currPlotData, stat='identity',aes(x=model,y=value,fill=Carrier)) +
+  theme_dark() +
+  facet_wrap(~period) +
+  scale_fill_manual(values = setNames(color[levels(currPlotData$Carrier)],levels(currPlotData$Carrier))) +
+  ylab("Transport Final Energy without Bunkers (EJ/yr)") 
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_transport_without_Bunkers_NZero.svg"), g[["final_energy_transport_no_bunkers"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_transport_without_Bunkers_NZero.png"), g[["final_energy_transport_no_bunkers"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+currPlotData <- plotData[plotData$Group == "Industry",]
+
+g[["final_energy_industry_with_pattern"]] <- ggplot() + #
+  geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+  geom_bar_pattern(data=currPlotData, stat='identity',aes(x=model,y=value,fill=Carrier,pattern=Sector), pattern_key_scale_factor = 0.3, pattern_density=0.3, pattern_spacing = 0.03, pattern_colour = "white", pattern_fill = "white", pattern_alpha=0.4) +
+  theme_dark() +
+  facet_wrap(~period) +
+  scale_fill_manual(values = setNames(color[levels(currPlotData$Carrier)],levels(currPlotData$Carrier))) +
+  scale_pattern_manual(values = pattern[unique(currPlotData$Sector)]) + #, breaks=c("Non-Energy Use","Bunkers")
+  guides(fill  = guide_legend(order = 1, override.aes = list(pattern = "none")) ,
+         pattern = guide_legend(order = 2, override.aes = list(fill = NA))) +
+  ylab("Industry Final Energy (EJ/yr)")
+
+g[["final_energy_industry"]] <- ggplot() +
+  geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+  geom_bar(data=currPlotData, stat='identity',aes(x=model,y=value,fill=Carrier)) +
+  theme_dark() +
+  facet_wrap(~period) +
+  scale_fill_manual(values = setNames(color[levels(currPlotData$Carrier)],levels(currPlotData$Carrier))) +
+  ylab("Industry Final Energy (EJ/yr)") 
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_industry_NZero.svg"), g[["final_energy_industry_with_pattern"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_industry_NZero.png"), g[["final_energy_industry_with_pattern"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+currPlotData <- plotData[plotData$Group == "Buildings",]
+
+g[["final_energy_buildings"]] <- ggplot() +
+  geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+  geom_bar(data=currPlotData, stat='identity',aes(x=model,y=value,fill=Carrier)) +
+  theme_dark() +
+  facet_wrap(~period) +
+  scale_fill_manual(values = setNames(color[levels(currPlotData$Carrier)],levels(currPlotData$Carrier))) +
+  ylab("Buildings Final Energy (EJ/yr)") 
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_buildings_NZero.svg"), g[["final_energy_buildings"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_buildings_NZero.png"), g[["final_energy_buildings"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r , echo=FALSE, dev="png", fig.ext = ".png", fig.width=12, fig.height=8, dpi=100}
+
+g[["final_energy_transport_with_pattern"]]
+
+```
+
+
+```{r , echo=FALSE, dev="png", fig.ext = ".png", fig.width=12, fig.height=8, dpi=100}
+
+g[["final_energy_industry_with_pattern"]]
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_buildings"]]
+
+```
+
+
+# Final Energy Electricity shares {.tabset}
+
+
+```{r creating_final_energy_elec_share_plots, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Total"=c(
+    "Final Energy|Electricity Share"
+  ),
+  "Industry"=c(
+    "Final Energy|Industry|Electricity Share"
+  ),
+  "Buildings"=c(
+    "Final Energy|Residential and Commercial|Electricity Share"
+  ),
+  "Transport"=c(
+    "Final Energy|Transportation|Electricity Share"
+  )
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+varTosector <- setNames(names(unlist(vars)),unlist(vars))
+plotData$Sector <- varTosector[as.character(plotData$variable)]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$Sector <- factor(plotData$Sector , levels = c("Total","Industry","Buildings","Transport"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["final_energy_elec_share"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    facet_wrap(~Sector) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +
+    ylab("Final Energy Electricity shares (%)")
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_electShare_NZero.svg"), g[["final_energy_elec_share"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_electShare_NZero.png"), g[["final_energy_elec_share"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+### total Electricity share
+
+vars <- list(
+  "Final Energy|Electricity Share"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["final_energy_elec_share_total"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +
+    ylab("Final Energy Electricity shares (%)")
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_electShare_total_NZero.svg"), g[["final_energy_elec_share_total"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_electShare_total_NZero.png"), g[["final_energy_elec_share_total"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+### Electricity share per sector
+
+vars <- list(
+  "Industry"=c(
+    "Final Energy|Industry|Electricity Share"
+  ),
+  "Buildings"=c(
+    "Final Energy|Residential and Commercial|Electricity Share"
+  ),
+  "Transport"=c(
+    "Final Energy|Transportation|Electricity Share"
+  )
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+varTosector <- setNames(names(unlist(vars)),unlist(vars))
+plotData$Sector <- varTosector[as.character(plotData$variable)]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$Sector <- factor(plotData$Sector , levels = c("Industry","Buildings","Transport"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["final_energy_elec_share_sector"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    facet_wrap(~Sector) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +
+    #ylab("Final Energy Electricity shares (%)") +
+    theme(legend.position="bottom")
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_electShare_per_sector_NZero.svg"), g[["final_energy_elec_share_sector"]] , device="svg", width = 12, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_electShare_per_sector_NZero.png"), g[["final_energy_elec_share_sector"]] , device="png", width = 12, height = 6, dpi=100, units = "in")
+}
+
+# merge plot
+
+g[["final_energy_elec_share_panel"]] <- grid.arrange(
+  g[["final_energy_elec_share_total"]] + theme(plot.margin=margin(10,70,10,70)) + ylab(NULL) + theme(plot.title = element_text(hjust = 0.5)), # + ggtitle("Final Energy Electricity shares (%)")
+  g[["final_energy_elec_share_sector"]] + theme(legend.position = "none") + ylab(NULL),
+  #widths = c(8, 6, 2),
+  layout_matrix = rbind(c(1, 1, 1, 1),
+                        c(1, 1, 1, 1),
+                        c(2, 2, 2, 2),
+                        c(2, 2, 2, 2))
+)
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_electShare_panel_NZero.svg"), g[["final_energy_elec_share_panel"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_electShare_panel_NZero.png"), g[["final_energy_elec_share_panel"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+## Panel
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  plot(g[["final_energy_elec_share_panel"]])
+
+```
+
+
+## Total
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_elec_share_total"]]
+
+```
+
+## Sector
+
+```{r, echo=FALSE, fig.width=12, fig.height=6}
+
+  g[["final_energy_elec_share_sector"]]
+
+```
+
+## Facets
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_elec_share"]]
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+### electricity share per sector
+
+vars <- list(
+  "Industry"=c(
+    "Final Energy|Industry|Electricity Share"
+  ),
+  "Buildings"=c(
+    "Final Energy|Residential and Commercial|Electricity Share"
+  ),
+  "Transport"=c(
+    "Final Energy|Transportation|Electricity Share"
+  )
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+fullplotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+varTosector <- setNames(names(unlist(vars)),unlist(vars))
+fullplotData$Sector <- varTosector[as.character(fullplotData$variable)]
+
+# Order
+fullplotData$model <- factor(fullplotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+fullplotData$Sector <- factor(fullplotData$Sector , levels = c("Industry","Buildings","Transport"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+
+plotData <- fullplotData[fullplotData$Sector == "Transport",]
+
+g[["final_energy_elec_share_transport"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +
+    ylab("Transport Final Energy Electricity shares (%)") 
+    #theme(legend.position="bottom") +
+   
+if(saveCharts){ 
+  ggsave(paste0(chartsFolder,"/svg/FE_electShare_transport_NZero.svg"), g[["final_energy_elec_share_transport"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_electShare_transport_NZero.png"), g[["final_energy_elec_share_transport"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+plotData <- fullplotData[fullplotData$Sector == "Industry",]
+
+g[["final_energy_elec_share_industry"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +
+    ylab("Industry Final Energy Electricity shares (%)") 
+    #theme(legend.position="bottom") +
+    
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_electShare_industry_NZero.svg"), g[["final_energy_elec_share_industry"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_electShare_industry_NZero.png"), g[["final_energy_elec_share_industry"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+plotData <- fullplotData[fullplotData$Sector == "Buildings",]
+
+g[["final_energy_elec_share_buildings"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +
+    ylab("Buildings Final Energy Electricity shares (%)") 
+    #theme(legend.position="bottom") +
+    
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_electShare_buildings_NZero.svg"), g[["final_energy_elec_share_buildings"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_electShare_buildings_NZero.png"), g[["final_energy_elec_share_buildings"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+## Transport
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_elec_share_transport"]]
+
+```
+
+
+## Industry
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_elec_share_industry"]]
+
+```
+
+
+## Buildings
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_elec_share_buildings"]]
+
+```
+
+# Final Energy Hydrogen shares {.tabset}
+
+
+```{r creating_final_energy_h2_share_plots, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Total"=c(
+    "Final Energy|Hydrogen Share"
+  ),
+  "Industry"=c(
+    "Final Energy|Industry|Hydrogen Share"
+  ),
+  "Buildings"=c(
+    "Final Energy|Residential and Commercial|Hydrogen Share"
+  ),
+  "Transport"=c(
+    "Final Energy|Transportation|Hydrogen Share"
+  )
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+varTosector <- setNames(names(unlist(vars)),unlist(vars))
+plotData$Sector <- varTosector[as.character(plotData$variable)]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$Sector <- factor(plotData$Sector , levels = c("Total","Industry","Buildings","Transport"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["final_energy_h2_share"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    facet_wrap(~Sector) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) #+
+    #ylab("Final Energy Hydrogen shares (%)")
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_h2Share_NZero.svg"), g[["final_energy_h2_share"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_h2Share_NZero.png"), g[["final_energy_h2_share"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+### total Hydrogen share
+
+vars <- list(
+  "Final Energy|Hydrogen Share"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["final_energy_h2_share_total"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) #+
+    scale_linetype_manual(values = linetype) #+
+    #ylab("Final Energy Hydrogen shares (%)")
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_h2Share_total_NZero.svg"), g[["final_energy_h2_share_total"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_h2Share_total_NZero.png"), g[["final_energy_h2_share_total"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+### Hydrogen share per sector
+
+vars <- list(
+  "Industry"=c(
+    "Final Energy|Industry|Hydrogen Share"
+  ),
+  "Buildings"=c(
+    "Final Energy|Residential and Commercial|Hydrogen Share"
+  ),
+  "Transport"=c(
+    "Final Energy|Transportation|Hydrogen Share"
+  )
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+varTosector <- setNames(names(unlist(vars)),unlist(vars))
+plotData$Sector <- varTosector[as.character(plotData$variable)]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$Sector <- factor(plotData$Sector , levels = c("Industry","Buildings","Transport"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["final_energy_h2_share_sector"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    facet_wrap(~Sector) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +
+    #ylab("Final Energy Hydrogen shares (%)") +
+    theme(legend.position="bottom")
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_h2Share_per_sector_NZero.svg"), g[["final_energy_h2_share_sector"]] , device="svg", width = 12, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_h2Share_per_sector_NZero.png"), g[["final_energy_h2_share_sector"]] , device="png", width = 12, height = 6, dpi=100, units = "in")
+}
+
+# merge plot
+
+g[["final_energy_h2_share_panel"]] <- grid.arrange(
+  g[["final_energy_h2_share_total"]] + theme(plot.margin=margin(10,70,10,70)) + ylab(NULL) + theme(plot.title = element_text(hjust = 0.5)), #+ ggtitle("Final Energy Hydrogen shares (%)") 
+  g[["final_energy_h2_share_sector"]] + theme(legend.position = "none") + ylab(NULL),
+  #widths = c(8, 6, 2),
+  layout_matrix = rbind(c(1, 1, 1, 1),
+                        c(1, 1, 1, 1),
+                        c(2, 2, 2, 2),
+                        c(2, 2, 2, 2))
+)
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_h2Share_panel_NZero.svg"), g[["final_energy_h2_share_panel"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_h2Share_panel_NZero.png"), g[["final_energy_h2_share_panel"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+## Panel
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  plot(g[["final_energy_h2_share_panel"]])
+
+```
+
+## Total
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_h2_share_total"]]
+
+```
+
+## Sector
+
+```{r, echo=FALSE, fig.width=12, fig.height=6}
+
+  g[["final_energy_h2_share_sector"]]
+
+```
+
+## Facets
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_h2_share"]]
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+### electricity share per sector
+
+vars <- list(
+  "Industry"=c(
+    "Final Energy|Industry|Hydrogen Share"
+  ),
+  "Buildings"=c(
+    "Final Energy|Residential and Commercial|Hydrogen Share"
+  ),
+  "Transport"=c(
+    "Final Energy|Transportation|Hydrogen Share"
+  )
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+fullplotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+varTosector <- setNames(names(unlist(vars)),unlist(vars))
+fullplotData$Sector <- varTosector[as.character(fullplotData$variable)]
+
+# Order
+fullplotData$model <- factor(fullplotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+fullplotData$Sector <- factor(fullplotData$Sector , levels = c("Industry","Buildings","Transport"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+
+plotData <- fullplotData[fullplotData$Sector == "Transport",]
+
+g[["final_energy_h2_share_transport"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +
+    ylab("Transport Final Energy Hydrogen shares (%)") 
+    #theme(legend.position="bottom") +
+    
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_h2Share_transport_NZero.svg"), g[["final_energy_h2_share_transport"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_h2Share_transport_NZero.png"), g[["final_energy_h2_share_transport"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+plotData <- fullplotData[fullplotData$Sector == "Industry",]
+
+g[["final_energy_h2_share_industry"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +
+    ylab("Industry Final Energy Hydrogen shares (%)") 
+    #theme(legend.position="bottom") +
+ 
+if(saveCharts){   
+  ggsave(paste0(chartsFolder,"/svg/FE_h2Share_industry_NZero.svg"), g[["final_energy_h2_share_industry"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_h2Share_industry_NZero.png"), g[["final_energy_h2_share_industry"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+plotData <- fullplotData[fullplotData$Sector == "Buildings",]
+
+g[["final_energy_h2_share_buildings"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +
+    ylab("Buildings Final Energy Hydrogen shares (%)") 
+    #theme(legend.position="bottom") +
+    
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/FE_h2Share_buildings_NZero.svg"), g[["final_energy_h2_share_buildings"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/FE_h2Share_buildings_NZero.png"), g[["final_energy_h2_share_buildings"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+## Transport
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_h2_share_transport"]]
+
+```
+
+
+## Industry
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_h2_share_industry"]]
+
+```
+
+
+## Buildings
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["final_energy_h2_share_buildings"]]
+
+```
+
+# Kyoto gases {.tabset}
+
+## NetZero
+
+```{r, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "F-Gases"="Emissions|F-Gases",
+  "N2O"="Emissions|Kyoto Gases|N2O",
+  "CH4"="Emissions|Kyoto Gases|CH4",
+  "CO2"="Emissions|CO2"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- c(2020,2030,2040,2050)
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$variable <- factor(plotData$variable , levels = unlist(vars))
+
+plotData <- plotData[!(plotData$model %in% c("LIMES", "Euro-Calliope","PRIMES","PROMETHEUS")),]
+
+total <- plotData %>%
+      group_by(model,scenario,region,period) %>%
+      summarize(value = sum(value, na.rm = TRUE),.groups="drop")
+
+g[["Emissions_per_gases"]] <- ggplot(plotData,aes(x=model,y=value,fill=variable)) +
+  geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+  geom_bar(stat='identity') +
+  geom_point(data=total,aes(x=model,y=value), shape=23,fill="black",color="white", alpha = 0.7,show.legend = F, size = 4, stroke = 3) +
+  theme_dark() +
+  facet_wrap(~period, nrow=1) +
+  scale_fill_manual(values = setNames(color[names(vars)],vars), labels=setNames(names(vars),vars)) +
+  ggtitle("NZero - Emissions per gases") + #+ scale_x_discrete(drop=FALSE) +
+  ylab(expression(paste("Mt ", CO[2],"eq/yr")))
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/Emissions_per_gases_NZero_2050.svg"), g[["Emissions_per_gases"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/Emissions_per_gases_NZero_2050.png"), g[["Emissions_per_gases"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+```{r emissions_per_gases, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["Emissions_per_gases"]]
+  
+```
+
+
+## NZero - detailed GHG emissions
+
+```{r, echo=FALSE, include=FALSE}
+
+plotdf <- rbind(df, 
+                calc_addVariable(df, "`Emissions|Kyoto Gases|non-CO2`" = "`Emissions|Kyoto Gases` - `Emissions|CO2`", units = "Mt CO2/yr", only.new=T),
+                calc_addVariable(df, "`Emissions|CO2|Energy and Industrial Processes|without Bunkers`" = "`Emissions|CO2|Energy and Industrial Processes` - `Emissions|CO2|Energy|Demand|Bunkers`", units = "Mt CO2/yr", only.new=T)) 
+
+# non energy and industrial processes Emissions
+vars <- list(
+  #"CO2 - Energy and Industrial Processes"="Emissions|CO2|Energy and Industrial Processes",
+	"non CO2"="Emissions|Kyoto Gases|non-CO2",
+#	"F-Gases"="Emissions|F-Gases",
+#  "N2O"="Emissions|Kyoto Gases|N2O",
+#  "CH4"="Emissions|Kyoto Gases|CH4",
+  "CO2 - AFOLU"="Emissions|CO2|AFOLU",
+	"CO2 - Waste"="Emissions|CO2|Waste",
+	"CO2 - Other"="Emissions|CO2|Other",
+	"CO2 - Other Removal (e.g. DACCS)"="Emissions|CO2|Other Removal",
+
+	"CO2 - Energy and Industrial Processes"="Emissions|CO2|Energy and Industrial Processes",
+  "CO2 - Bunkers"="Emissions|CO2|Energy|Demand|Bunkers",
+  "CO2 - Energy and Industrial Processes without bunkers" = "Emissions|CO2|Energy and Industrial Processes|without Bunkers"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- c(2020,2030,2040,2050)
+
+plotData <- plotdf[plotdf$period %in% year & plotdf$scenario %in% scenario & plotdf$variable %in% unlist(vars),]
+
+plotData <- plotData[!(plotData$variable == "Emissions|CO2|Energy and Industrial Processes" & plotData$model %in% c("IMAGE","PRIMES","PROMETHEUS","REMIND","WITCH")),]
+
+hist <- data.frame(
+  model = rep("historical",4),
+  scenario = rep("WP1 NetZero",4),
+  region = rep("EU27 & UK (*)",4),  
+  variable = c("Emissions|Kyoto Gases|non-CO2","Emissions|CO2|AFOLU","Emissions|CO2|Energy|Demand|Bunkers","Emissions|CO2|Energy and Industrial Processes|without Bunkers"),
+  unit = rep("Mt CO2/yr",4),
+  period = rep(2020,4),
+  value =c(778,-230,284,3180)
+)
+
+plotData <- rbind(plotData,hist)
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("historical","LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$variable <- factor(plotData$variable , levels = unlist(vars))
+
+#plotData <- plotData[!(plotData$model %in% c("Euro-Calliope")),]
+
+total <- plotData %>%
+      group_by(model,scenario,region,period) %>%
+      summarize(value = sum(value, na.rm = TRUE),.groups="drop")
+#facet_grid(set ~ ., scales = "free", space = "free") +
+g[["NZero - detailed GHG emissions"]] <- ggplot(plotData,aes(x=model,y=value,fill=variable)) +
+  geom_hline(yintercept=0, color = "black", linewidth=2, alpha = 1) +
+  geom_bar(stat='identity') +
+  geom_point(data=total,aes(x=model,y=value), shape=23,fill="black",color="white", alpha = 0.7,show.legend = F, size = 4, stroke = 3) +
+  theme_dark() +
+  facet_grid(~ period, scales = "free", space = "free") +
+  #facet_wrap(~period, nrow=1) +
+  scale_fill_manual(values = setNames(color[names(vars)],vars), labels=setNames(names(vars),vars), guide = guide_legend(nrow = 4)) +
+  ggtitle("NZero - detailed GHG emissions") + #+ scale_x_discrete(drop=FALSE) +
+  ylab(expression(paste("Mt ", CO[2],"eq/yr"))) +
+  theme(legend.position="bottom")
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/NZero - detailed GHG emissions.svg"), g[["NZero - detailed GHG emissions"]] , device="svg", width = 12, height = 10, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/NZero - detailed GHG emissions.png"), g[["NZero - detailed GHG emissions"]] , device="png", width = 12, height = 10, dpi=100, units = "in")
+}
+
+```
+
+```{r , echo=FALSE, fig.width=12, fig.height=10}
+
+  g[["NZero - detailed GHG emissions"]]
+  
+```
+
+
+# VRE shares {.tabset}
+
+## NetZero
+
+```{r, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Secondary Energy|VRE Share"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <-sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["vre_share"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1), breaks = seq(0, 1, by = 0.2), limits = c(0,1)) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = linetype) +
+    ggtitle("VRE share (%)")
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/vre_share.svg"), g[["vre_share"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/vre_share.png"), g[["vre_share"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["vre_share"]]
+
+```
+
+
+# Carbon Capture {.tabset}
+
+## NetZero
+
+```{r, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Carbon Capture"
+)
+
+scenario <- c("WP1 NetZero","WP1 NetZero-LimCCS")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["carbon_capture"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model,linetype=scenario)) +
+    geom_line(data=h,size=1) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = c("WP1 NetZero"="solid", "WP1 NetZero-LimCCS"="dashed",linetype)) +
+    ggtitle("Carbon Capture") +
+    ylab(expression(paste("Mt ", CO[2],"eq/yr")))
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/carbon_capture.svg"), g[["carbon_capture"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/carbon_capture.png"), g[["carbon_capture"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["carbon_capture"]]
+
+```
+
+
+
+
+# Nuclear {.tabset}
+
+## Secondary Energy
+
+```{r, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Secondary Energy|Electricity|Nuclear"
+)
+
+scenario <- c("WP1 NetZero","WP1 NetZero-LimNuc")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# EJ 2 TWh
+plotData$value <- plotData$value*277.7777778
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+# EJ 2 TWh
+h$value <- h$value*277.7777778
+
+g[["nuclear_NZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model,linetype=scenario)) +
+    geom_line(data=h,size=1) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = c(linetype,"WP1 NetZero"="solid", "WP1 NetZero-LimNuc"="dashed",linetype)) +
+    ggtitle("Secondary Energy Nuclear") +
+    ylab("EJ/yr")
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/nuclear_NZero.svg"), g[["nuclear_NZero"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/nuclear_NZero.png"), g[["nuclear_NZero"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["nuclear_NZero"]]
+
+```
+
+
+## Nuclear Net-zero
+
+```{r, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Secondary Energy|Electricity|Nuclear"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# EJ 2 TWh
+plotData$value <- plotData$value*277.7777778
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+# EJ 2 TWh
+h$value <- h$value*277.7777778
+
+g[["nuclear_NZero_only"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+#    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+#    scale_linetype_manual(values = c(linetype,"WP1 NetZero"="solid", "WP1 NetZero-LimNuc"="dashed",linetype)) +
+    ggtitle("Secondary Energy Nuclear - Net-zero") +
+    ylab("EJ/yr") +
+  expand_limits(y=1100)
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/nuclear_NZero_only.svg"), g[["nuclear_NZero_only"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/nuclear_NZero_only.png"), g[["nuclear_NZero_only"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["nuclear_NZero_only"]]
+
+```
+
+
+## Nuclear LimNuc
+
+```{r, echo=FALSE, include=FALSE}
+
+vars <- list(
+  "Secondary Energy|Electricity|Nuclear"
+)
+
+scenario <- c("WP1 NetZero-LimNuc")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# EJ 2 TWh
+plotData$value <- plotData$value*277.7777778
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+# EJ 2 TWh
+h$value <- h$value*277.7777778
+
+g[["nuclear_LimNuc"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+#    geom_line(data=h,size=1,aes(linetype=source)) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+#    scale_linetype_manual(values = c(linetype,"WP1 NetZero"="solid", "WP1 NetZero-LimNuc"="dashed",linetype)) +
+    ggtitle("Secondary Energy Nuclear - LimNuc") +
+    ylab("EJ/yr") +
+  expand_limits(y=1100)
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/nuclear_LimNuc.svg"), g[["nuclear_LimNuc"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/nuclear_LimNuc.png"), g[["nuclear_LimNuc"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+  g[["nuclear_LimNuc"]]
+
+```
+
+
+# Electricty {.tabset}
+
+## NetZero
+
+```{r, echo=FALSE, include=FALSE}
+
+vars <- c(
+#  "Curtailment"="Secondary Energy|Electricity|Curtailment",
+  "Ocean" = "Secondary Energy|Electricity|Ocean",
+  "Biomass"="Secondary Energy|Electricity|Biomass",
+  "Coal"="Secondary Energy|Electricity|Coal",
+  "Gas"="Secondary Energy|Electricity|Gas",
+  "Geothermal"="Secondary Energy|Electricity|Geothermal",
+  "Hydro"="Secondary Energy|Electricity|Hydro",
+  "Hydrogen"="Secondary Energy|Electricity|Hydrogen",
+  "Nuclear"="Secondary Energy|Electricity|Nuclear",
+  "Oil"="Secondary Energy|Electricity|Oil",
+  "Solar"="Secondary Energy|Electricity|Solar",
+  "Wind"="Secondary Energy|Electricity|Wind",
+  #"Wind Offshore"="Secondary Energy|Electricity|Wind|Offshore",
+  #"Wind Onshore"="Secondary Energy|Electricity|Wind|Onshore",
+  "Trade"="Trade|Secondary Energy|Electricity|Volume"
+)
+
+scenario <- c("WP1 NetZero")
+
+year <- c(2020,2030,2040,2050)
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# EJ 2 TWh
+plotData$value <- plotData$value*277.7777778
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+plotData$variable <- factor(plotData$variable , levels = vars)
+
+g[["electricity_NetZero_2050"]] <- ggplot(plotData,aes(x=model,y=value,fill=variable)) +
+  geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+  geom_bar(stat='identity', alpha = 0.8) +
+  facet_wrap(~period,nrow=1) +
+  theme_dark() +
+  scale_fill_manual(values = setNames(color[names(vars)],vars), labels = setNames(names(vars), vars)) +
+    ggtitle("Electricity Generation") +
+    ylab("TWh")
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/electricity_NetZero_2050.svg"), g[["electricity_NetZero_2050"]] , device="svg", width = 12, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/electricity_NetZero_2050.png"), g[["electricity_NetZero_2050"]] , device="png", width = 12, height = 8, dpi=100, units = "in")
+}
+
+```
+
+```{r, echo=FALSE, fig.width=12, fig.height=8}
+
+    g[["electricity_NetZero_2050"]]
+
+```
+
+
+
+<!-- modal code -->
+<script type="text/javascript">
+
+$(document).ready(function () {
+
+$("img").attr("title", "click to see in fullscreen")
+  
+$("body").append(
+'<!-- The Modal -->\
+<div id="myModal" class="modal hide">\
+  <!-- Modal content -->\
+  <div class="modal-content">\
+    <span class="close">&times;</span>\
+    <div class="modal-card">\
+      <img class="modal-img"\
+        alt="">\
+    </div>\
+  </div>\
+</div>').ready(function(){
+
+  $("img").click(function(){
+    src = $(this).attr("src");
+    $(".modal-img").attr("src", src);
+    $(".modal").removeClass("hide").addClass("block");              
+  });
+
+  $(".modal .close").click(function () {
+      console.log(this);
+    $(".modal").removeClass("block").addClass("hide");
+  });
+
+  $(window).click(function (event) {
+    if (event.target == myModal) {
+      $(".modal").removeClass("block").addClass("hide");
+    }
+  });
+
+  });
+});
+
+</script>
+
+
+
+<!-- additional plots for presentation -->
+
+```{r, echo=FALSE}
+
+theme.double.text.size = 15
+geom.text.double.size = theme.double.text.size/.pt
+theme_doubleColumn <- function(){
+  theme_minimal(base_size = 25) +
+    theme(
+      legend.position="bottom",
+      #legend.title = element_blank(),
+      #axis.title.x=element_blank(),
+      axis.ticks.x=element_blank(),
+      axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+      #axis.text = element_text(size = theme.double.text.size),
+      #legend.text=element_text(size= theme.double.text.size),
+      #axis.text.x = element_text(size = 0.8*theme.double.text.size, angle = 90, hjust = 1, vjust = 0.5),
+      #axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 10)),
+      legend.key.height = unit(1, "cm"),
+      legend.key.width = unit(1,"cm"),
+      #panel.spacing = unit(1, "lines"),
+      #plot.title = element_text(size = theme.double.text.size, face = "plain"),
+      #strip.text.x = element_text(size = theme.double.text.size),
+      plot.background = element_rect(fill = "white", color = NA)
+    )
+}
+# update geom default 
+update_geom_defaults("line", list(size = 1))
+
+```
+
+```{r, echo=FALSE, include=FALSE}
+## GHG Emissions
+
+vars <- list("Emissions|Kyoto Gases")
+
+scenario <- c("WP1 NetZero") #"WP1 NPI", "WP1 NetZero", "WP1 NetZero-LimBio", "WP1 NetZero-LimCCS", "WP1 NetZero-LimNuc"
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+plotData[plotData$model == "REMIND",]$value <- 0.95*plotData[plotData$model == "REMIND",]$value
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["white theme - GHG Emissions - NZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", linewidth=2, alpha = 0.5) +
+    geom_vline(xintercept=2020, color = "black", linewidth=1.5, alpha = 0.5,linetype="dashed") +
+    geom_line(size=1,aes(color=model)) + #,linetype=scenario
+    geom_line(data=h,size=1, linetype="dashed") +
+    geom_point(aes(color=model)) +
+    theme_doubleColumn() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    #scale_linetype_manual(values = c("WP1 NPI"="dashed", "WP1 NetZero"="solid", "WP1 NetZero-LimCCS"="dotted", "WP1 NetZero-LimNuc"="dotdash",linetype)) +
+    ylab(expression(paste("GHG Emissions - Mt ", CO[2],"eq/yr"))) + 
+    theme(axis.title.x=element_blank()) +
+    theme(legend.title = element_blank()) +
+    theme(legend.position="right", legend.justification = "bottom")
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/white theme - GHG Emissions - NZero.svg"), g[["white theme - GHG Emissions - NZero"]] , device="svg", width = 14, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/white theme - GHG Emissions - NZero.png"), g[["white theme - GHG Emissions - NZero"]] , device="png", width = 14, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=14, fig.height=8}
+
+#  g[["white theme - GHG Emissions - NZero"]]
+
+```
+
+```{r, echo=FALSE, include=FALSE}
+
+## CO2 Emissions NZero
+
+vars <- list("Emissions|CO2")
+
+scenario <- c("WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+plotData[plotData$model == "REMIND",]$value <- 0.95*plotData[plotData$model == "REMIND",]$value
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["white theme - CO2 Emissions - NZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", linewidth=2, alpha = 0.5) +
+    geom_vline(xintercept=2020, color = "black", linewidth=1.5, alpha = 0.5,linetype="dashed") +
+    geom_line(size=1,aes(color=model)) + #,linetype=scenario
+    geom_line(data=h,size=1, linetype="dashed") +
+    geom_point(aes(color=model)) +
+    theme_doubleColumn() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    #scale_linetype_manual(values = c("WP1 NPI"="dashed", "WP1 NetZero"="solid", "WP1 NetZero-LimCCS"="dotted", "WP1 NetZero-LimNuc"="dotdash",linetype)) +
+    ylab(expression(paste("CO2 Emissions - Mt ", CO[2],"/yr"))) + 
+    theme(axis.title.x=element_blank()) +
+    theme(legend.title = element_blank()) +
+    theme(legend.position="right", legend.justification = "bottom")
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/white theme - CO2 Emissions - NZero.svg"), g[["white theme - CO2 Emissions - NZero"]] , device="svg", width = 14, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/white theme - CO2 Emissions - NZero.png"), g[["white theme - CO2 Emissions - NZero"]] , device="png", width = 14, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=14, fig.height=8}
+
+#  g[["white theme - CO2 Emissions - NZero"]]
+
+```
+
+
+```{r, echo=FALSE, include=FALSE}
+
+## CO2 Emissions NZero
+
+vars <- list("Emissions|CO2")
+
+scenario <- c("WP1 NPI", "WP1 NetZero")
+
+year <- sort(unique(df$period)[unique(df$period) >= 2005 & unique(df$period) <= 2050])
+
+plotData <- df[df$period %in% year & df$scenario %in% scenario & df$variable %in% unlist(vars),]
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope","IMAGE","MEESA","MESSAGE","OSeMBE","PRIMES","PROMETHEUS","REMIND","TIAM-ECN","WITCH"))
+
+plotData[plotData$model == "REMIND",]$value <- 0.95*plotData[plotData$model == "REMIND",]$value
+
+# historical data
+h <- hist[hist$variable %in% unlist(vars),]
+
+g[["white theme - CO2 Emissions - NPi and NZero"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", linewidth=2, alpha = 0.5) +
+    geom_vline(xintercept=2020, color = "black", linewidth=1.5, alpha = 0.5,linetype="dashed") +
+    geom_line(size=1,aes(color=model,linetype=scenario)) +
+    geom_line(data=h,size=1, linetype="dashed") +
+    geom_point(aes(color=model)) +
+    theme_doubleColumn() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    scale_linetype_manual(values = c("WP1 NPI"="dashed", "WP1 NetZero"="solid", "WP1 NetZero-LimCCS"="dotted", "WP1 NetZero-LimNuc"="dotdash",linetype)) +
+    ylab(expression(paste("CO2 Emissions - Mt ", CO[2],"/yr"))) + 
+    theme(axis.title.x=element_blank()) +
+    theme(legend.title = element_blank()) +
+    theme(legend.position="right", legend.justification = "bottom")
+
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/white theme - CO2 Emissions - NPi and NZero.svg"), g[["white theme - CO2 Emissions - NPi and NZero"]] , device="svg", width = 14, height = 8, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/white theme - CO2 Emissions - NPi and NZero.png"), g[["white theme - CO2 Emissions - NPi and NZero"]] , device="png", width = 14, height = 8, dpi=100, units = "in")
+}
+
+```
+
+
+```{r, echo=FALSE, fig.width=14, fig.height=8}
+
+#  g[["white theme - CO2 Emissions - NPi and NZero"]]
+
+```
+
+
+
+## Wind and Solar Electricity
+
+```{r, echo=FALSE}
+
+plotdf <- df[df$variable %in% c("Secondary Energy|Electricity|Wind","Secondary Energy|Electricity|Solar"),]
+
+plotData <- plotdf[!duplicated(plotdf),] %>% 
+  group_by(model,scenario,region,unit,period) %>%
+  summarize(value = sum(value),.groups="drop") %>%
+  mutate(variable = "Secondary Energy|Electricity|Wind and Solar") %>%
+  filter(scenario == "WP1 NetZero", period %in% 2005:2050)
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH"))
+
+# historical data
+#h <- hist[hist$variable %in% unlist(vars),]
+
+# EJ 2 TWh
+plotData$value <- plotData$value*277.7777778
+
+# line plot
+g[["NetZero - Wind and Solar Electricity"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1) +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    ggtitle("NetZero - Wind and Solar Electricity") +
+    ylab("TWh")
+  
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/NetZero - Wind and Solar Electricity - line.svg"), g[["NetZero - Wind and Solar Electricity"]] , device="svg", width = 10, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/NetZero - Wind and Solar Electricity - line.png"), g[["NetZero - Wind and Solar Electricity"]] , device="png", width = 10, height = 6, dpi=100, units = "in")  
+}
+  
+```
+
+
+```{r, echo=FALSE, fig.width=10, fig.height=6}
+
+  g[["NetZero - Wind and Solar Electricity"]]
+
+```
+
+
+## Electricity Renewables Share
+
+```{r, echo=FALSE}
+
+plotdf <- df[!duplicated(df),]
+
+numerator <- plotdf[plotdf$variable %in% c("Secondary Energy|Electricity|Geothermal", "Secondary Energy|Electricity|Hydro", "Secondary Energy|Electricity|Wind", "Secondary Energy|Electricity|Solar", "Secondary Energy|Electricity|Biomass"),] %>%
+  group_by(model,scenario,region,unit,period) %>%
+  summarize(numerator = sum(value),.groups="drop") %>%
+  mutate(variable = "SE renewables") %>%
+  relocate(model,scenario,region,variable,unit,period,numerator) %>%
+  filter(scenario == "WP1 NetZero", period %in% 2005:2050)
+
+plotData <- numerator %>% left_join( plotdf[plotdf$variable %in% c("Secondary Energy|Electricity"),] %>%
+            filter(scenario == "WP1 NetZero", period %in% 2005:2050) %>% rename(denominator = value), 
+        by=c("model","scenario","region","unit","period")) %>%
+  mutate(value = numerator/denominator)
+
+
+# for(model in c("LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH")){
+#   for (var in c("Secondary Energy|Electricity|Geothermal", "Secondary Energy|Electricity|Hydro", "Secondary Energy|Electricity|Wind", "Secondary Energy|Electricity|Solar", "Secondary Energy|Electricity|Biomass", "Secondary Energy|Electricity")){
+#     print(var)
+#     if(! (var %in% unique(df[df$model == model,]$variable))){
+#       print(paste0("model: ", model, " , variable: ",  var))
+#     }
+#     
+#   }
+# }
+
+
+# historical data
+#h <- hist[hist$variable %in% unlist(vars),]
+
+# historical data
+res <- read.csv2("../historical/renewablesShares.csv", stringsAsFactors = FALSE,check.names=FALSE) %>%
+    pivot_longer(-type,names_to = "period", values_to = "value") %>%
+    mutate(period = as.numeric(period),
+           value = as.numeric(value))
+  
+h <- res[res$type=="RES-E",] %>% mutate(model = "historical")
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("historical", "LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH"))
+
+#https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:52022SC0230&from=EN
+#By 2030, the renewable energy share in the electricity ('RES-E') sector would reach 69% in the RePower context.
+#exactly what is estimated
+
+# line plot
+g[["Electricity Renewables Share"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1, color="white", linetype="dashed") +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    ggtitle("Electricity Renewables Share") +
+    scale_y_continuous(labels = scales::percent) +
+    expand_limits(y=c(0,1)) +
+    ylab("%")
+  
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/Electricity Renewables Share.svg"), g[["Electricity Renewables Share"]] , device="svg", width = 10, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/Electricity Renewables Share.png"), g[["Electricity Renewables Share"]] , device="png", width = 10, height = 6, dpi=100, units = "in")  
+}
+  
+```
+
+
+```{r, echo=FALSE, fig.width=10, fig.height=6}
+
+  g[["Electricity Renewables Share"]]
+
+
+  plotData[plotData$period == 2040,] %>%
+    ungroup() %>%
+    select(model,period,value) %>%
+    mutate(value = round(value,2)) %>%
+    arrange(value)
+
+```
+
+
+
+## Secondary energy renewables Share
+
+```{r, echo=FALSE}
+
+# for(model in c("LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH")){
+# #  for (var in c("Secondary Energy")){
+#   for (var in c("Secondary Energy|Hydrogen","Secondary Energy|Gases","Secondary Energy|Liquids","Secondary Energy|Solids","Secondary Energy|Heat","Secondary Energy|Electricity")){
+# #  for (var in c("Secondary Energy|Electricity|Geothermal", "Secondary Energy|Electricity|Hydro", "Secondary Energy|Electricity|Wind", "Secondary Energy|Electricity|Solar", "Secondary Energy|Electricity|Biomass", "Secondary Energy|Hydrogen|Biomass", "Secondary Energy|Gases|Biomass", "Secondary Energy|Heat|Geothermal", "Secondary Energy|Heat|Solar", "Secondary Energy|Heat|Biomass", "Secondary Energy|Liquids|Biomass", "Secondary Energy|Solids|Biomass", "Secondary Energy")){
+#     if(! (var %in% unique(df[df$model == model,]$variable))){
+#       print(paste0("model: ", model, " , variable: ",  var))
+#     }
+# 
+#   }
+# }
+
+plotdf <- df[!duplicated(df),]
+
+  numerator <- plotdf[plotdf$variable %in% c("Secondary Energy|Electricity|Geothermal", "Secondary Energy|Electricity|Hydro", "Secondary Energy|Electricity|Wind", "Secondary Energy|Electricity|Solar", "Secondary Energy|Electricity|Biomass", "Secondary Energy|Hydrogen|Biomass", "Secondary Energy|Gases|Biomass", "Secondary Energy|Heat|Geothermal", "Secondary Energy|Heat|Solar", "Secondary Energy|Heat|Biomass", "Secondary Energy|Liquids|Biomass", "Secondary Energy|Solids|Biomass"),] %>%
+  group_by(model,scenario,region,unit,period) %>%
+  summarize(numerator = sum(value),.groups="drop") %>%
+  mutate(variable = "SE renewables") %>%
+  relocate(model,scenario,region,variable,unit,period,numerator) %>%
+  filter(scenario == "WP1 NetZero", period %in% 2005:2050)
+
+  denominator <- plotdf[plotdf$variable %in% c("Secondary Energy|Hydrogen","Secondary Energy|Gases","Secondary Energy|Liquids","Secondary Energy|Solids","Secondary Energy|Heat","Secondary Energy|Electricity"),] %>%
+    group_by(model,scenario,region,unit,period) %>%
+    summarize(denominator = sum(value),.groups="drop") %>%
+    filter(scenario == "WP1 NetZero", period %in% 2005:2050)
+  
+plotData <- numerator %>% left_join(denominator, 
+        by=c("model","scenario","region","unit","period")) %>%
+  mutate(value = numerator/denominator)
+
+plotData <- plotData[!(plotData$model %in% c("MEESA","OSeMBE")),]
+
+# historical data
+res <- read.csv2("../historical/renewablesShares.csv", stringsAsFactors = FALSE,check.names=FALSE) %>%
+    pivot_longer(-type,names_to = "period", values_to = "value") %>%
+    mutate(period = as.numeric(period),
+           value = as.numeric(value))
+  
+h <- res[res$type=="RES",] %>% mutate(model = "historical")
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("historical", "LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH"))
+
+#https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:52022SC0230&from=EN
+#By 2030, the renewable energy share in the electricity ('RES-E') sector would reach 69% in the RePower context.
+#exactly what is estimated
+
+# line plot
+g[["Secondary energy renewables Share"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1, color="white", linetype="dashed") +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    ggtitle("Secondary energy renewables Share") +
+    scale_y_continuous(labels = scales::percent) +
+    expand_limits(y=c(0,1)) +
+    ylab("%")
+  
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/Secondary energy renewables Share.svg"), g[["Secondary energy renewables Share"]] , device="svg", width = 10, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/Secondary energy renewables Share.png"), g[["Secondary energy renewables Share"]] , device="png", width = 10, height = 6, dpi=100, units = "in") 
+}
+  
+#plotData[plotData$period == 2040,]
+
+```
+
+
+```{r, echo=FALSE, fig.width=10, fig.height=6}
+
+  g[["Secondary energy renewables Share"]]
+
+  # plotData[plotData$period == 2040,] %>%
+  #   ungroup() %>%
+  #   select(model,period,value) %>%
+  #   mutate(value = round(value,2)) %>%
+  #   arrange(value)
+
+```
+
+
+## Secondary energy renewables Share
+
+```{r, echo=FALSE}
+
+# for(model in c("LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH")){
+# #  for (var in c("Secondary Energy")){
+# #  for (var in c("Secondary Energy|Hydrogen","Secondary Energy|Gases","Secondary Energy|Liquids","Secondary Energy|Solids","Secondary Energy|Heat","Secondary Energy|Electricity")){
+#   for (var in c("Secondary Energy|Electricity|Geothermal", "Secondary Energy|Electricity|Hydro", "Secondary Energy|Electricity|Wind", "Secondary Energy|Electricity|Solar", "Secondary Energy|Electricity|Biomass", "Secondary Energy|Hydrogen|Biomass", "Secondary Energy|Gases|Biomass", "Secondary Energy|Heat|Geothermal", "Secondary Energy|Heat|Solar", "Secondary Energy|Heat|Biomass", "Secondary Energy|Liquids|Biomass", "Secondary Energy|Solids|Biomass", "Secondary Energy")){
+#     if(! (var %in% unique(df[df$model == model,]$variable))){
+#       print(paste0("model: ", model, " , variable: ",  var))
+#     }
+# 
+#   }
+# }
+
+plotdf <- df[!duplicated(df),]
+
+  numerator <- plotdf[plotdf$variable %in% c("Secondary Energy|Electricity|Geothermal", "Secondary Energy|Electricity|Hydro", "Secondary Energy|Electricity|Wind", "Secondary Energy|Electricity|Solar", "Secondary Energy|Electricity|Biomass", "Secondary Energy|Hydrogen|Biomass", "Secondary Energy|Gases|Biomass", "Secondary Energy|Heat|Geothermal", "Secondary Energy|Heat|Solar", "Secondary Energy|Heat|Biomass", "Secondary Energy|Liquids|Biomass", "Secondary Energy|Solids|Biomass"),] %>%
+  group_by(model,scenario,region,unit,period) %>%
+  summarize(numerator = sum(value),.groups="drop") %>%
+  mutate(variable = "SE renewables") %>%
+  relocate(model,scenario,region,variable,unit,period,numerator) %>%
+  filter(scenario == "WP1 NetZero", period %in% 2005:2050)
+
+  denominator <- plotdf[plotdf$variable %in% c("Secondary Energy|Hydrogen","Secondary Energy|Gases","Secondary Energy|Liquids","Secondary Energy|Solids","Secondary Energy|Heat","Secondary Energy|Electricity"),] %>%
+    group_by(model,scenario,region,unit,period) %>%
+    summarize(denominator = sum(value),.groups="drop") %>%
+    filter(scenario == "WP1 NetZero", period %in% 2005:2050)
+  
+plotData <- numerator %>% left_join(denominator, 
+        by=c("model","scenario","region","unit","period")) %>%
+  mutate(value = numerator/denominator)
+
+plotData <- plotData[!(plotData$model %in% c("MEESA","OSeMBE","PROMETHEUS", "LIMES", "Euro-Calliope", "TIAM-ECN")),]
+
+# historical data
+res <- read.csv2("../historical/renewablesShares.csv", stringsAsFactors = FALSE,check.names=FALSE) %>%
+    pivot_longer(-type,names_to = "period", values_to = "value") %>%
+    mutate(period = as.numeric(period),
+           value = as.numeric(value))
+  
+h <- res[res$type=="RES",] %>% mutate(model = "historical")
+
+# Order
+plotData$model <- factor(plotData$model , levels = c("historical", "LIMES", "Euro-Calliope", "IMAGE", "MEESA", "MESSAGE", "OSeMBE", "PRIMES", "PROMETHEUS", "REMIND", "TIAM-ECN", "WITCH"))
+
+#https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX:52022SC0230&from=EN
+#By 2030, the renewable energy share in the electricity ('RES-E') sector would reach 69% in the RePower context.
+#exactly what is estimated
+
+# line plot
+g[["Secondary energy renewables Share - without outliers"]] <- ggplot(plotData,aes(x=period,y=value)) +
+    geom_hline(yintercept=0, color = "black", size=2, alpha = 1) +
+    geom_vline(xintercept=2020, color = "black", size=1.5, alpha = 1) +
+    geom_line(size=1,aes(color=model)) +
+    geom_line(data=h,size=1, color="white", linetype="dashed") +
+    geom_point(aes(color=model)) +
+    theme_dark() +
+    #facet_wrap(~scenario) +
+    scale_color_manual(values = setNames(color[levels(plotData$model)],levels(plotData$model))) +
+    ggtitle("Secondary energy renewables Share") +
+    scale_y_continuous(labels = scales::percent) +
+    expand_limits(y=c(0,1)) +
+    ylab("%")
+  
+if(saveCharts){
+  ggsave(paste0(chartsFolder,"/svg/Secondary energy renewables Share - without outliers.svg"), g[["Secondary energy renewables Share - without outliers"]] , device="svg", width = 10, height = 6, dpi=100, units = "in")
+  ggsave(paste0(chartsFolder,"/png/Secondary energy renewables Share - without outliers.png"), g[["Secondary energy renewables Share - without outliers"]] , device="png", width = 10, height = 6, dpi=100, units = "in")  
+}
+  
+```
+
+
+```{r, echo=FALSE, fig.width=10, fig.height=6}
+
+  g[["Secondary energy renewables Share - without outliers"]]
+
+
+  # plotData[plotData$period == 2040,] %>%
+  #   ungroup() %>%
+  #   select(model,period,value) %>%
+  #   mutate(value = round(value,2)) %>%
+  #   arrange(value)
+
+```
+
+
+
+
+
+

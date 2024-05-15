@@ -1,0 +1,157 @@
+parent,prio
+Emissions|CO2,1
+Emissions|CO2|Energy and Industrial Processes,1
+Emissions|CO2|Energy,2
+Emissions|CO2|Energy|Demand,2
+Emissions|CO2|Energy|Supply,2
+Emissions|CO2|Energy|Supply|Fuels,4
+Emissions|CO2|Energy|Supply|Electricity and Heat,2
+Emissions|CO2|AFOLU,2
+Emissions|Kyoto Gases,1
+Emissions|Kyoto Gases|AFOLU,1
+Emissions|Kyoto Gases|Energy and Industrial Processes,1
+Emissions|Kyoto Gases 2,1
+Carbon Capture,1
+Carbon Capture 2,1
+Carbon Capture|Storage,2
+Carbon Capture|Usage,2
+Carbon Removal,1
+Carbon Removal|Land Use,3
+Primary Energy,1
+Primary Energy 2,1
+Primary Energy|Fossil,2
+Primary Energy|Biomass,1
+Primary Energy|Coal,1
+Primary Energy|Gas,1
+Primary Energy|Oil,1
+Primary Energy|Biomass|Electricity,2
+Primary Energy|Coal|Electricity,2
+Primary Energy|Gas|Electricity,2
+Primary Energy|Oil|Electricity,2
+Primary Energy|Biomass 2,2
+Secondary Energy|Electricity|Biomass,1
+Secondary Energy|Electricity|Coal,1
+Secondary Energy|Electricity|Fossil 2,2
+Secondary Energy|Electricity|Gas,1
+Secondary Energy|Electricity|Fossil,2
+Secondary Energy|Electricity|Oil,1
+Secondary Energy|Electricity|Solar,1
+Secondary Energy|Electricity|Wind,1
+Secondary Energy,1
+Secondary Energy|Electricity,1
+Secondary Energy|Gases 2,2
+Secondary Energy|Gases|Fossil,3
+Secondary Energy|Heat,2
+Secondary Energy|Heat|Fossil,2
+Secondary Energy|Hydrogen,1
+Secondary Energy|Hydrogen|Fossil,1
+Secondary Energy|Hydrogen|Biomass,2
+Secondary Energy|Hydrogen|Fossil 2,2
+Secondary Energy|Hydrogen|Coal,2
+Secondary Energy|Hydrogen|Gas,2
+Secondary Energy|Hydrogen|Oil,2
+Secondary Energy|Liquids,1
+Secondary Energy|Liquids|Biomass,3
+Secondary Energy|Liquids|Fossil 2,3
+Secondary Energy|Liquids|Coal,3
+Secondary Energy|Liquids|Gas,3
+Secondary Energy|Liquids|Fossil,3
+Secondary Energy|Solids,1
+Final Energy,1
+Final Energy|Bunkers,2
+Final Energy|Bunkers|Gases,4
+Final Energy|Bunkers|Liquids,4
+Final Energy|Bunkers|International Aviation,3
+Final Energy|Bunkers|International Aviation|Gases,4
+Final Energy|Bunkers|International Aviation|Hydrogen,4
+Final Energy|Bunkers|International Aviation|Liquids,4
+Final Energy|Bunkers|International Shipping,3
+Final Energy|Bunkers|International Shipping|Gases,4
+Final Energy|Bunkers|International Shipping|Hydrogen,4
+Final Energy|Bunkers|International Shipping|Liquids,4
+Final Energy|Bunkers|Passenger,4
+Final Energy 2,4
+Final Energy|Gases,4
+Final Energy|Liquids,4
+Final Energy|Non-Energy Use,1
+Final Energy|Non-Energy Use|Gases,4
+Final Energy|Non-Energy Use|Liquids,4
+Final Energy|Non-Energy Use|Solids,3
+Final Energy|Industry,3
+Final Energy|Industry 2,1
+Final Energy|Industry|Gases,4
+Final Energy|Industry|Liquids,4
+Final Energy|Industry|Solids,3
+Final Energy|Other Sector,1
+Final Energy|Other Sector|Gases,4
+Final Energy|Other Sector|Liquids,4
+Final Energy|Other Sector|Solids,3
+Final Energy|Residential and Commercial,1
+Final Energy|Residential and Commercial|Gases,4
+Final Energy|Residential and Commercial|Liquids,4
+Final Energy|Residential and Commercial|Solids,3
+Final Energy|Residential and Commercial|Space and Water Heating,2
+Final Energy|Solids,2
+Final Energy|Transportation,1
+Final Energy|Transportation 2,1
+Final Energy|Transportation 3,2
+Final Energy|Transportation|Bus,3
+Final Energy|Transportation|Bus 2,2
+Final Energy|Transportation|Bus|Gases,4
+Final Energy|Transportation|Bus|Hybrid,4
+Final Energy|Transportation|Bus|Hydrogen,4
+Final Energy|Transportation|Bus|ICE,4
+Final Energy|Transportation|Bus|Liquids,4
+Final Energy|Transportation|Domestic Aviation,2
+Final Energy|Transportation|Domestic Aviation|Gases,4
+Final Energy|Transportation|Domestic Aviation|Hydrogen,4
+Final Energy|Transportation|Domestic Aviation|Liquids,4
+Final Energy|Transportation|Domestic Shipping,2
+Final Energy|Transportation|Domestic Shipping|Gases,4
+Final Energy|Transportation|Domestic Shipping|Hydrogen,4
+Final Energy|Transportation|Domestic Shipping|Liquids,4
+Final Energy|Transportation|Freight,3
+Final Energy|Transportation|Freight|Liquids,4
+Final Energy|Transportation|Rail|Freight,4
+Final Energy|Transportation|Gases,4
+Final Energy|Transportation|Hydrogen,4
+Final Energy|Transportation|LDV,3
+Final Energy|Transportation|LDV 2,2
+Final Energy|Transportation|LDV|Gases,4
+Final Energy|Transportation|LDV|Hybrid,4
+Final Energy|Transportation|LDV|Hydrogen,4
+Final Energy|Transportation|LDV|ICE,4
+Final Energy|Transportation|LDV|Liquids,4
+Final Energy|Transportation|Liquids,4
+Final Energy|Transportation|Passenger,3
+Final Energy|Transportation|Passenger|Liquids,4
+Final Energy|Transportation|Rail|Passenger,3
+Final Energy|Transportation|Rail,2
+Final Energy|Transportation|Rail|Gases,4
+Final Energy|Transportation|Rail|Hydrogen,4
+Final Energy|Transportation|Rail|Liquids,4
+Final Energy|Transportation|Truck,3
+Final Energy|Transportation|Truck 2,2
+Final Energy|Transportation|Truck|Gases,4
+Final Energy|Transportation|Truck|Hybrid,4
+Final Energy|Transportation|Truck|Hydrogen,4
+Final Energy|Transportation|Truck|ICE,4
+Final Energy|Transportation|Truck|Liquids,4
+Capacity|Electricity,1
+Capacity|Electricity|Biomass,2
+Capacity|Electricity|Coal,2
+Capacity|Electricity|Gas,2
+Capacity|Electricity|Oil,2
+Capacity|Electricity|Solar,2
+Capacity|Electricity|Wind,2
+Capacity|Gases,3
+Capacity|Gases|Biomass,3
+Capacity|Gases|Coal,3
+Capacity|Hydrogen,2
+Capacity|Hydrogen|Biomass,3
+Capacity|Hydrogen|Coal,3
+Capacity|Hydrogen|Gas,3
+Capacity|Liquids,3
+Capacity|Liquids|Biomass,3
+Capacity|Liquids|Coal,3
+Capacity|Liquids|Gas,3
